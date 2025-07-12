@@ -1,0 +1,20 @@
+# Git Rake Configuration
+# This file can be named .gitrakerc, .gitrakerc.yml, or .gitrakerc.yaml
+
+# Number of days before a branch is considered stale
+staleDaysThreshold: 30
+
+# Namespace for storing deleted branches
+trashNamespace: "refs/rake-trash"
+
+# Number of days to keep deleted branches in trash
+trashTtlDays: 90
+
+# Theme: "light", "dark", or "auto"
+theme: "auto"
+
+# Include remote tracking branches in the list
+includeRemote: false
+
+# Automatically cleanup old trash entries on startup
+autoCleanupTrash: true
