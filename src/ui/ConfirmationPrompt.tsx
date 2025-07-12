@@ -20,11 +20,11 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
     if (key.ctrl && input === 'c') {
       return;
     }
-    
+
     if (key.leftArrow || key.rightArrow) {
       setSelectedOption(selectedOption === 'confirm' ? 'cancel' : 'confirm');
     }
-    
+
     if (key.return) {
       if (selectedOption === 'confirm') {
         onConfirm();
@@ -32,15 +32,15 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
         onCancel();
       }
     }
-    
+
     if (key.escape) {
       onCancel();
     }
-    
+
     if (input === 'y' || input === 'Y') {
       onConfirm();
     }
-    
+
     if (input === 'n' || input === 'N') {
       onCancel();
     }
@@ -54,7 +54,7 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
       <Text color={warningColor} bold>
         {dryRun ? `DRY RUN: Would ${operation}` : `Confirm ${operation}`} {branches.length} branch{branches.length > 1 ? 'es' : ''}:
       </Text>
-      
+
       <Box flexDirection="column" height={10} overflow="hidden">
         {branches.map((branch, index) => (
           <Text key={branch.name} color={theme.colors.text}>
@@ -67,16 +67,16 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
           <Text color={theme.colors.secondary}>... and {branches.length - 10} more</Text>
         )}
       </Box>
-      
+
       {!dryRun && operation === 'delete' && (
         <Text color={theme.colors.warning}>
           Note: Branches will be moved to trash and can be restored later.
         </Text>
       )}
-      
+
       <Box marginTop={1}>
-        <Box 
-          borderStyle="single" 
+        <Box
+          borderStyle="single"
           borderColor={selectedOption === 'confirm' ? theme.colors.success : theme.colors.border}
           paddingX={1}
           marginRight={2}
@@ -85,9 +85,9 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
             {dryRun ? 'Preview' : 'Confirm'} (Y)
           </Text>
         </Box>
-        
-        <Box 
-          borderStyle="single" 
+
+        <Box
+          borderStyle="single"
           borderColor={selectedOption === 'cancel' ? theme.colors.error : theme.colors.border}
           paddingX={1}
         >
@@ -96,7 +96,7 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
           </Text>
         </Box>
       </Box>
-      
+
       <Box marginTop={1}>
         <Text color={theme.colors.secondary}>
           ←→: navigate • Enter/Y: confirm • ESC/N: cancel

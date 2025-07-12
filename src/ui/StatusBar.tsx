@@ -17,8 +17,8 @@ interface StatusBarProps {
 
 function StatusBarInner({ filterType, totalBranches, filteredBranches, selectedCount, restoreMode = false, dryRun = false, searchMode = false, searchInputActive = false, searchQuery = '' }: StatusBarProps) {
   const { theme } = useTheme();
-  
-  
+
+
   const getFilterDisplay = () => {
     switch (filterType) {
       case 'all': return 'All';
@@ -36,9 +36,9 @@ function StatusBarInner({ filterType, totalBranches, filteredBranches, selectedC
         Git Rake{restoreMode ? ' - Restore Mode' : ''}
         {dryRun && <Text color={theme.colors.warning}> [DRY RUN]</Text>}
       </Text>
-      
+
       <Text color={theme.colors.text}> • </Text>
-      
+
       {/* Filter and count info */}
       <Text color={theme.colors.text}>
         Filter: <Text color={theme.colors.primary}>{getFilterDisplay()}</Text>
@@ -47,7 +47,7 @@ function StatusBarInner({ filterType, totalBranches, filteredBranches, selectedC
       <Text color={theme.colors.text}>
         {searchMode ? 'Found' : 'Showing'}: <Text color={theme.colors.success}>{filteredBranches}</Text>/{totalBranches}
       </Text>
-      
+
       {/* Search info if in search mode */}
       {searchMode && (
         <>
@@ -58,7 +58,7 @@ function StatusBarInner({ filterType, totalBranches, filteredBranches, selectedC
           </Text>
         </>
       )}
-      
+
       {selectedCount > 0 && (
         <>
           <Text color={theme.colors.text}> • </Text>

@@ -201,7 +201,7 @@ export function App({ dryRun = false, includeRemote = false, restoreMode = false
         />
 
         {/* Main content area */}
-        <Box flex={1} flexDirection="column">
+        <Box flexGrow={1} flexDirection="column">
           {state === 'confirming' ? (
             <Box padding={1}>
               <ConfirmationPrompt

@@ -35,19 +35,19 @@ export function BranchList({ branches, onBranchesSelected, onPreviewBranch, onSt
   const [searchMode, setSearchMode] = useState(false);
   const [searchInputActive, setSearchInputActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const searcher = useMemo(() => new BranchSearcher(branches), [branches]);
 
   const filteredBranches = useMemo(() => {
     let result = branches;
-    
+
     if (searchQuery.trim()) {
       result = searcher.search(searchQuery);
     } else {
       const filterOptions = getFilterOptionsForType(filterType);
       result = filterBranches(branches, filterOptions);
     }
-    
+
     return sortBranches(result);
   }, [branches, filterType, searchQuery, searcher]);
 
@@ -91,7 +91,7 @@ export function BranchList({ branches, onBranchesSelected, onPreviewBranch, onSt
     if (key.ctrl && input === 'c') {
       return;
     }
-    
+
     if (searchMode) {
       if (key.escape) {
         setSearchMode(false);
@@ -99,55 +99,55 @@ export function BranchList({ branches, onBranchesSelected, onPreviewBranch, onSt
         setSearchQuery('');
         return;
       }
-      
+
       // Re-activate search input if user presses / only when search input is not active
       if (input === '/' && !searchInputActive) {
         setSearchInputActive(true);
         return;
       }
-      
+
       // Handle search input only when search input is active
       if (searchInputActive) {
         if (key.backspace) {
           setSearchQuery(searchQuery.slice(0, -1));
           return;
         }
-        
+
         if (key.delete) {
           setSearchQuery('');
           return;
         }
-        
+
         if (input && !key.ctrl && !key.meta && !key.upArrow && !key.downArrow && input !== ' ') {
           setSearchQuery(searchQuery + input);
           return;
         }
       }
-      
+
       // Allow arrow keys in search mode - deactivate search input when navigating
       if (key.upArrow && selectedIndex > 0) {
         setSelectedIndex(selectedIndex - 1);
         setSearchInputActive(false);
         return;
       }
-      
+
       if (key.downArrow && selectedIndex < filteredBranches.length - 1) {
         setSelectedIndex(selectedIndex + 1);
         setSearchInputActive(false);
         return;
       }
-      
+
       // Fall through to normal input handling when search input is not active
     }
 
     if (key.upArrow && selectedIndex > 0) {
       setSelectedIndex(selectedIndex - 1);
     }
-    
+
     if (key.downArrow && selectedIndex < filteredBranches.length - 1) {
       setSelectedIndex(selectedIndex + 1);
     }
-    
+
     if (input === ' ' && currentBranch && !currentBranch.isCurrent) {
       const newSelected = new Set(selectedBranches);
       if (newSelected.has(currentBranch.name)) {
@@ -157,12 +157,12 @@ export function BranchList({ branches, onBranchesSelected, onPreviewBranch, onSt
       }
       setSelectedBranches(newSelected);
     }
-    
+
     if (input === '/') {
       setSearchMode(true);
       setSearchInputActive(true);
     }
-    
+
     if (input === 'f') {
       const filterTypes: FilterType[] = ['all', 'merged', 'stale', 'unmerged'];
       const currentIndex = filterTypes.indexOf(filterType);
@@ -183,10 +183,10 @@ export function BranchList({ branches, onBranchesSelected, onPreviewBranch, onSt
   return (
     <Box flexDirection="column" height="100%">
       <BranchListHeader />
-      
-      <Box flexDirection="column" flex={1} overflow="hidden">
+
+      <Box flexDirection="column" flexGrow={1} overflow="hidden">
         {filteredBranches.length === 0 ? (
-          <Box flex={1} justifyContent="center" alignItems="center">
+          <Box flexGrow={1} justifyContent="center" alignItems="center">
             <Text color={theme.colors.secondary}>
               {searchQuery ? `No branches found for "${searchQuery}"` : 'No branches found'}
             </Text>

@@ -33,7 +33,7 @@ export function BranchPreview({ branch, gitRepo }: BranchPreviewProps) {
         <Box paddingX={1} paddingY={1}>
           <Text color={theme.colors.primary} bold>Branch Preview</Text>
         </Box>
-        <Box flex={1} justifyContent="center" alignItems="center">
+        <Box flexGrow={1} justifyContent="center" alignItems="center">
           <Text color={theme.colors.secondary}>Select a branch to view details</Text>
         </Box>
       </Box>
@@ -45,7 +45,7 @@ export function BranchPreview({ branch, gitRepo }: BranchPreviewProps) {
       <Box paddingX={1} paddingY={1}>
         <Text color={theme.colors.primary} bold>{branch.name}</Text>
       </Box>
-      
+
       <Box flexDirection="column" paddingX={1} paddingY={1}>
         <Text color={theme.colors.text}>
           <Text color={theme.colors.secondary}>Status: </Text>
@@ -56,31 +56,31 @@ export function BranchPreview({ branch, gitRepo }: BranchPreviewProps) {
             <Text color={theme.colors.warning}> • Stale ({branch.staleDays} days)</Text>
           )}
         </Text>
-        
+
         <Text color={theme.colors.text}>
           <Text color={theme.colors.secondary}>Type: </Text>
           {branch.isLocal ? 'Local' : 'Remote'}
         </Text>
-        
+
         <Text color={theme.colors.text}>
           <Text color={theme.colors.secondary}>Last Commit: </Text>
           {branch.lastCommitHash.substring(0, 8)}
         </Text>
-        
+
         {branch.lastCommitAuthor && (
           <Text color={theme.colors.text}>
             <Text color={theme.colors.secondary}>Author: </Text>
             {branch.lastCommitAuthor}
           </Text>
         )}
-        
+
         {(branch.aheadBy !== undefined || branch.behindBy !== undefined) && (
           <Text color={theme.colors.text}>
             <Text color={theme.colors.secondary}>Relationship: </Text>
             {branch.aheadBy !== undefined && branch.aheadBy > 0 && (
               <Text color={theme.colors.success}>+{branch.aheadBy} ahead</Text>
             )}
-            {branch.aheadBy !== undefined && branch.behindBy !== undefined && 
+            {branch.aheadBy !== undefined && branch.behindBy !== undefined &&
              branch.aheadBy > 0 && branch.behindBy > 0 && <Text>, </Text>}
             {branch.behindBy !== undefined && branch.behindBy > 0 && (
               <Text color={theme.colors.warning}>-{branch.behindBy} behind</Text>
@@ -91,12 +91,12 @@ export function BranchPreview({ branch, gitRepo }: BranchPreviewProps) {
           </Text>
         )}
       </Box>
-      
+
       <Box paddingX={1} paddingY={1} borderTop={true} borderColor={theme.colors.border}>
         <Text color={theme.colors.primary} bold>Recent Commits</Text>
       </Box>
-      
-      <Box flexDirection="column" flex={1} paddingX={1} overflow="hidden">
+
+      <Box flexDirection="column" flexGrow={1} paddingX={1} overflow="hidden">
         {loading ? (
           <Text color={theme.colors.secondary}>Loading...</Text>
         ) : (
