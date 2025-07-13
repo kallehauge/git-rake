@@ -3,9 +3,12 @@ import { useInput, useApp } from 'ink';
 import { useGitRepository } from '../hooks/useGitRepository.js';
 import { useAppOperations } from '../hooks/useAppOperations.js';
 import { useAppUIContext, useBranchDataContext, useSelectionContext } from '../contexts/AppProviders.js';
-import { BranchManagementView } from './BranchManagementView.js';
+import { BranchesView } from './BranchesView.js';
+import { BranchView } from './BranchView.js';
 import { ErrorView } from './ErrorView.js';
 import { OperatingView } from './OperatingView.js';
+
+type ViewState = 'branches' | 'branch';
 
 interface AppContainerProps {
   dryRun?: boolean;
@@ -23,16 +26,19 @@ export function AppContainer({
   onRefreshBranches
 }: AppContainerProps) {
   const { exit } = useApp();
-  const {
-    state,
-    ctrlCCount,
-    resetCtrlCCount,
-    setShowDetailView,
-    setState,
-    toggleDetailView,
-    setCtrlCCount
-  } = useAppUIContext();
-  const { selectedBranches } = useBranchDataContext();
+  const { state, setState } = useAppUIContext();
+
+  const [currentView, setCurrentView] = useState<ViewState>('branches');
+  const [ctrlCCount, setCtrlCCount] = useState(0);
+
+  const toggleBranchView = useCallback(() => {
+    setCurrentView(prev => prev === 'branch' ? 'branches' : 'branch');
+  }, []);
+
+  const resetCtrlCCount = useCallback(() => {
+    setCtrlCCount(0);
+  }, []);
+  const { selectedBranches, branches } = useBranchDataContext();
   const { setSelectedBranches } = useSelectionContext();
   const [error, setError] = useState<string>('');
 
@@ -60,14 +66,13 @@ export function AppContainer({
   }, [handleConfirmOperation, selectedBranches]);
 
   useInput((input, key) => {
-    // Handle ESC for exiting detail view
+    // Handle ESC for returning to branches view
     if (key.escape) {
-      setShowDetailView(false);
+      setCurrentView('branches');
       return;
     }
 
-    // Handle operations in browsing state
-    if (state === 'browsing') {
+    if (state === 'ready') {
       if (input === 'd' && selectedBranches.length > 0 && !restoreMode) {
         setState('confirming');
         return;
@@ -79,7 +84,7 @@ export function AppContainer({
       }
 
       if (input === 'v') {
-        toggleDetailView();
+        toggleBranchView();
         return;
       }
     }
@@ -96,10 +101,12 @@ export function AppContainer({
     }
   });
 
-  // Set initial state to browsing since branches are loaded in App component
+  // Set to ready state once branches are loaded from Git
   useEffect(() => {
-    setState('browsing');
-  }, [setState]);
+    if (branches.length > 0 && state === 'loading') {
+      setState('ready');
+    }
+  }, [branches.length, state, setState]);
 
   if (state === 'error') {
     return <ErrorView error={error} />;
@@ -109,15 +116,21 @@ export function AppContainer({
     return <OperatingView dryRun={dryRun} />;
   }
 
-  return (
-    <BranchManagementView
-      onConfirmOperation={handleConfirmOperationCallback}
-      onCancelOperation={handleCancelOperation}
-      restoreMode={restoreMode}
-      dryRun={dryRun}
-      currentPath={currentPath}
-      gitRepo={gitRepo}
-      ctrlCCount={ctrlCCount}
-    />
-  );
+  switch (currentView) {
+    case 'branch':
+      return <BranchView gitRepo={gitRepo} />;
+
+    case 'branches':
+    default:
+      return (
+        <BranchesView
+          onConfirmOperation={handleConfirmOperationCallback}
+          onCancelOperation={handleCancelOperation}
+          restoreMode={restoreMode}
+          dryRun={dryRun}
+          currentPath={currentPath}
+          ctrlCCount={ctrlCCount}
+        />
+      );
+  }
 }

@@ -35,7 +35,7 @@ export function useAppOperations({
       }
 
       await onOperationComplete();
-      setState('browsing');
+      setState('ready');
     } catch (err) {
       onOperationError(err instanceof Error ? err.message : 'Operation failed');
       setState('error');
@@ -43,7 +43,7 @@ export function useAppOperations({
   }, [gitRepo, restoreMode, dryRun, onOperationComplete, onOperationError, setState]);
 
   const handleCancelOperation = useCallback(() => {
-    setState('browsing');
+    setState('ready');
   }, [setState]);
 
   return {

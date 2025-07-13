@@ -1,35 +1,31 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import { GitRepository } from '../services/GitRepository.js';
 import { useAppUIContext, useBranchDataContext } from '../contexts/AppProviders.js';
 import { useTheme } from '../contexts/ThemeProvider.js';
 import { BranchList } from '../components/BranchList.js';
-import { BranchPreview } from '../components/BranchPreview.js';
 import { ConfirmationPrompt } from '../components/ConfirmationPrompt.js';
 import { StatusBar } from '../components/StatusBar.js';
 
-interface BranchManagementViewProps {
+interface BranchesViewProps {
   onConfirmOperation: () => void;
   onCancelOperation: () => void;
   restoreMode: boolean;
   dryRun: boolean;
   currentPath: string;
-  gitRepo: GitRepository;
   ctrlCCount: number;
 }
 
-export const BranchManagementView = React.memo(function BranchManagementView({
+export const BranchesView = React.memo(function BranchesView({
   onConfirmOperation,
   onCancelOperation,
   restoreMode,
   dryRun,
   currentPath,
-  gitRepo,
   ctrlCCount,
-}: BranchManagementViewProps) {
+}: BranchesViewProps) {
   const { theme } = useTheme();
-  const { state, showDetailView } = useAppUIContext();
-  const { selectedBranches, currentBranch } = useBranchDataContext();
+  const { state } = useAppUIContext();
+  const { selectedBranches } = useBranchDataContext();
 
   return (
     <Box flexDirection="column">
@@ -51,8 +47,6 @@ export const BranchManagementView = React.memo(function BranchManagementView({
               onCancel={onCancelOperation}
             />
           </Box>
-        ) : showDetailView ? (
-          <BranchPreview branch={currentBranch} gitRepo={gitRepo} />
         ) : (
           <BranchList
             loading={state === 'loading'}
@@ -65,8 +59,6 @@ export const BranchManagementView = React.memo(function BranchManagementView({
         <Text color={theme.colors.secondary}>
           {state === 'confirming' ? (
             '←→: navigate • Enter/Y: confirm • ESC/N: cancel'
-          ) : showDetailView ? (
-            'v: back to list • Ctrl+C: exit'
           ) : (
             `↑↓: navigate • Space: select • /: search • f: filter • v: details • ${restoreMode ? 'r: restore' : 'd: delete'} • Ctrl+C: exit`
           )}
