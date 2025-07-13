@@ -1,12 +1,12 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import { GitRepository } from '../git/GitRepository.js';
+import { GitRepository } from '../services/GitRepository.js';
 import { useAppUIContext, useBranchDataContext } from '../contexts/AppProviders.js';
-import { useTheme } from './ThemeProvider.js';
-import { BranchList } from './BranchList.js';
-import { BranchPreview } from './BranchPreview.js';
-import { ConfirmationPrompt } from './ConfirmationPrompt.js';
-import { StatusBar } from './StatusBar.js';
+import { useTheme } from '../contexts/ThemeProvider.js';
+import { BranchList } from '../components/BranchList.js';
+import { BranchPreview } from '../components/BranchPreview.js';
+import { ConfirmationPrompt } from '../components/ConfirmationPrompt.js';
+import { StatusBar } from '../components/StatusBar.js';
 
 interface BranchManagementViewProps {
   onConfirmOperation: () => void;

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Box, Text } from 'ink';
 import { GitBranch } from '../types/index.js';
-import { useTheme } from './ThemeProvider.js';
-import { GitRepository } from '../git/GitRepository.js';
+import { useTheme } from '../contexts/ThemeProvider.js';
+import { GitRepository } from '../services/GitRepository.js';
 
 interface BranchPreviewProps {
   branch: GitBranch | null;

@@ -1,5 +1,5 @@
 import { Box, Text } from 'ink';
-import { useTheme } from './ThemeProvider.js';
+import { useTheme } from '../contexts/ThemeProvider.js';
 
 interface OperatingViewProps {
   dryRun: boolean;

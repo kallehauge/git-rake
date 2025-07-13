@@ -1,7 +1,7 @@
 import React from 'react';
 import { useInput } from 'ink';
 import { Box, Text } from 'ink';
-import { useTheme } from './ThemeProvider.js';
+import { useTheme } from '../contexts/ThemeProvider.js';
 import { BranchItem } from './BranchItem.js';
 import { BranchListHeader } from './BranchListHeader.js';
 import { useKeyboardHandler } from '../hooks/useKeyboardHandler.js';

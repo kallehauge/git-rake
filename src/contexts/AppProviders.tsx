@@ -28,3 +28,4 @@ export { useSearchContext } from './SearchContext.js';
 export { useSelectionContext } from './SelectionContext.js';
 export { useAppUIContext } from './AppUIContext.js';
 export { useBranchDataContext } from './BranchDataContext.js';
+export { useTheme } from './ThemeProvider.js';

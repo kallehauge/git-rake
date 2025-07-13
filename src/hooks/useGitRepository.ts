@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { GitRepository } from '../git/GitRepository.js';
+import { GitRepository } from '../services/GitRepository.js';
 import { ConfigLoader } from '../utils/config.js';
 
 interface UseGitRepositoryProps {

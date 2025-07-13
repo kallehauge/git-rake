@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Box, Text } from 'ink';
 import { GitBranch } from '../types/index.js';
-import { useTheme } from './ThemeProvider.js';
+import { useTheme } from '../contexts/ThemeProvider.js';
 import {
   getCompactTimeAgo,
   truncateCommitMessage,
