@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { GitBranch, FilterType } from '../types/index.js';
 import { useTheme } from './ThemeProvider.js';
 import { BranchItem } from './BranchItem.js';
 import { BranchListHeader } from './BranchListHeader.js';
-import { SearchInput } from './SearchInput.js';
 import { BranchSearcher, getFilterOptionsForType, filterBranches, sortBranches } from '../utils/filters.js';
 
 interface StatusBarInfo {

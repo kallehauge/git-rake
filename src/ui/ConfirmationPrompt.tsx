@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { GitBranch } from '../types/index.js';
 import { useTheme } from './ThemeProvider.js';

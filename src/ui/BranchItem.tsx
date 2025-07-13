@@ -1,6 +1,4 @@
-import React from 'react';
 import { Box, Text } from 'ink';
-import { formatDistanceToNow, format } from 'date-fns';
 import { GitBranch } from '../types/index.js';
 import { useTheme } from './ThemeProvider.js';
 
@@ -22,13 +20,6 @@ export function BranchItem({ branch, isSelected, isMarked, showSelection }: Bran
   };
 
   const selectionIndicator = getSelectionIndicator();
-
-  // Enhanced styling for current branch
-  const backgroundColor = isSelected
-    ? theme.colors.primary
-    : branch.isCurrent
-    ? 'rgba(0, 100, 200, 0.1)'
-    : undefined;
 
   const textColor = isSelected ? 'white' : theme.colors.text;
   const branchNameColor = isSelected
