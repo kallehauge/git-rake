@@ -46,7 +46,6 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
     }
   });
 
-  const actionText = dryRun ? `preview ${operation}` : operation;
   const warningColor = operation === 'delete' ? theme.colors.error : theme.colors.warning;
 
   return (

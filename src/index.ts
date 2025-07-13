@@ -47,7 +47,7 @@ program
   .action(async (branchName, options) => {
     const { GitRepository } = await import('./git/GitRepository.js');
     const gitRepo = new GitRepository(options.cwd);
-    
+
     try {
       await gitRepo.restoreBranchFromTrash(branchName);
       console.log(`✅ Restored branch: ${branchName}`);
@@ -64,15 +64,15 @@ program
   .action(async (options) => {
     const { GitRepository } = await import('./git/GitRepository.js');
     const gitRepo = new GitRepository(options.cwd);
-    
+
     try {
       const trashBranches = await gitRepo.getTrashBranches();
-      
+
       if (trashBranches.length === 0) {
         console.log('No branches in trash');
         return;
       }
-      
+
       console.log('Branches in trash:');
       trashBranches.forEach((branch: string) => {
         console.log(`  • ${branch}`);
@@ -90,7 +90,7 @@ program
   .action(async (options) => {
     const { GitRepository } = await import('./git/GitRepository.js');
     const gitRepo = new GitRepository(options.cwd);
-    
+
     try {
       await gitRepo.cleanupTrash();
       console.log('✅ Cleaned up old trash entries');
@@ -108,7 +108,6 @@ program
     console.log(createExampleConfig());
   });
 
-// Parse and execute
 program.parse();
 
 export { App };

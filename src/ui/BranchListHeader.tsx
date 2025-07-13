@@ -11,42 +11,36 @@ export function BranchListHeader() {
         <Text color={theme.colors.secondary}> </Text>
       </Box>
 
-      {/* Branch name header */}
       <Box width={25} marginRight={2}>
         <Text color={theme.colors.secondary} bold>
           BRANCH NAME
         </Text>
       </Box>
 
-      {/* Status header */}
       <Box width={10} marginRight={1}>
         <Text color={theme.colors.secondary} bold>
           STATUS
         </Text>
       </Box>
 
-      {/* Time ago header */}
       <Box width={8} marginRight={1}>
         <Text color={theme.colors.secondary} bold>
           AGE
         </Text>
       </Box>
 
-      {/* Commit hash header */}
       <Box width={8} marginRight={1}>
         <Text color={theme.colors.secondary} bold>
           COMMIT
         </Text>
       </Box>
 
-      {/* Author header */}
       <Box width={12} marginRight={1}>
         <Text color={theme.colors.secondary} bold>
           AUTHOR
         </Text>
       </Box>
 
-      {/* Message header - moved to far right */}
       <Box flexGrow={1}>
         <Text color={theme.colors.secondary} bold>
           MESSAGE

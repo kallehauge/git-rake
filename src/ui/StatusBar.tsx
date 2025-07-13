@@ -1,21 +1,15 @@
-import React from 'react';
 import { Box, Text } from 'ink';
-import { FilterType } from '../types/index.js';
 import { useTheme } from './ThemeProvider.js';
+import { useAppState } from '../contexts/AppStateContext.js';
 
 interface StatusBarProps {
-  filterType: FilterType;
-  totalBranches: number;
-  filteredBranches: number;
-  selectedCount: number;
   restoreMode?: boolean;
   dryRun?: boolean;
-  searchMode?: boolean;
-  searchInputActive?: boolean;
-  searchQuery?: string;
 }
 
-function StatusBarInner({ filterType, totalBranches, filteredBranches, selectedCount, restoreMode = false, dryRun = false, searchMode = false, searchInputActive = false, searchQuery = '' }: StatusBarProps) {
+function StatusBarInner({ restoreMode = false, dryRun = false }: StatusBarProps) {
+  const { statusBarInfo } = useAppState();
+  const { filterType, totalBranches, filteredBranches, selectedCount, searchMode, searchInputActive, searchQuery } = statusBarInfo;
   const { theme } = useTheme();
 
 
@@ -71,4 +65,4 @@ function StatusBarInner({ filterType, totalBranches, filteredBranches, selectedC
   );
 }
 
-export const StatusBar = React.memo(StatusBarInner);
+export const StatusBar = StatusBarInner;

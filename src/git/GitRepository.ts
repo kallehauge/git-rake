@@ -1,4 +1,4 @@
-import { simpleGit, SimpleGit, BranchSummary } from 'simple-git';
+import { simpleGit, SimpleGit } from 'simple-git';
 import { differenceInDays } from 'date-fns';
 import { GitBranch, GitConfig, BranchOperation } from '../types/index.js';
 
@@ -32,10 +32,10 @@ export class GitRepository {
 
   async getAllBranches(includeRemote = false): Promise<GitBranch[]> {
     const branches: GitBranch[] = [];
-    
+
     const localBranches = await this.git.branchLocal();
     const currentBranch = await this.getCurrentBranch();
-    
+
     for (const branchName of Object.keys(localBranches.branches)) {
       const branch = await this.getBranchInfo(branchName, true, currentBranch);
       if (branch) {
@@ -63,14 +63,14 @@ export class GitRepository {
   }
 
   private async getBranchInfo(
-    branchName: string, 
-    isLocal: boolean, 
+    branchName: string,
+    isLocal: boolean,
     currentBranch: string
   ): Promise<GitBranch | null> {
     try {
       const cleanBranchName = branchName.replace('origin/', '');
       const ref = isLocal ? `refs/heads/${branchName}` : `refs/remotes/${branchName}`;
-      
+
       const log = await this.git.log([
         '--max-count=1',
         branchName
@@ -95,13 +95,13 @@ export class GitRepository {
       let isMerged = false;
       let aheadBy: number | undefined;
       let behindBy: number | undefined;
-      
+
       try {
         if (isLocal && branchName !== currentBranch) {
           // Check if merged
           const mergedBranches = await this.git.raw(['branch', '--merged']);
           isMerged = mergedBranches.includes(branchName);
-          
+
           // Get ahead/behind counts relative to main/master
           try {
             const mainBranch = currentBranch === 'main' ? 'main' : 'master';
@@ -147,24 +147,24 @@ export class GitRepository {
 
   async moveBranchToTrash(branchName: string): Promise<void> {
     const trashRef = `${this.config.trashNamespace}/${branchName}`;
-    
+
     // Create trash ref before deleting branch
     await this.git.raw(['update-ref', trashRef, `refs/heads/${branchName}`]);
-    
+
     // Delete the original branch
     await this.deleteBranch(branchName, true);
   }
 
   async restoreBranchFromTrash(branchName: string): Promise<void> {
     const trashRef = `${this.config.trashNamespace}/${branchName}`;
-    
+
     try {
       // Check if trash ref exists
       await this.git.raw(['show-ref', '--verify', trashRef]);
-      
+
       // Restore branch from trash
       await this.git.raw(['update-ref', `refs/heads/${branchName}`, trashRef]);
-      
+
       // Remove from trash
       await this.git.raw(['update-ref', '-d', trashRef]);
     } catch (error) {
@@ -191,7 +191,7 @@ export class GitRepository {
         const trashRef = `${this.config.trashNamespace}/${branchName}`;
         const log = await this.git.raw(['log', '-1', '--format=%ci', trashRef]);
         const commitDate = new Date(log.trim());
-        
+
         if (commitDate < cutoffDate) {
           await this.git.raw(['update-ref', '-d', trashRef]);
         }
@@ -209,7 +209,7 @@ export class GitRepository {
         .filter(line => line.includes('origin/'))
         .map(line => line.match(/origin\/(.+)/)?.[1])
         .filter(Boolean) as string[];
-      
+
       return prunedBranches;
     } catch {
       return [];
