@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { GitBranch } from '../types/index.js';
-import { useAppState } from '../contexts/AppStateContext.js';
+import { useSelectionContext } from '../contexts/AppProviders.js';
 
 interface UseBranchSelectionReturn {
   toggleBranchSelection: (branch: GitBranch) => void;
@@ -11,38 +11,43 @@ interface UseBranchSelectionReturn {
 }
 
 export function useBranchSelection(): UseBranchSelectionReturn {
-  const { dispatch } = useAppState();
+  const { 
+    toggleBranchSelection: toggleBranchSelectionAction,
+    clearSelection: clearSelectionAction,
+    navigateUp: navigateUpAction,
+    navigateDown: navigateDownAction
+  } = useSelectionContext();
 
   const toggleBranchSelection = useCallback((branch: GitBranch) => {
     if (branch.isCurrent) return;
-    dispatch({ type: 'TOGGLE_BRANCH_SELECTION', payload: branch.name });
-  }, [dispatch]);
+    toggleBranchSelectionAction(branch.name);
+  }, [toggleBranchSelectionAction]);
 
   const clearSelection = useCallback(() => {
-    dispatch({ type: 'CLEAR_SELECTION' });
-  }, [dispatch]);
+    clearSelectionAction();
+  }, [clearSelectionAction]);
 
   const navigateUp = useCallback(() => {
-    dispatch({ type: 'NAVIGATE_UP' });
-  }, [dispatch]);
+    navigateUpAction();
+  }, [navigateUpAction]);
 
   const navigateDown = useCallback(() => {
-    dispatch({ type: 'NAVIGATE_DOWN' });
-  }, [dispatch]);
+    navigateDownAction();
+  }, [navigateDownAction]);
 
   const handleNavigation = useCallback((key: any): boolean => {
     if (key.upArrow) {
-      dispatch({ type: 'NAVIGATE_UP' });
+      navigateUpAction();
       return true;
     }
 
     if (key.downArrow) {
-      dispatch({ type: 'NAVIGATE_DOWN' });
+      navigateDownAction();
       return true;
     }
 
     return false;
-  }, [dispatch]);
+  }, [navigateUpAction, navigateDownAction]);
 
   return {
     toggleBranchSelection,

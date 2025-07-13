@@ -1,10 +1,11 @@
 import { useCallback } from 'react';
-import { useAppState } from '../contexts/AppStateContext.js';
+import { useSearchContext, useBranchDataContext } from '../contexts/AppProviders.js';
 import { useSearch } from './useSearch.js';
 import { useBranchSelection } from './useBranchSelection.js';
 
 export function useKeyboardHandler() {
-  const { currentBranch, searchMode, dispatch } = useAppState();
+  const { currentBranch } = useBranchDataContext();
+  const { searchMode, setSearchInputActive } = useSearchContext();
   const { handleSearchInput, activateSearch, cycleFilter } = useSearch();
   const { toggleBranchSelection, handleNavigation } = useBranchSelection();
 
@@ -22,7 +23,7 @@ export function useKeyboardHandler() {
     // Handle navigation in search mode
     if (searchMode) {
       if (handleNavigation(key)) {
-        dispatch({ type: 'SET_SEARCH_INPUT_ACTIVE', payload: false });
+        setSearchInputActive(false);
         return true;
       }
     }
@@ -51,7 +52,7 @@ export function useKeyboardHandler() {
     }
 
     return false;
-  }, [currentBranch, searchMode, dispatch, handleSearchInput, activateSearch, cycleFilter, toggleBranchSelection, handleNavigation]);
+  }, [currentBranch, searchMode, setSearchInputActive, handleSearchInput, activateSearch, cycleFilter, toggleBranchSelection, handleNavigation]);
 
   return { handleKeyInput };
 }

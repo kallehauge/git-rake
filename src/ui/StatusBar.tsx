@@ -1,6 +1,6 @@
 import { Box, Text } from 'ink';
 import { useTheme } from './ThemeProvider.js';
-import { useAppState } from '../contexts/AppStateContext.js';
+import { useBranchDataContext } from '../contexts/AppProviders.js';
 
 interface StatusBarProps {
   restoreMode?: boolean;
@@ -8,7 +8,7 @@ interface StatusBarProps {
 }
 
 function StatusBarInner({ restoreMode = false, dryRun = false }: StatusBarProps) {
-  const { statusBarInfo } = useAppState();
+  const { statusBarInfo } = useBranchDataContext();
   const { filterType, totalBranches, filteredBranches, selectedCount, searchMode, searchInputActive, searchQuery } = statusBarInfo;
   const { theme } = useTheme();
 

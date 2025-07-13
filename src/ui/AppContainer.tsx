@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useInput, useApp } from 'ink';
 import { useGitRepository } from '../hooks/useGitRepository.js';
 import { useAppOperations } from '../hooks/useAppOperations.js';
-import { useAppState } from '../contexts/AppStateContext.js';
+import { useAppUIContext, useBranchDataContext, useSelectionContext } from '../contexts/AppProviders.js';
 import { BranchManagementView } from './BranchManagementView.js';
 import { ErrorView } from './ErrorView.js';
 import { OperatingView } from './OperatingView.js';
@@ -23,7 +23,17 @@ export function AppContainer({
   onRefreshBranches
 }: AppContainerProps) {
   const { exit } = useApp();
-  const { state, ctrlCCount, selectedBranches, dispatch } = useAppState();
+  const {
+    state,
+    ctrlCCount,
+    resetCtrlCCount,
+    setShowDetailView,
+    setState,
+    toggleDetailView,
+    setCtrlCCount
+  } = useAppUIContext();
+  const { selectedBranches } = useBranchDataContext();
+  const { setSelectedBranches } = useSelectionContext();
   const [error, setError] = useState<string>('');
 
   const { gitRepo, currentPath } = useGitRepository({ workingDir });
@@ -36,14 +46,14 @@ export function AppContainer({
       if (onRefreshBranches) {
         await onRefreshBranches();
       }
-      dispatch({ type: 'SET_SELECTED_BRANCHES', payload: [] });
+      setSelectedBranches([]);
     },
     onOperationError: setError,
   });
 
   const resetCtrlCTimer = useCallback(() => {
-    setTimeout(() => dispatch({ type: 'RESET_CTRL_C_COUNT' }), 2000);
-  }, [dispatch]);
+    setTimeout(() => resetCtrlCCount(), 2000);
+  }, [resetCtrlCCount]);
 
   const handleConfirmOperationCallback = useCallback(() => {
     handleConfirmOperation(selectedBranches);
@@ -52,24 +62,24 @@ export function AppContainer({
   useInput((input, key) => {
     // Handle ESC for exiting detail view
     if (key.escape) {
-      dispatch({ type: 'SET_SHOW_DETAIL_VIEW', payload: false });
+      setShowDetailView(false);
       return;
     }
 
     // Handle operations in browsing state
     if (state === 'browsing') {
       if (input === 'd' && selectedBranches.length > 0 && !restoreMode) {
-        dispatch({ type: 'SET_STATE', payload: 'confirming' });
+        setState('confirming');
         return;
       }
 
       if (input === 'r' && selectedBranches.length > 0 && restoreMode) {
-        dispatch({ type: 'SET_STATE', payload: 'confirming' });
+        setState('confirming');
         return;
       }
 
       if (input === 'v') {
-        dispatch({ type: 'TOGGLE_DETAIL_VIEW' });
+        toggleDetailView();
         return;
       }
     }
@@ -77,7 +87,7 @@ export function AppContainer({
     // Double Ctrl+C to exit
     if (key.ctrl && input === 'c') {
       if (ctrlCCount === 0) {
-        dispatch({ type: 'SET_CTRL_C_COUNT', payload: 1 });
+        setCtrlCCount(1);
         resetCtrlCTimer();
       } else {
         process.stdout.write('\x1b[2J\x1b[0f');
@@ -88,8 +98,8 @@ export function AppContainer({
 
   // Set initial state to browsing since branches are loaded in App component
   useEffect(() => {
-    dispatch({ type: 'SET_STATE', payload: 'browsing' });
-  }, [dispatch]);
+    setState('browsing');
+  }, [setState]);
 
   if (state === 'error') {
     return <ErrorView error={error} />;

@@ -5,7 +5,7 @@ import { useTheme } from './ThemeProvider.js';
 import { BranchItem } from './BranchItem.js';
 import { BranchListHeader } from './BranchListHeader.js';
 import { useKeyboardHandler } from '../hooks/useKeyboardHandler.js';
-import { useAppState } from '../contexts/AppStateContext.js';
+import { useBranchDataContext, useSelectionContext, useSearchContext } from '../contexts/AppProviders.js';
 
 interface BranchListProps {
   loading?: boolean;
@@ -13,12 +13,9 @@ interface BranchListProps {
 
 export const BranchList = React.memo(function BranchList({ loading = false }: BranchListProps) {
   const { theme } = useTheme();
-  const {
-    filteredBranches,
-    selectedIndex,
-    selectedBranchNames,
-    searchQuery,
-  } = useAppState();
+  const { filteredBranches } = useBranchDataContext();
+  const { selectedIndex, selectedBranchNames } = useSelectionContext();
+  const { searchQuery } = useSearchContext();
 
   const { handleKeyInput } = useKeyboardHandler();
 

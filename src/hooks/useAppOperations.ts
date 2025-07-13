@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { GitRepository } from '../git/GitRepository.js';
 import { GitBranch } from '../types/index.js';
-import { useAppState } from '../contexts/AppStateContext.js';
+import { useAppUIContext } from '../contexts/AppProviders.js';
 
 interface UseAppOperationsProps {
   gitRepo: GitRepository;
@@ -18,10 +18,10 @@ export function useAppOperations({
   onOperationComplete,
   onOperationError,
 }: UseAppOperationsProps) {
-  const { dispatch } = useAppState();
+  const { setState } = useAppUIContext();
 
   const handleConfirmOperation = useCallback(async (selectedBranches: GitBranch[]) => {
-    dispatch({ type: 'SET_STATE', payload: 'operating' });
+    setState('operating');
 
     try {
       const operations = selectedBranches.map(branch => ({
@@ -35,16 +35,16 @@ export function useAppOperations({
       }
 
       await onOperationComplete();
-      dispatch({ type: 'SET_STATE', payload: 'browsing' });
+      setState('browsing');
     } catch (err) {
       onOperationError(err instanceof Error ? err.message : 'Operation failed');
-      dispatch({ type: 'SET_STATE', payload: 'error' });
+      setState('error');
     }
-  }, [gitRepo, restoreMode, dryRun, onOperationComplete, onOperationError, dispatch]);
+  }, [gitRepo, restoreMode, dryRun, onOperationComplete, onOperationError, setState]);
 
   const handleCancelOperation = useCallback(() => {
-    dispatch({ type: 'SET_STATE', payload: 'browsing' });
-  }, [dispatch]);
+    setState('browsing');
+  }, [setState]);
 
   return {
     handleConfirmOperation,

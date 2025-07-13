@@ -1,4 +1,4 @@
-import { AppStateProvider } from '../contexts/AppStateContext.js';
+import { AppProviders } from '../contexts/AppProviders.js';
 import { AppContainer } from './AppContainer.js';
 import { useGitRepository } from '../hooks/useGitRepository.js';
 import { useBranches } from '../hooks/useBranches.js';
@@ -32,9 +32,9 @@ export function App(props: AppProps) {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppStateProvider branches={branches}>
+      <AppProviders branches={branches}>
         <AppContainer {...props} onRefreshBranches={loadBranches} />
-      </AppStateProvider>
+      </AppProviders>
     </ThemeProvider>
   );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { GitRepository } from '../git/GitRepository.js';
-import { useAppState } from '../contexts/AppStateContext.js';
+import { useAppUIContext, useBranchDataContext } from '../contexts/AppProviders.js';
 import { useTheme } from './ThemeProvider.js';
 import { BranchList } from './BranchList.js';
 import { BranchPreview } from './BranchPreview.js';
@@ -28,7 +28,8 @@ export const BranchManagementView = React.memo(function BranchManagementView({
   ctrlCCount,
 }: BranchManagementViewProps) {
   const { theme } = useTheme();
-  const { state, previewBranch, showDetailView, selectedBranches } = useAppState();
+  const { state, showDetailView } = useAppUIContext();
+  const { selectedBranches, currentBranch } = useBranchDataContext();
 
   return (
     <Box flexDirection="column">
@@ -51,7 +52,7 @@ export const BranchManagementView = React.memo(function BranchManagementView({
             />
           </Box>
         ) : showDetailView ? (
-          <BranchPreview branch={previewBranch} gitRepo={gitRepo} />
+          <BranchPreview branch={currentBranch} gitRepo={gitRepo} />
         ) : (
           <BranchList
             loading={state === 'loading'}
