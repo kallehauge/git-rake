@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
-import { GitRepository } from '../git/GitRepository';
-import { ConfigLoader } from '../utils/config';
-import { GitBranch, FilterType } from '../types';
-import { ThemeProvider } from './ThemeProvider';
-import { BranchList } from './BranchList';
-import { BranchPreview } from './BranchPreview';
-import { ConfirmationPrompt } from './ConfirmationPrompt';
-import { StatusBar } from './StatusBar';
+import { GitRepository } from '../git/GitRepository.js';
+import { ConfigLoader } from '../utils/config.js';
+import { GitBranch, FilterType } from '../types/index.js';
+import { ThemeProvider } from './ThemeProvider.js';
+import { BranchList } from './BranchList.js';
+import { BranchPreview } from './BranchPreview.js';
+import { ConfirmationPrompt } from './ConfirmationPrompt.js';
+import { StatusBar } from './StatusBar.js';
 
 interface AppProps {
   dryRun?: boolean;
@@ -68,7 +68,7 @@ export function App({ dryRun = false, includeRemote = false, restoreMode = false
       let branchList: GitBranch[];
       if (restoreMode) {
         const trashBranches = await gitRepo.getTrashBranches();
-        branchList = trashBranches.map(name => ({
+        branchList = trashBranches.map((name: string) => ({
           name,
           ref: `refs/rake-trash/${name}`,
           isCurrent: false,

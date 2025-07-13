@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { GitBranch } from '../types';
-import { useTheme } from './ThemeProvider';
+import { GitBranch } from '../types/index.js';
+import { useTheme } from './ThemeProvider.js';
 
 interface ConfirmationPromptProps {
   branches: GitBranch[];

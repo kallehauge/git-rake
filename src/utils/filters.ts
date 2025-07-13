@@ -1,5 +1,5 @@
 import Fuse from 'fuse.js';
-import { GitBranch, FilterOptions, FilterType } from '../types';
+import { GitBranch, FilterOptions, FilterType } from '../types/index.js';
 
 export function filterBranches(branches: GitBranch[], options: FilterOptions): GitBranch[] {
   return branches.filter(branch => {

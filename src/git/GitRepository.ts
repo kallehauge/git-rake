@@ -1,6 +1,6 @@
 import { simpleGit, SimpleGit, BranchSummary } from 'simple-git';
 import { differenceInDays } from 'date-fns';
-import { GitBranch, GitConfig, BranchOperation } from '../types';
+import { GitBranch, GitConfig, BranchOperation } from '../types/index.js';
 
 export class GitRepository {
   private git: SimpleGit;

@@ -1,7 +1,8 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { GitConfig, Theme } from '../types';
+import { GitConfig, Theme } from '../types/index.js';
 
 export interface GitRakeConfig extends GitConfig {
+  staleDaysThreshold: number;
   theme: string;
   includeRemote: boolean;
   autoCleanupTrash: boolean;

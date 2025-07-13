@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import { useTheme } from './ThemeProvider';
+import { useTheme } from './ThemeProvider.js';
 
 export function BranchListHeader() {
   const { theme } = useTheme();

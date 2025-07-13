@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import { FilterType } from '../types';
-import { useTheme } from './ThemeProvider';
+import { FilterType } from '../types/index.js';
+import { useTheme } from './ThemeProvider.js';
 
 interface StatusBarProps {
   filterType: FilterType;
