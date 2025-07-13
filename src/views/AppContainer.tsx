@@ -5,10 +5,11 @@ import { useAppOperations } from '../hooks/useAppOperations.js';
 import { useAppUIContext, useBranchDataContext, useSelectionContext } from '../contexts/AppProviders.js';
 import { BranchesView } from './BranchesView.js';
 import { BranchView } from './BranchView.js';
+import { ConfirmationView } from './ConfirmationView.js';
 import { ErrorView } from './ErrorView.js';
 import { OperatingView } from './OperatingView.js';
 
-type ViewState = 'branches' | 'branch';
+type ViewState = 'branches' | 'branch' | 'confirmation';
 
 interface AppContainerProps {
   dryRun?: boolean;
@@ -44,7 +45,7 @@ export function AppContainer({
 
   const { gitRepo, currentPath } = useGitRepository({ workingDir });
 
-  const { handleConfirmOperation, handleCancelOperation } = useAppOperations({
+  const { handleConfirmOperation } = useAppOperations({
     gitRepo,
     restoreMode,
     dryRun,
@@ -53,6 +54,7 @@ export function AppContainer({
         await onRefreshBranches();
       }
       setSelectedBranches([]);
+      setCurrentView('branches');
     },
     onOperationError: setError,
   });
@@ -74,12 +76,12 @@ export function AppContainer({
 
     if (state === 'ready') {
       if (input === 'd' && selectedBranches.length > 0 && !restoreMode) {
-        setState('confirming');
+        setCurrentView('confirmation');
         return;
       }
 
       if (input === 'r' && selectedBranches.length > 0 && restoreMode) {
-        setState('confirming');
+        setCurrentView('confirmation');
         return;
       }
 
@@ -120,12 +122,23 @@ export function AppContainer({
     case 'branch':
       return <BranchView gitRepo={gitRepo} />;
 
+    case 'confirmation':
+      return (
+        <ConfirmationView
+          branches={selectedBranches}
+          operation={restoreMode ? 'restore' : 'delete'}
+          dryRun={dryRun}
+          onConfirm={handleConfirmOperationCallback}
+          onCancel={() => setCurrentView('branches')}
+          currentPath={currentPath}
+          ctrlCCount={ctrlCCount}
+        />
+      );
+
     case 'branches':
     default:
       return (
         <BranchesView
-          onConfirmOperation={handleConfirmOperationCallback}
-          onCancelOperation={handleCancelOperation}
           restoreMode={restoreMode}
           dryRun={dryRun}
           currentPath={currentPath}

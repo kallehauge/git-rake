@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactNode, useState, useMemo } from 'react';
 
-export type AppState = 'loading' | 'ready' | 'confirming' | 'operating' | 'error';
+export type AppState = 'loading' | 'ready' | 'operating' | 'error';
 
 export interface AppUIState {
   state: AppState;

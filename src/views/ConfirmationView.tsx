@@ -1,45 +1,47 @@
-import React from 'react';
+import { memo } from 'react';
 import { Box, Text } from 'ink';
-import { useAppUIContext } from '../contexts/AppProviders.js';
+import { GitBranch } from '../types/index.js';
 import { useTheme } from '../contexts/ThemeProvider.js';
-import { BranchList } from '../components/BranchList.js';
-import { StatusBar } from '../components/StatusBar.js';
+import { ConfirmationPrompt } from '../components/ConfirmationPrompt.js';
 
-interface BranchesViewProps {
-  restoreMode: boolean;
+interface ConfirmationViewProps {
+  branches: GitBranch[];
+  operation: 'delete' | 'restore';
   dryRun: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
   currentPath: string;
   ctrlCCount: number;
 }
 
-export const BranchesView = React.memo(function BranchesView({
-  restoreMode,
+export const ConfirmationView = memo(function ConfirmationView({
+  branches,
+  operation,
   dryRun,
+  onConfirm,
+  onCancel,
   currentPath,
   ctrlCCount,
-}: BranchesViewProps) {
+}: ConfirmationViewProps) {
   const { theme } = useTheme();
-  const { state } = useAppUIContext();
 
   return (
     <Box flexDirection="column">
-      {/* Status bar */}
-      <StatusBar
-        restoreMode={restoreMode}
-        dryRun={dryRun}
-      />
-
       {/* Main content area */}
-      <Box flexGrow={1} flexDirection="column">
-        <BranchList
-          loading={state === 'loading'}
+      <Box flexGrow={1} flexDirection="column" padding={1}>
+        <ConfirmationPrompt
+          branches={branches}
+          operation={operation}
+          dryRun={dryRun}
+          onConfirm={onConfirm}
+          onCancel={onCancel}
         />
       </Box>
 
       {/* Help bar */}
       <Box borderStyle="single" borderColor={theme.colors.secondary}>
         <Text color={theme.colors.secondary}>
-          {`↑↓: navigate • Space: select • /: search • f: filter • v: details • ${restoreMode ? 'r: restore' : 'd: delete'} • Ctrl+C: exit`}
+          ←→: navigate • Enter/Y: confirm • ESC/N: cancel
           {ctrlCCount > 0 && (
             <Text color={theme.colors.warning}> (Press Ctrl+C again to exit)</Text>
           )}
