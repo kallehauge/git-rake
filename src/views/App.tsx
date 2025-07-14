@@ -25,7 +25,7 @@ export function App(props: AppProps) {
   if (error) {
     return (
       <ThemeProvider theme={theme}>
-        <ErrorView error={error} />
+        <ErrorView error={error} currentPath={currentPath} />
       </ThemeProvider>
     );
   }

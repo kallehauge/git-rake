@@ -3,9 +3,9 @@ import { useInput, useApp } from 'ink';
 import { useGitRepository } from '../hooks/useGitRepository.js';
 import { useAppOperations } from '../hooks/useAppOperations.js';
 import { useAppUIContext, useBranchDataContext, useSelectionContext } from '../contexts/AppProviders.js';
-import { BranchesView } from './BranchesView.js';
+import { BranchesView } from './branches/BranchesView.js';
 import { BranchView } from './BranchView.js';
-import { ConfirmationView } from './ConfirmationView.js';
+import { ConfirmationView } from './confirmation/ConfirmationView.js';
 import { ErrorView } from './ErrorView.js';
 import { OperatingView } from './OperatingView.js';
 
@@ -111,16 +111,16 @@ export function AppContainer({
   }, [branches.length, state, setState]);
 
   if (state === 'error') {
-    return <ErrorView error={error} />;
+    return <ErrorView error={error} currentPath={currentPath} />;
   }
 
   if (state === 'operating') {
-    return <OperatingView dryRun={dryRun} />;
+    return <OperatingView dryRun={dryRun} currentPath={currentPath} ctrlCCount={ctrlCCount} />;
   }
 
   switch (currentView) {
     case 'branch':
-      return <BranchView gitRepo={gitRepo} />;
+      return <BranchView gitRepo={gitRepo} currentPath={currentPath} ctrlCCount={ctrlCCount} />;
 
     case 'confirmation':
       return (

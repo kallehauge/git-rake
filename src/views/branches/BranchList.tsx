@@ -1,11 +1,11 @@
 import React from 'react';
 import { useInput } from 'ink';
 import { Box, Text } from 'ink';
-import { useTheme } from '../contexts/ThemeProvider.js';
+import { useTheme } from '../../contexts/ThemeProvider.js';
 import { BranchItem } from './BranchItem.js';
 import { BranchListHeader } from './BranchListHeader.js';
-import { useKeyboardHandler } from '../hooks/useKeyboardHandler.js';
-import { useBranchDataContext, useSelectionContext, useSearchContext } from '../contexts/AppProviders.js';
+import { useKeyboardHandler } from '../../hooks/useKeyboardHandler.js';
+import { useBranchDataContext, useSelectionContext, useSearchContext } from '../../contexts/AppProviders.js';
 
 interface BranchListProps {
   loading?: boolean;
