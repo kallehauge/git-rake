@@ -1,78 +1,77 @@
 import { useCallback } from 'react';
-import { useSearchContext } from '../contexts/AppProviders.js';
+import { useSearchContext, useAppUIContext } from '../contexts/AppProviders.js';
+import { FilterType } from '../types/index.js';
 
 interface UseSearchReturn {
   handleSearchInput: (input: string, key: any) => boolean;
+  activateSearch: () => void;
   clearSearch: () => void;
   cycleFilter: () => void;
-  activateSearch: () => void;
 }
 
 export function useSearch(): UseSearchReturn {
   const {
     searchMode,
-    searchInputActive,
-    clearSearch: clearSearchAction,
-    setSearchInputActive,
-    backspaceSearchQuery,
+    filterType,
     setSearchQuery,
     appendSearchQuery,
-    cycleFilter: cycleFilterAction,
-    setSearchMode
+    setSearchMode,
+    setFilterType
   } = useSearchContext();
+  const { setInputLocked } = useAppUIContext();
 
   const handleSearchInput = useCallback((input: string, key: any): boolean => {
     if (!searchMode) return false;
 
     if (key.escape) {
-      clearSearchAction();
+      setSearchMode(false);
+      setSearchQuery('');
+      setInputLocked(false);
       return true;
     }
 
-    // Re-activate search input if user presses / only when search input is not active
-    if (input === '/' && !searchInputActive) {
-      setSearchInputActive(true);
+    if (key.return) {
+      setSearchMode(false);
+      setInputLocked(false);
       return true;
     }
 
-    // Handle search input only when search input is active
-    if (searchInputActive) {
-      if (key.backspace) {
-        backspaceSearchQuery();
-        return true;
-      }
-
-      if (key.delete) {
-        setSearchQuery('');
-        return true;
-      }
-
-      if (input && !key.ctrl && !key.meta && !key.upArrow && !key.downArrow && input !== ' ') {
-        appendSearchQuery(input);
-        return true;
-      }
+    if (key.delete || key.backspace) {
+      setSearchQuery('');
+      return true;
     }
 
-    return false;
-  }, [searchMode, searchInputActive, clearSearchAction, setSearchInputActive, backspaceSearchQuery, setSearchQuery, appendSearchQuery]);
+    if (input && !key.ctrl && !key.meta && !key.shift) {
+      appendSearchQuery(input);
+      return true;
+    }
 
-  const clearSearch = useCallback(() => {
-    clearSearchAction();
-  }, [clearSearchAction]);
+    // Consume any other keys to prevent them from affecting other handlers
+    return true;
+  }, [searchMode, setSearchQuery, appendSearchQuery, setInputLocked, setSearchMode]);
 
-  const cycleFilter = useCallback(() => {
-    cycleFilterAction();
-  }, [cycleFilterAction]);
 
   const activateSearch = useCallback(() => {
     setSearchMode(true);
-    setSearchInputActive(true);
-  }, [setSearchMode, setSearchInputActive]);
+    setInputLocked(true);
+  }, [setSearchMode, setInputLocked]);
+
+  const clearSearch = useCallback(() => {
+    setSearchMode(false);
+    setSearchQuery('');
+  }, [setSearchMode, setSearchQuery]);
+
+  const cycleFilter = useCallback(() => {
+    const filterTypes: FilterType[] = ['all', 'merged', 'stale', 'unmerged'];
+    const currentIndex = filterTypes.indexOf(filterType);
+    const nextIndex = (currentIndex + 1) % filterTypes.length;
+    setFilterType(filterTypes[nextIndex]);
+  }, [filterType, setFilterType]);
 
   return {
     handleSearchInput,
+    activateSearch,
     clearSearch,
     cycleFilter,
-    activateSearch,
   };
 }

@@ -1,11 +1,10 @@
 import React from 'react';
-import { useInput } from 'ink';
-import { Box, Text } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import { useTheme } from '../../contexts/ThemeProvider.js';
 import { BranchItem } from './BranchItem.js';
 import { BranchListHeader } from './BranchListHeader.js';
-import { useKeyboardHandler } from '../../hooks/useKeyboardHandler.js';
-import { useBranchDataContext, useSelectionContext, useSearchContext } from '../../contexts/AppProviders.js';
+import { useBranchDataContext, useSelectionContext, useSearchContext, useAppUIContext } from '../../contexts/AppProviders.js';
+import { useBranchSelection } from '../../hooks/useBranchSelection.js';
 
 interface BranchListProps {
   loading?: boolean;
@@ -13,13 +12,22 @@ interface BranchListProps {
 
 export const BranchList = React.memo(function BranchList({ loading = false }: BranchListProps) {
   const { theme } = useTheme();
-  const { filteredBranches } = useBranchDataContext();
+  const { filteredBranches, currentBranch } = useBranchDataContext();
   const { selectedIndex, selectedBranchNames } = useSelectionContext();
   const { searchQuery } = useSearchContext();
+  const { state, inputLocked } = useAppUIContext();
+  const { toggleBranchSelection, handleListNavigation } = useBranchSelection();
 
-  const { handleKeyInput } = useKeyboardHandler();
+  useInput((input, key) => {
+    if (state !== 'ready' || loading) return;
 
-  useInput(handleKeyInput);
+    if (handleListNavigation(key)) return;
+
+    if (input === ' ' && currentBranch) {
+      toggleBranchSelection(currentBranch);
+      return;
+    }
+  }, { isActive: !inputLocked });
 
   if (loading) {
     return (

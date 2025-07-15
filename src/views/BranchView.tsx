@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Text } from 'ink';
+import { Box, Text, useInput } from 'ink';
 import { GitRepository } from '../services/GitRepository.js';
-import { useBranchDataContext } from '../contexts/AppProviders.js';
+import { useBranchDataContext, useAppUIContext } from '../contexts/AppProviders.js';
 import { useTheme } from '../contexts/ThemeProvider.js';
 import { ViewLayout } from '../components/ViewLayout.js';
 
 interface BranchViewProps {
   gitRepo: GitRepository;
   currentPath: string;
-  ctrlCCount: number;
 }
 
 export const BranchView = React.memo(function BranchView({
   gitRepo,
   currentPath,
-  ctrlCCount,
 }: BranchViewProps) {
   const { theme } = useTheme();
   const { currentBranch } = useBranchDataContext();
+  const { setCurrentView, inputLocked } = useAppUIContext();
   const [gitLog, setGitLog] = useState<string>('');
   const [loadingGitLog, setLoadingGitLog] = useState(false);
 
@@ -34,7 +33,13 @@ export const BranchView = React.memo(function BranchView({
       .finally(() => setLoadingGitLog(false));
   }, [currentBranch, gitRepo]);
 
-  const helpText = 'ESC: back to branches • v: toggle view';
+  useInput((input, key) => {
+    if (key.escape) {
+      setCurrentView('branches');
+    }
+  }, { isActive: !inputLocked });
+
+  const helpText = 'ESC: back to branches';
 
   const statusBarContent = (
     <Text color={theme.colors.primary} bold>
@@ -47,7 +52,6 @@ export const BranchView = React.memo(function BranchView({
       <ViewLayout
         statusBarContent={statusBarContent}
         helpText={helpText}
-        ctrlCCount={ctrlCCount}
         currentPath={currentPath}
       >
         <Box flexDirection="column" height="100%">
@@ -66,7 +70,6 @@ export const BranchView = React.memo(function BranchView({
     <ViewLayout
       statusBarContent={statusBarContent}
       helpText={helpText}
-      ctrlCCount={ctrlCCount}
       currentPath={currentPath}
     >
       <Box flexDirection="column" height="100%">

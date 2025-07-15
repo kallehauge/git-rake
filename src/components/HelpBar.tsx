@@ -3,19 +3,15 @@ import { useTheme } from '../contexts/ThemeProvider.js';
 
 interface HelpBarProps {
   helpText: string;
-  ctrlCCount?: number;
 }
 
-export function HelpBar({ helpText, ctrlCCount = 0 }: HelpBarProps) {
+export function HelpBar({ helpText }: HelpBarProps) {
   const { theme } = useTheme();
 
   return (
     <Box borderStyle="single" borderColor={theme.colors.secondary}>
       <Text color={theme.colors.secondary}>
-        {helpText}
-        {ctrlCCount > 0 && (
-          <Text color={theme.colors.warning}> (Press Ctrl+C again to exit)</Text>
-        )}
+        {helpText} • ctrl+c: exit
       </Text>
     </Box>
   );

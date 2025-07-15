@@ -5,10 +5,9 @@ import { ViewLayout } from '../components/ViewLayout.js';
 interface OperatingViewProps {
   dryRun: boolean;
   currentPath: string;
-  ctrlCCount: number;
 }
 
-export function OperatingView({ dryRun, currentPath, ctrlCCount }: OperatingViewProps) {
+export function OperatingView({ dryRun, currentPath }: OperatingViewProps) {
   const { theme } = useTheme();
   const helpText = 'Please wait...';
 
@@ -23,7 +22,6 @@ export function OperatingView({ dryRun, currentPath, ctrlCCount }: OperatingView
       statusBarContent={statusBarContent}
       dryRun={dryRun}
       helpText={helpText}
-      ctrlCCount={ctrlCCount}
       currentPath={currentPath}
     >
       <Box flexDirection="column" padding={1}>

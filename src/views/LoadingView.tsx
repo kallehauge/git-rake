@@ -4,10 +4,9 @@ import { ViewLayout } from '../components/ViewLayout.js';
 
 interface LoadingViewProps {
   currentPath?: string;
-  ctrlCCount?: number;
 }
 
-export function LoadingView({ currentPath = '', ctrlCCount = 0 }: LoadingViewProps) {
+export function LoadingView({ currentPath = '' }: LoadingViewProps) {
   const { theme } = useTheme();
   const helpText = 'Loading...';
 
@@ -21,7 +20,6 @@ export function LoadingView({ currentPath = '', ctrlCCount = 0 }: LoadingViewPro
     <ViewLayout
       statusBarContent={statusBarContent}
       helpText={helpText}
-      ctrlCCount={ctrlCCount}
       currentPath={currentPath}
     >
       <Box flexDirection="column" padding={1}>

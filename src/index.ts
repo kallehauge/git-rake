@@ -11,7 +11,7 @@ program
   .version('1.0.0')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action((options) => {
-    render(React.createElement(App, { workingDir: options.cwd }));
+    render(React.createElement(App, { workingDir: options.cwd }), { exitOnCtrlC: false });
   });
 
 program

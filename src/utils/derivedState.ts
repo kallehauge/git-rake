@@ -1,6 +1,14 @@
 import { GitBranch, FilterType } from '../types/index.js';
 import { BranchSearcher, getFilterOptionsForType, filterBranches, sortBranches } from './filters.js';
-import { StatusBarInfo } from '../hooks/useDerivedState.js';
+
+export interface StatusBarInfo {
+  filterType: FilterType;
+  totalBranches: number;
+  filteredBranches: number;
+  selectedCount: number;
+  searchMode: boolean;
+  searchQuery: string;
+}
 
 export function computeFilteredBranches(
   branches: GitBranch[],
@@ -35,7 +43,6 @@ export function computeStatusBarInfo(
   filteredBranches: number,
   selectedCount: number,
   searchMode: boolean,
-  searchInputActive: boolean,
   searchQuery: string
 ): StatusBarInfo {
   return {
@@ -44,7 +51,6 @@ export function computeStatusBarInfo(
     filteredBranches,
     selectedCount,
     searchMode,
-    searchInputActive,
     searchQuery,
   };
 }

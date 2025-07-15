@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import { GitBranch } from '../../types/index.js';
 import { useTheme } from '../../contexts/ThemeProvider.js';
+import { useAppUIContext } from '../../contexts/AppProviders.js';
 
 interface ConfirmationPromptProps {
   branches: GitBranch[];
@@ -13,14 +14,10 @@ interface ConfirmationPromptProps {
 
 export function ConfirmationPrompt({ branches, operation, dryRun = false, onConfirm, onCancel }: ConfirmationPromptProps) {
   const { theme } = useTheme();
+  const { setCurrentView, inputLocked } = useAppUIContext();
   const [selectedOption, setSelectedOption] = useState<'confirm' | 'cancel'>('cancel');
 
   useInput((input, key) => {
-    // Allow Ctrl+C to pass through to App component for exit handling
-    if (key.ctrl && input === 'c') {
-      return;
-    }
-
     if (key.leftArrow || key.rightArrow) {
       setSelectedOption(selectedOption === 'confirm' ? 'cancel' : 'confirm');
     }
@@ -34,7 +31,7 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
     }
 
     if (key.escape) {
-      onCancel();
+      setCurrentView('branches');
     }
 
     if (input === 'y' || input === 'Y') {
@@ -44,7 +41,7 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
     if (input === 'n' || input === 'N') {
       onCancel();
     }
-  });
+  }, { isActive: !inputLocked });
 
   const warningColor = operation === 'delete' ? theme.colors.error : theme.colors.warning;
 
@@ -94,12 +91,6 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
             Cancel (N)
           </Text>
         </Box>
-      </Box>
-
-      <Box marginTop={1}>
-        <Text color={theme.colors.secondary}>
-          ←→: navigate • Enter/Y: confirm • ESC/N: cancel
-        </Text>
       </Box>
     </Box>
   );

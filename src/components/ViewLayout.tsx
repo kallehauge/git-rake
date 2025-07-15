@@ -10,7 +10,6 @@ interface ViewLayoutProps {
   restoreMode?: boolean;
   dryRun?: boolean;
   helpText: string;
-  ctrlCCount?: number;
   currentPath: string;
 }
 
@@ -20,7 +19,6 @@ export function ViewLayout({
   restoreMode = false,
   dryRun = false,
   helpText,
-  ctrlCCount = 0,
   currentPath
 }: ViewLayoutProps) {
   const { theme } = useTheme();
@@ -35,7 +33,7 @@ export function ViewLayout({
         {children}
       </Box>
 
-      <HelpBar helpText={helpText} ctrlCCount={ctrlCCount} />
+      <HelpBar helpText={helpText} />
 
       <Box paddingX={1}>
         <Text color={theme.colors.secondary}>

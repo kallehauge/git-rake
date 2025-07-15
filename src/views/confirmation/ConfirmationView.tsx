@@ -12,7 +12,6 @@ interface ConfirmationViewProps {
   onConfirm: () => void;
   onCancel: () => void;
   currentPath: string;
-  ctrlCCount: number;
 }
 
 export const ConfirmationView = memo(function ConfirmationView({
@@ -22,7 +21,6 @@ export const ConfirmationView = memo(function ConfirmationView({
   onConfirm,
   onCancel,
   currentPath,
-  ctrlCCount,
 }: ConfirmationViewProps) {
   const { theme } = useTheme();
   const helpText = '←→: navigate • Enter/Y: confirm • ESC/N: cancel';
@@ -38,7 +36,6 @@ export const ConfirmationView = memo(function ConfirmationView({
       statusBarContent={statusBarContent}
       dryRun={dryRun}
       helpText={helpText}
-      ctrlCCount={ctrlCCount}
       currentPath={currentPath}
     >
       <Box flexGrow={1} flexDirection="column" padding={1}>

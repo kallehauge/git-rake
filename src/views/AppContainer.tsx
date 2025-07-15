@@ -1,15 +1,16 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useInput, useApp } from 'ink';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { useInput, useApp, Box, Text } from 'ink';
 import { useGitRepository } from '../hooks/useGitRepository.js';
 import { useAppOperations } from '../hooks/useAppOperations.js';
-import { useAppUIContext, useBranchDataContext, useSelectionContext } from '../contexts/AppProviders.js';
+import { useBranchSelection } from '../hooks/useBranchSelection.js';
+import { useAppUIContext, useBranchDataContext } from '../contexts/AppProviders.js';
+import { useTheme } from '../contexts/ThemeProvider.js';
 import { BranchesView } from './branches/BranchesView.js';
 import { BranchView } from './BranchView.js';
 import { ConfirmationView } from './confirmation/ConfirmationView.js';
 import { ErrorView } from './ErrorView.js';
 import { OperatingView } from './OperatingView.js';
 
-type ViewState = 'branches' | 'branch' | 'confirmation';
 
 interface AppContainerProps {
   dryRun?: boolean;
@@ -27,20 +28,13 @@ export function AppContainer({
   onRefreshBranches
 }: AppContainerProps) {
   const { exit } = useApp();
-  const { state, setState } = useAppUIContext();
+  const { theme } = useTheme();
+  const { state, setState, currentView, setCurrentView } = useAppUIContext();
+  const [showExitWarning, setShowExitWarning] = useState(false);
+  const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [currentView, setCurrentView] = useState<ViewState>('branches');
-  const [ctrlCCount, setCtrlCCount] = useState(0);
-
-  const toggleBranchView = useCallback(() => {
-    setCurrentView(prev => prev === 'branch' ? 'branches' : 'branch');
-  }, []);
-
-  const resetCtrlCCount = useCallback(() => {
-    setCtrlCCount(0);
-  }, []);
   const { selectedBranches, branches } = useBranchDataContext();
-  const { setSelectedBranches } = useSelectionContext();
+  const { clearSelection } = useBranchSelection();
   const [error, setError] = useState<string>('');
 
   const { gitRepo, currentPath } = useGitRepository({ workingDir });
@@ -53,53 +47,37 @@ export function AppContainer({
       if (onRefreshBranches) {
         await onRefreshBranches();
       }
-      setSelectedBranches([]);
+      clearSelection();
       setCurrentView('branches');
     },
     onOperationError: setError,
   });
 
-  const resetCtrlCTimer = useCallback(() => {
-    setTimeout(() => resetCtrlCCount(), 2000);
-  }, [resetCtrlCCount]);
-
   const handleConfirmOperationCallback = useCallback(() => {
     handleConfirmOperation(selectedBranches);
   }, [handleConfirmOperation, selectedBranches]);
 
+  const handleCtrlC = useCallback(() => {
+    if (showExitWarning) {
+      process.stdout.write('\x1b[2J\x1b[0f');
+      exit();
+    } else {
+      setShowExitWarning(true);
+
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current);
+      }
+
+      exitTimeoutRef.current = setTimeout(() => {
+        setShowExitWarning(false);
+        exitTimeoutRef.current = null;
+      }, 2000);
+    }
+  }, [showExitWarning, exit]);
+
   useInput((input, key) => {
-    // Handle ESC for returning to branches view
-    if (key.escape) {
-      setCurrentView('branches');
-      return;
-    }
-
-    if (state === 'ready') {
-      if (input === 'd' && selectedBranches.length > 0 && !restoreMode) {
-        setCurrentView('confirmation');
-        return;
-      }
-
-      if (input === 'r' && selectedBranches.length > 0 && restoreMode) {
-        setCurrentView('confirmation');
-        return;
-      }
-
-      if (input === 'v') {
-        toggleBranchView();
-        return;
-      }
-    }
-
-    // Double Ctrl+C to exit
     if (key.ctrl && input === 'c') {
-      if (ctrlCCount === 0) {
-        setCtrlCCount(1);
-        resetCtrlCTimer();
-      } else {
-        process.stdout.write('\x1b[2J\x1b[0f');
-        exit();
-      }
+      handleCtrlC();
     }
   });
 
@@ -110,40 +88,53 @@ export function AppContainer({
     }
   }, [branches.length, state, setState]);
 
-  if (state === 'error') {
-    return <ErrorView error={error} currentPath={currentPath} />;
-  }
+  const renderCurrentView = () => {
+    if (state === 'error') {
+      return <ErrorView error={error} currentPath={currentPath} />;
+    }
 
-  if (state === 'operating') {
-    return <OperatingView dryRun={dryRun} currentPath={currentPath} ctrlCCount={ctrlCCount} />;
-  }
+    if (state === 'operating') {
+      return <OperatingView dryRun={dryRun} currentPath={currentPath} />;
+    }
 
-  switch (currentView) {
-    case 'branch':
-      return <BranchView gitRepo={gitRepo} currentPath={currentPath} ctrlCCount={ctrlCCount} />;
+    switch (currentView) {
+      case 'branch':
+        return <BranchView gitRepo={gitRepo} currentPath={currentPath} />;
 
-    case 'confirmation':
-      return (
-        <ConfirmationView
-          branches={selectedBranches}
-          operation={restoreMode ? 'restore' : 'delete'}
-          dryRun={dryRun}
-          onConfirm={handleConfirmOperationCallback}
-          onCancel={() => setCurrentView('branches')}
-          currentPath={currentPath}
-          ctrlCCount={ctrlCCount}
-        />
-      );
+      case 'confirmation':
+        return (
+          <ConfirmationView
+            branches={selectedBranches}
+            operation={restoreMode ? 'restore' : 'delete'}
+            dryRun={dryRun}
+            onConfirm={handleConfirmOperationCallback}
+            onCancel={() => setCurrentView('branches')}
+            currentPath={currentPath}
+          />
+        );
 
-    case 'branches':
-    default:
-      return (
-        <BranchesView
-          restoreMode={restoreMode}
-          dryRun={dryRun}
-          currentPath={currentPath}
-          ctrlCCount={ctrlCCount}
-        />
-      );
-  }
+      case 'branches':
+      default:
+        return (
+          <BranchesView
+            restoreMode={restoreMode}
+            dryRun={dryRun}
+            currentPath={currentPath}
+          />
+        );
+    }
+  };
+
+  return (
+    <Box flexDirection="column">
+      {renderCurrentView()}
+      {showExitWarning && (
+        <Box paddingX={1} paddingY={0}>
+          <Text color={theme.colors.warning}>
+            Press Ctrl+C again to exit
+          </Text>
+        </Box>
+      )}
+    </Box>
+  );
 }

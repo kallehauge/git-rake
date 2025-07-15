@@ -5,10 +5,9 @@ import { ViewLayout } from '../components/ViewLayout.js';
 interface ErrorViewProps {
   error: string;
   currentPath: string;
-  ctrlCCount?: number;
 }
 
-export function ErrorView({ error, currentPath, ctrlCCount = 0 }: ErrorViewProps) {
+export function ErrorView({ error, currentPath }: ErrorViewProps) {
   const { theme } = useTheme();
   const helpText = 'ESC: exit • Ctrl+C: force exit';
 
@@ -22,7 +21,6 @@ export function ErrorView({ error, currentPath, ctrlCCount = 0 }: ErrorViewProps
     <ViewLayout
       statusBarContent={statusBarContent}
       helpText={helpText}
-      ctrlCCount={ctrlCCount}
       currentPath={currentPath}
     >
       <Box flexDirection="column" padding={1}>

@@ -4,7 +4,7 @@ import { useBranchDataContext } from '../../contexts/AppProviders.js';
 
 export function BranchStatusBarContent() {
   const { statusBarInfo } = useBranchDataContext();
-  const { filterType, totalBranches, filteredBranches, selectedCount, searchMode, searchInputActive, searchQuery } = statusBarInfo;
+  const { filterType, totalBranches, filteredBranches, selectedCount, searchMode, searchQuery } = statusBarInfo;
   const { theme } = useTheme();
 
   const getFilterDisplay = () => {
@@ -34,7 +34,7 @@ export function BranchStatusBarContent() {
           <Text color={theme.colors.text}> • </Text>
           <Text color={theme.colors.text}>
             Search: <Text color={theme.colors.primary}>{searchQuery}</Text>
-            {searchInputActive && <Text color={theme.colors.primary}>|</Text>}
+            {searchMode && <Text color={theme.colors.primary}>|</Text>}
           </Text>
         </>
       )}

@@ -1,13 +1,6 @@
 import { createContext, useContext, ReactNode, useMemo } from 'react';
 import { GitBranch } from '../types/index.js';
-import {
-  useFilteredBranches,
-  useSelectedBranches,
-  useCurrentBranch,
-  useValidatedSelectedIndex,
-  useStatusBarInfo,
-  StatusBarInfo
-} from '../hooks/useDerivedState.js';
+import { computeFilteredBranches, computeSelectedBranches, computeStatusBarInfo, computeCurrentBranch, StatusBarInfo } from '../utils/derivedState.js';
 import { SearchContext } from './SearchContext.js';
 import { SelectionContext } from './SelectionContext.js';
 
@@ -30,7 +23,6 @@ const defaultBranchData: BranchData = {
     filteredBranches: 0,
     selectedCount: 0,
     searchMode: false,
-    searchInputActive: false,
     searchQuery: '',
   },
 };
@@ -43,23 +35,35 @@ interface BranchDataProviderProps {
 }
 
 export function BranchDataProvider({ children, branches }: BranchDataProviderProps) {
-  const { searchQuery, filterType, searchMode, searchInputActive } = useContext(SearchContext);
+  const { searchQuery, filterType, searchMode } = useContext(SearchContext);
   const { selectedBranchNames, selectedIndex } = useContext(SelectionContext);
 
-  const filteredBranches = useFilteredBranches(branches, searchQuery, filterType);
-  const selectedBranches = useSelectedBranches(branches, selectedBranchNames);
-  const validatedSelectedIndex = useValidatedSelectedIndex(selectedIndex, filteredBranches.length);
-  const currentBranch = useCurrentBranch(filteredBranches, validatedSelectedIndex);
+  const filteredBranches = useMemo(() => {
+    return computeFilteredBranches(branches, searchQuery, filterType);
+  }, [branches, searchQuery, filterType]);
 
-  const statusBarInfo = useStatusBarInfo(
-    filterType,
-    branches.length,
-    filteredBranches.length,
-    selectedBranches.length,
-    searchMode,
-    searchInputActive,
-    searchQuery
-  );
+  const selectedBranches = useMemo(() => {
+    return computeSelectedBranches(branches, selectedBranchNames);
+  }, [branches, selectedBranchNames]);
+
+  const validatedSelectedIndex = useMemo(() => {
+    return Math.max(0, Math.min(selectedIndex, filteredBranches.length - 1));
+  }, [selectedIndex, filteredBranches.length]);
+
+  const currentBranch = useMemo(() => {
+    return computeCurrentBranch(filteredBranches, validatedSelectedIndex);
+  }, [filteredBranches, validatedSelectedIndex]);
+
+  const statusBarInfo = useMemo(() => {
+    return computeStatusBarInfo(
+      filterType,
+      branches.length,
+      filteredBranches.length,
+      selectedBranches.length,
+      searchMode,
+      searchQuery
+    );
+  }, [filterType, branches.length, filteredBranches.length, selectedBranches.length, searchMode, searchQuery]);
 
   const branchData: BranchData = useMemo(() => ({
     branches,

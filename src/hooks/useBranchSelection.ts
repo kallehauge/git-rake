@@ -1,59 +1,77 @@
 import { useCallback } from 'react';
 import { GitBranch } from '../types/index.js';
-import { useSelectionContext } from '../contexts/AppProviders.js';
+import { useSelectionContext, useBranchDataContext } from '../contexts/AppProviders.js';
 
 interface UseBranchSelectionReturn {
   toggleBranchSelection: (branch: GitBranch) => void;
   clearSelection: () => void;
+  setSelectedBranches: (branches: GitBranch[]) => void;
   navigateUp: () => void;
   navigateDown: () => void;
-  handleNavigation: (key: any) => boolean;
+  handleListNavigation: (key: any) => boolean;
 }
 
 export function useBranchSelection(): UseBranchSelectionReturn {
-  const { 
-    toggleBranchSelection: toggleBranchSelectionAction,
-    clearSelection: clearSelectionAction,
-    navigateUp: navigateUpAction,
-    navigateDown: navigateDownAction
+  const {
+    selectedBranchNames,
+    selectedIndex,
+    setSelectedIndex,
+    setSelectedBranchNames
   } = useSelectionContext();
+  const { filteredBranches } = useBranchDataContext();
 
   const toggleBranchSelection = useCallback((branch: GitBranch) => {
     if (branch.isCurrent) return;
-    toggleBranchSelectionAction(branch.name);
-  }, [toggleBranchSelectionAction]);
+
+    const newSet = new Set(selectedBranchNames);
+    if (newSet.has(branch.name)) {
+      newSet.delete(branch.name);
+    } else {
+      newSet.add(branch.name);
+    }
+    setSelectedBranchNames(newSet);
+  }, [selectedBranchNames, setSelectedBranchNames]);
 
   const clearSelection = useCallback(() => {
-    clearSelectionAction();
-  }, [clearSelectionAction]);
+    setSelectedBranchNames(new Set());
+  }, [setSelectedBranchNames]);
+
+  const setSelectedBranches = useCallback((branches: GitBranch[]) => {
+    const branchNames = new Set(branches.map(b => b.name));
+    setSelectedBranchNames(branchNames);
+  }, [setSelectedBranchNames]);
 
   const navigateUp = useCallback(() => {
-    navigateUpAction();
-  }, [navigateUpAction]);
+    const newIndex = Math.max(0, selectedIndex - 1);
+    setSelectedIndex(newIndex);
+  }, [selectedIndex, setSelectedIndex]);
 
   const navigateDown = useCallback(() => {
-    navigateDownAction();
-  }, [navigateDownAction]);
+    const maxIndex = Math.max(0, filteredBranches.length - 1);
+    const newIndex = Math.min(maxIndex, selectedIndex + 1);
+    setSelectedIndex(newIndex);
+  }, [selectedIndex, setSelectedIndex, filteredBranches.length]);
 
-  const handleNavigation = useCallback((key: any): boolean => {
+  const handleListNavigation = useCallback((key: any): boolean => {
     if (key.upArrow) {
-      navigateUpAction();
+      navigateUp();
       return true;
     }
 
     if (key.downArrow) {
-      navigateDownAction();
+      navigateDown();
       return true;
     }
 
     return false;
-  }, [navigateUpAction, navigateDownAction]);
+  }, [navigateUp, navigateDown]);
 
   return {
     toggleBranchSelection,
     clearSelection,
+    setSelectedBranches,
     navigateUp,
     navigateDown,
-    handleNavigation,
+    handleListNavigation,
   };
 }
