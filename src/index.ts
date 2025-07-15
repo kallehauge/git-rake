@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'ink';
 import { Command } from 'commander';
-import { App } from './views/App.js';
+import { App } from './views/app/App.js';
 
 const program = new Command();
 

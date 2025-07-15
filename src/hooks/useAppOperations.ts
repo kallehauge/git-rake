@@ -21,7 +21,6 @@ export function useAppOperations({
   const { setState } = useAppUIContext();
 
   const handleConfirmOperation = useCallback(async (selectedBranches: GitBranch[]) => {
-    setState('operating');
 
     try {
       const operations = selectedBranches.map(branch => ({

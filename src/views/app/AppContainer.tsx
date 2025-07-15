@@ -1,15 +1,14 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { useInput, useApp, Box, Text } from 'ink';
-import { useGitRepository } from '../hooks/useGitRepository.js';
-import { useAppOperations } from '../hooks/useAppOperations.js';
-import { useBranchSelection } from '../hooks/useBranchSelection.js';
-import { useAppUIContext, useBranchDataContext } from '../contexts/AppProviders.js';
-import { useTheme } from '../contexts/ThemeProvider.js';
-import { BranchesView } from './branches/BranchesView.js';
-import { BranchView } from './BranchView.js';
-import { ConfirmationView } from './confirmation/ConfirmationView.js';
-import { ErrorView } from './ErrorView.js';
-import { OperatingView } from './OperatingView.js';
+import { useState, useCallback, useRef } from 'react';
+import { useInput, useApp, Box } from 'ink';
+import { useGitRepository } from '../../hooks/useGitRepository.js';
+import { useAppOperations } from '../../hooks/useAppOperations.js';
+import { useBranchSelection } from '../../hooks/useBranchSelection.js';
+import { useAppUIContext, useBranchDataContext } from '../../contexts/AppProviders.js';
+import { BranchesView } from '../branches/BranchesView.js';
+import { BranchView } from '../branch/BranchView.js';
+import { ConfirmationView } from '../confirmation/ConfirmationView.js';
+import { ErrorView } from '../error/ErrorView.js';
+import { ExitWarning } from './ExitWarning.js';
 
 
 interface AppContainerProps {
@@ -28,12 +27,11 @@ export function AppContainer({
   onRefreshBranches
 }: AppContainerProps) {
   const { exit } = useApp();
-  const { theme } = useTheme();
-  const { state, setState, currentView, setCurrentView } = useAppUIContext();
+  const { state, currentView, setCurrentView } = useAppUIContext();
   const [showExitWarning, setShowExitWarning] = useState(false);
   const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { selectedBranches, branches } = useBranchDataContext();
+  const { selectedBranches } = useBranchDataContext();
   const { clearSelection } = useBranchSelection();
   const [error, setError] = useState<string>('');
 
@@ -53,8 +51,8 @@ export function AppContainer({
     onOperationError: setError,
   });
 
-  const handleConfirmOperationCallback = useCallback(() => {
-    handleConfirmOperation(selectedBranches);
+  const handleConfirmOperationCallback = useCallback(async () => {
+    return handleConfirmOperation(selectedBranches);
   }, [handleConfirmOperation, selectedBranches]);
 
   const handleCtrlC = useCallback(() => {
@@ -81,20 +79,9 @@ export function AppContainer({
     }
   });
 
-  // Set to ready state once branches are loaded from Git
-  useEffect(() => {
-    if (branches.length > 0 && state === 'loading') {
-      setState('ready');
-    }
-  }, [branches.length, state, setState]);
-
   const renderCurrentView = () => {
     if (state === 'error') {
       return <ErrorView error={error} currentPath={currentPath} />;
-    }
-
-    if (state === 'operating') {
-      return <OperatingView dryRun={dryRun} currentPath={currentPath} />;
     }
 
     switch (currentView) {
@@ -128,13 +115,7 @@ export function AppContainer({
   return (
     <Box flexDirection="column">
       {renderCurrentView()}
-      {showExitWarning && (
-        <Box paddingX={1} paddingY={0}>
-          <Text color={theme.colors.warning}>
-            Press Ctrl+C again to exit
-          </Text>
-        </Box>
-      )}
+      {showExitWarning && <ExitWarning />}
     </Box>
   );
 }

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { GitRepository } from '../services/GitRepository.js';
-import { useBranchDataContext, useAppUIContext } from '../contexts/AppProviders.js';
-import { useTheme } from '../contexts/ThemeProvider.js';
-import { ViewLayout } from '../components/ViewLayout.js';
+import { GitRepository } from '../../services/GitRepository.js';
+import { useBranchDataContext, useAppUIContext } from '../../contexts/AppProviders.js';
+import { useTheme } from '../../contexts/ThemeProvider.js';
+import { ViewLayout } from '../../components/ViewLayout.js';
+import { Spinner } from '../../components/Spinner.js';
 
 interface BranchViewProps {
   gitRepo: GitRepository;
@@ -129,7 +130,7 @@ export const BranchView = React.memo(function BranchView({
 
         <Box flexDirection="column" flexGrow={1} paddingX={1} overflow="hidden">
           {loadingGitLog ? (
-            <Text color={theme.colors.secondary}>Loading...</Text>
+            <Spinner text="Loading branch log..." />
           ) : (
             <Text color={theme.colors.text}>{gitLog}</Text>
           )}

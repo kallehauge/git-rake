@@ -6,11 +6,9 @@ import { BranchListHeader } from './BranchListHeader.js';
 import { useBranchDataContext, useSelectionContext, useSearchContext, useAppUIContext } from '../../contexts/AppProviders.js';
 import { useBranchSelection } from '../../hooks/useBranchSelection.js';
 
-interface BranchListProps {
-  loading?: boolean;
-}
+interface BranchListProps {}
 
-export const BranchList = React.memo(function BranchList({ loading = false }: BranchListProps) {
+export const BranchList = React.memo(function BranchList({}: BranchListProps) {
   const { theme } = useTheme();
   const { filteredBranches, currentBranch } = useBranchDataContext();
   const { selectedIndex, selectedBranchNames } = useSelectionContext();
@@ -19,7 +17,7 @@ export const BranchList = React.memo(function BranchList({ loading = false }: Br
   const { toggleBranchSelection, handleListNavigation } = useBranchSelection();
 
   useInput((input, key) => {
-    if (state !== 'ready' || loading) return;
+    if (state !== 'ready') return;
 
     if (handleListNavigation(key)) return;
 
@@ -28,14 +26,6 @@ export const BranchList = React.memo(function BranchList({ loading = false }: Br
       return;
     }
   }, { isActive: !inputLocked });
-
-  if (loading) {
-    return (
-      <Box flexDirection="column" height="100%">
-        <Text color={theme.colors.text}>Loading branches...</Text>
-      </Box>
-    );
-  }
 
   return (
     <Box flexDirection="column" height="100%">

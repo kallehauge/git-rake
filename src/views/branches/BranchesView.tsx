@@ -5,6 +5,7 @@ import { useSearch } from '../../hooks/useSearch.js';
 import { BranchList } from './BranchList.js';
 import { ViewLayout } from '../../components/ViewLayout.js';
 import { BranchStatusBarContent } from './BranchStatusBarContent.js';
+import { Spinner } from '../../components/Spinner.js';
 
 interface BranchesViewProps {
   restoreMode: boolean;
@@ -18,7 +19,7 @@ export const BranchesView = React.memo(function BranchesView({
   currentPath,
 }: BranchesViewProps) {
   const { state, setCurrentView, inputLocked } = useAppUIContext();
-  const { selectedBranches } = useBranchDataContext();
+  const { selectedBranches, branches } = useBranchDataContext();
   const { handleSearchInput, activateSearch, cycleFilter } = useSearch();
 
   useInput((input, key) => {
@@ -62,7 +63,11 @@ export const BranchesView = React.memo(function BranchesView({
       currentPath={currentPath}
     >
       <Box flexGrow={1} flexDirection="column">
-        <BranchList loading={state === 'loading'} />
+        {branches.length === 0 ? (
+          <Spinner text="Loading branches..." />
+        ) : (
+          <BranchList />
+        )}
       </Box>
     </ViewLayout>
   );
