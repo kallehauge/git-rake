@@ -1,6 +1,6 @@
 import React from 'react'
-import { render } from 'ink'
 import { Command } from 'commander'
+import { withFullScreen } from 'fullscreen-ink'
 import { App } from '@views/app/App.js'
 
 const program = new Command()
@@ -12,10 +12,13 @@ program
   )
   .version('1.0.0')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
-  .action(options => {
-    render(React.createElement(App, { workingDir: options.cwd }), {
-      exitOnCtrlC: false,
-    })
+  .action(async options => {
+    const ink = withFullScreen(
+      React.createElement(App, { workingDir: options.cwd }),
+      { exitOnCtrlC: false },
+    )
+    await ink.start()
+    await ink.waitUntilExit()
   })
 
 program
@@ -23,26 +26,32 @@ program
   .description('Clean up local branches interactively')
   .option('-r, --include-remote', 'Include remote tracking branches')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
-  .action(options => {
-    render(
+  .action(async options => {
+    const ink = withFullScreen(
       React.createElement(App, {
         includeRemote: options.includeRemote,
         workingDir: options.cwd,
       }),
+      { exitOnCtrlC: true },
     )
+    await ink.start()
+    await ink.waitUntilExit()
   })
 
 program
   .command('restore')
   .description('Restore deleted branches from trash')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
-  .action(options => {
-    render(
+  .action(async options => {
+    const ink = withFullScreen(
       React.createElement(App, {
         restoreMode: true,
         workingDir: options.cwd,
       }),
+      { exitOnCtrlC: false },
     )
+    await ink.start()
+    await ink.waitUntilExit()
   })
 
 program
