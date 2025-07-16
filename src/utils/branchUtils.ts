@@ -1,4 +1,5 @@
 import { GitBranch } from '@services/GitRepository.js'
+import { AppTheme } from '@utils/config.js'
 
 export function getCompactTimeAgo(date: Date): string {
   const now = new Date()
@@ -55,7 +56,10 @@ export interface BranchStatus {
   color: string
 }
 
-export function getBranchStatus(branch: GitBranch, colors: any): BranchStatus {
+export function getBranchStatus(
+  branch: GitBranch,
+  colors: AppTheme['colors'],
+): BranchStatus {
   if (branch.isCurrent) {
     return { text: 'current', color: colors.primary }
   }

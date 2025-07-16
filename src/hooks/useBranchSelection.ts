@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { Key } from 'ink'
 import { GitBranch } from '@services/GitRepository.js'
 import {
   useSelectionContext,
@@ -11,7 +12,7 @@ interface UseBranchSelectionReturn {
   setSelectedBranches: (branches: GitBranch[]) => void
   navigateUp: () => void
   navigateDown: () => void
-  handleListNavigation: (key: any) => boolean
+  handleListNavigation: (key: Key) => boolean
 }
 
 export function useBranchSelection(): UseBranchSelectionReturn {
@@ -62,7 +63,7 @@ export function useBranchSelection(): UseBranchSelectionReturn {
   }, [selectedIndex, setSelectedIndex, filteredBranches.length])
 
   const handleListNavigation = useCallback(
-    (key: any): boolean => {
+    (key: Key): boolean => {
       if (key.upArrow) {
         navigateUp()
         return true

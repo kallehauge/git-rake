@@ -11,9 +11,7 @@ import {
 } from '@contexts/AppProviders.js'
 import { useBranchSelection } from '@hooks/useBranchSelection.js'
 
-interface BranchListProps {}
-
-export const BranchList = React.memo(function BranchList({}: BranchListProps) {
+export const BranchList = React.memo(function BranchList() {
   const { theme } = useTheme()
   const { filteredBranches, currentBranch } = useBranchDataContext()
   const { selectedIndex, selectedBranchNames } = useSelectionContext()

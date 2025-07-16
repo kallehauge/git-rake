@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { GitRepository } from '@services/GitRepository.js'
 import { GitBranch } from '@services/GitRepository.js'
+import { GitRakeConfig } from '@utils/config.js'
 
 interface UseBranchesProps {
   gitRepo: GitRepository
-  config: any
+  config: GitRakeConfig
   includeRemote?: boolean
   restoreMode?: boolean
   currentPath: string

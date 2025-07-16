@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { GitRepository } from '@services/GitRepository.js'
-import { ConfigLoader } from '@utils/config.js'
+import { ConfigLoader, GitRakeConfig, AppTheme } from '@utils/config.js'
 
 interface UseGitRepositoryProps {
   workingDir?: string
@@ -8,8 +8,8 @@ interface UseGitRepositoryProps {
 
 interface UseGitRepositoryReturn {
   gitRepo: GitRepository
-  config: any
-  theme: any
+  config: GitRakeConfig
+  theme: AppTheme
   currentPath: string
 }
 

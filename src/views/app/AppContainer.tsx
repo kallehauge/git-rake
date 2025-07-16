@@ -21,7 +21,6 @@ interface AppContainerProps {
 }
 
 export function AppContainer({
-  includeRemote = false,
   restoreMode = false,
   workingDir,
   onRefreshBranches,

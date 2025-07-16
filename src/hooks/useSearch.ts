@@ -1,9 +1,10 @@
 import { useCallback } from 'react'
+import { Key } from 'ink'
 import { useSearchContext, useAppUIContext } from '@contexts/AppProviders.js'
 import { BranchFilter } from '@utils/filters.js'
 
 interface UseSearchReturn {
-  handleSearchInput: (input: string, key: any) => boolean
+  handleSearchInput: (input: string, key: Key) => boolean
   activateSearch: () => void
   clearSearch: () => void
   cycleFilter: () => void
@@ -21,7 +22,7 @@ export function useSearch(): UseSearchReturn {
   const { setInputLocked } = useAppUIContext()
 
   const handleSearchInput = useCallback(
-    (input: string, key: any): boolean => {
+    (input: string, key: Key): boolean => {
       if (!searchMode) return false
 
       if (key.escape) {
