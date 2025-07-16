@@ -12,7 +12,7 @@ export function Spinner({ text, type = 'dots' }: SpinnerProps) {
   const { theme } = useTheme()
 
   return (
-    <Box>
+    <Box justifyContent="center" alignItems="center" height={6}>
       <Text color={theme.colors.primary}>
         <InkSpinner type={type} /> {text}
       </Text>
