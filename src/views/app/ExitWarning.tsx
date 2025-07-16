@@ -1,5 +1,5 @@
 import { Box, Text } from 'ink';
-import { useTheme } from '../../contexts/ThemeProvider.js';
+import { useTheme } from '@contexts/ThemeProvider.js';
 
 export function ExitWarning() {
   const { theme } = useTheme();

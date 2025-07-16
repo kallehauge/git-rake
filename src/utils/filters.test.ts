@@ -1,5 +1,5 @@
 import { filterBranches, getFilterOptionsForType, sortBranches } from './filters';
-import { GitBranch } from '../types';
+import { GitBranch } from '@types';
 
 const mockBranch = (overrides: Partial<GitBranch> = {}): GitBranch => ({
   name: 'test-branch',

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { GitRepository } from '../services/GitRepository.js';
-import { GitBranch } from '../types/index.js';
+import { GitRepository } from '@services/GitRepository.js';
+import { GitBranch } from '@services/GitRepository.js';
 
 interface UseBranchesProps {
   gitRepo: GitRepository;

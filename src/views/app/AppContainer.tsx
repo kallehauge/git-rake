@@ -1,13 +1,13 @@
 import { useState, useCallback, useRef } from 'react';
 import { useInput, useApp, Box } from 'ink';
-import { useGitRepository } from '../../hooks/useGitRepository.js';
-import { useAppOperations } from '../../hooks/useAppOperations.js';
-import { useBranchSelection } from '../../hooks/useBranchSelection.js';
-import { useAppUIContext, useBranchDataContext } from '../../contexts/AppProviders.js';
-import { BranchesView } from '../branches/BranchesView.js';
-import { BranchView } from '../branch/BranchView.js';
-import { ConfirmationView } from '../confirmation/ConfirmationView.js';
-import { ErrorView } from '../error/ErrorView.js';
+import { useGitRepository } from '@hooks/useGitRepository.js';
+import { useAppOperations } from '@hooks/useAppOperations.js';
+import { useBranchSelection } from '@hooks/useBranchSelection.js';
+import { useAppUIContext, useBranchDataContext } from '@contexts/AppProviders.js';
+import { BranchesView } from '@views/branches/BranchesView.js';
+import { BranchView } from '@views/branch/BranchView.js';
+import { ConfirmationView } from '@views/confirmation/ConfirmationView.js';
+import { ErrorView } from '@views/error/ErrorView.js';
 import { ExitWarning } from './ExitWarning.js';
 
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'ink';
 import { Command } from 'commander';
-import { App } from './views/app/App.js';
+import { App } from '@views/app/App.js';
 
 const program = new Command();
 
@@ -43,7 +43,7 @@ program
   .description('Restore a specific branch from trash')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async (branchName, options) => {
-    const { GitRepository } = await import('./services/GitRepository.js');
+    const { GitRepository } = await import('@services/GitRepository.js');
     const gitRepo = new GitRepository(options.cwd);
 
     try {
@@ -60,7 +60,7 @@ program
   .description('List branches in trash')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async (options) => {
-    const { GitRepository } = await import('./services/GitRepository.js');
+    const { GitRepository } = await import('@services/GitRepository.js');
     const gitRepo = new GitRepository(options.cwd);
 
     try {
@@ -86,7 +86,7 @@ program
   .description('Clean up old entries from trash')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async (options) => {
-    const { GitRepository } = await import('./services/GitRepository.js');
+    const { GitRepository } = await import('@services/GitRepository.js');
     const gitRepo = new GitRepository(options.cwd);
 
     try {
@@ -102,7 +102,7 @@ program
   .command('config')
   .description('Generate example configuration file')
   .action(async () => {
-    const { createExampleConfig } = await import('./utils/config.js');
+    const { createExampleConfig } = await import('@utils/config.js');
     console.log(createExampleConfig());
   });
 

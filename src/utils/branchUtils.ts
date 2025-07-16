@@ -1,4 +1,4 @@
-import { GitBranch } from '../types/index.js';
+import { GitBranch } from '@services/GitRepository.js';
 
 export function getCompactTimeAgo(date: Date): string {
   const now = new Date();

@@ -1,15 +1,15 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { Theme } from '../types/index.js';
+import { AppTheme } from '@utils/config.js';
 
 interface ThemeContextType {
-  theme: Theme;
+  theme: AppTheme;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 interface ThemeProviderProps {
   children: ReactNode;
-  theme: Theme;
+  theme: AppTheme;
 }
 
 export function ThemeProvider({ children, theme }: ThemeProviderProps) {

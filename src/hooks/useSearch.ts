@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { useSearchContext, useAppUIContext } from '../contexts/AppProviders.js';
-import { FilterType } from '../types/index.js';
+import { useSearchContext, useAppUIContext } from '@contexts/AppProviders.js';
+import { BranchFilter } from '@utils/filters.js';
 
 interface UseSearchReturn {
   handleSearchInput: (input: string, key: any) => boolean;
@@ -62,7 +62,7 @@ export function useSearch(): UseSearchReturn {
   }, [setSearchMode, setSearchQuery]);
 
   const cycleFilter = useCallback(() => {
-    const filterTypes: FilterType[] = ['all', 'merged', 'stale', 'unmerged'];
+    const filterTypes: BranchFilter[] = ['all', 'merged', 'stale', 'unmerged'];
     const currentIndex = filterTypes.indexOf(filterType);
     const nextIndex = (currentIndex + 1) % filterTypes.length;
     setFilterType(filterTypes[nextIndex]);

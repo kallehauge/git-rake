@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Box, Text } from 'ink';
-import { useTheme } from '../contexts/ThemeProvider.js';
+import { useTheme } from '@contexts/ThemeProvider.js';
 import { StatusBar } from './StatusBar.js';
 import { HelpBar } from './HelpBar.js';
 

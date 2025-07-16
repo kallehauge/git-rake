@@ -1,6 +1,33 @@
 import { simpleGit, SimpleGit } from 'simple-git';
 import { differenceInDays } from 'date-fns';
-import { GitBranch, GitConfig, BranchOperation } from '../types/index.js';
+
+export interface GitBranch {
+  name: string;
+  ref: string;
+  isCurrent: boolean;
+  isLocal: boolean;
+  isRemote: boolean;
+  lastCommitDate: Date;
+  lastCommitMessage: string;
+  lastCommitHash: string;
+  lastCommitAuthor?: string;
+  isMerged: boolean;
+  isStale: boolean;
+  staleDays?: number;
+  aheadBy?: number;
+  behindBy?: number;
+}
+
+export interface GitConfig {
+  staleDaysThreshold: number;
+  trashNamespace: string;
+  trashTtlDays: number;
+}
+
+export interface GitBranchOperation {
+  type: 'delete' | 'restore' | 'prune';
+  branch: GitBranch;
+}
 
 export class GitRepository {
   private git: SimpleGit;
@@ -236,7 +263,7 @@ export class GitRepository {
     }
   }
 
-  async performBatchOperations(operations: BranchOperation[]): Promise<void> {
+  async performBatchOperations(operations: GitBranchOperation[]): Promise<void> {
     for (const operation of operations) {
       try {
         switch (operation.type) {

@@ -1,8 +1,21 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import { GitConfig, Theme } from '../types/index.js';
+import { GitConfig } from '@services/GitRepository.js';
+
+export interface AppTheme {
+  name: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    success: string;
+    warning: string;
+    error: string;
+    text: string;
+    background: string;
+    border: string;
+  };
+}
 
 export interface GitRakeConfig extends GitConfig {
-  staleDaysThreshold: number;
   theme: string;
   includeRemote: boolean;
   autoCleanupTrash: boolean;
@@ -17,7 +30,7 @@ const defaultConfig: GitRakeConfig = {
   autoCleanupTrash: true,
 };
 
-const defaultThemes: Record<string, Theme> = {
+const defaultThemes: Record<string, AppTheme> = {
   light: {
     name: 'light',
     colors: {
@@ -64,19 +77,19 @@ export class ConfigLoader {
 
   loadConfig(): GitRakeConfig {
     const result = this.explorer.search();
-    
+
     if (result) {
       return { ...defaultConfig, ...result.config };
     }
-    
+
     return defaultConfig;
   }
 
-  getTheme(themeName: string): Theme {
+  getTheme(themeName: string): AppTheme {
     return defaultThemes[themeName] || defaultThemes.auto;
   }
 
-  getAllThemes(): Theme[] {
+  getAllThemes(): AppTheme[] {
     return Object.values(defaultThemes);
   }
 

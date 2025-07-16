@@ -1,17 +1,17 @@
 import { createContext, useContext, ReactNode, useState, useCallback, useMemo } from 'react';
-import { FilterType } from '../types/index.js';
+import { BranchFilter } from '@utils/filters.js';
 
 export interface SearchState {
   searchMode: boolean;
   searchQuery: string;
-  filterType: FilterType;
+  filterType: BranchFilter;
 }
 
 export interface SearchActions {
   setSearchMode: (active: boolean) => void;
   setSearchQuery: (query: string) => void;
   appendSearchQuery: (char: string) => void;
-  setFilterType: (type: FilterType) => void;
+  setFilterType: (type: BranchFilter) => void;
 }
 
 type SearchContextType = SearchState & SearchActions;
@@ -35,7 +35,7 @@ interface SearchProviderProps {
 export function SearchProvider({ children }: SearchProviderProps) {
   const [searchMode, setSearchModeState] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [filterType, setFilterType] = useState<BranchFilter>('all');
 
   const setSearchMode = useCallback((active: boolean) => {
     setSearchModeState(active);

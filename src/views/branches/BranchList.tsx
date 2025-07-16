@@ -1,10 +1,10 @@
 import React from 'react';
 import { Box, Text, useInput } from 'ink';
-import { useTheme } from '../../contexts/ThemeProvider.js';
+import { useTheme } from '@contexts/ThemeProvider.js';
 import { BranchItem } from './BranchItem.js';
 import { BranchListHeader } from './BranchListHeader.js';
-import { useBranchDataContext, useSelectionContext, useSearchContext, useAppUIContext } from '../../contexts/AppProviders.js';
-import { useBranchSelection } from '../../hooks/useBranchSelection.js';
+import { useBranchDataContext, useSelectionContext, useSearchContext, useAppUIContext } from '@contexts/AppProviders.js';
+import { useBranchSelection } from '@hooks/useBranchSelection.js';
 
 interface BranchListProps {}
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import InkSpinner from 'ink-spinner';
-import { useTheme } from '../contexts/ThemeProvider.js';
+import { useTheme } from '@contexts/ThemeProvider.js';
 
 interface SpinnerProps {
   text?: string;

@@ -1,19 +1,29 @@
 import Fuse from 'fuse.js';
-import { GitBranch, FilterOptions, FilterType } from '../types/index.js';
+import { GitBranch } from '@services/GitRepository.js';
 
-export function filterBranches(branches: GitBranch[], options: FilterOptions): GitBranch[] {
+export interface BranchFilterOptions {
+  showMerged: boolean;
+  showUnmerged: boolean;
+  showStale: boolean;
+  showLocal: boolean;
+  showRemote: boolean;
+}
+
+export type BranchFilter = 'all' | 'merged' | 'stale' | 'unmerged';
+
+export function filterBranches(branches: GitBranch[], options: BranchFilterOptions): GitBranch[] {
   return branches.filter(branch => {
     if (branch.isLocal && !options.showLocal) return false;
     if (branch.isRemote && !options.showRemote) return false;
     if (branch.isMerged && !options.showMerged) return false;
     if (!branch.isMerged && !options.showUnmerged) return false;
     if (branch.isStale && !options.showStale) return false;
-    
+
     return true;
   });
 }
 
-export function getFilterOptionsForType(filterType: FilterType): FilterOptions {
+export function getFilterOptionsForType(filterType: BranchFilter): BranchFilterOptions {
   switch (filterType) {
     case 'all':
       return {
@@ -85,7 +95,7 @@ export function sortBranches(branches: GitBranch[]): GitBranch[] {
     // Current branch first
     if (a.isCurrent) return -1;
     if (b.isCurrent) return 1;
-    
+
     // Then by last commit date (newest first)
     return b.lastCommitDate.getTime() - a.lastCommitDate.getTime();
   });

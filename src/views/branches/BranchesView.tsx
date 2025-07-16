@@ -1,11 +1,11 @@
 import React from 'react';
 import { Box, useInput } from 'ink';
-import { useAppUIContext, useBranchDataContext } from '../../contexts/AppProviders.js';
-import { useSearch } from '../../hooks/useSearch.js';
+import { useAppUIContext, useBranchDataContext } from '@contexts/AppProviders.js';
+import { useSearch } from '@hooks/useSearch.js';
 import { BranchList } from './BranchList.js';
-import { ViewLayout } from '../../components/ViewLayout.js';
+import { ViewLayout } from '@components/ViewLayout.js';
 import { BranchStatusBarContent } from './BranchStatusBarContent.js';
-import { Spinner } from '../../components/Spinner.js';
+import { Spinner } from '@components/Spinner.js';
 
 interface BranchesViewProps {
   restoreMode: boolean;

@@ -1,10 +1,10 @@
 import { memo, useState, useCallback } from 'react';
 import { Box, Text } from 'ink';
-import { GitBranch } from '../../types/index.js';
+import { GitBranch } from '@services/GitRepository.js';
 import { ConfirmationPrompt } from './ConfirmationPrompt.js';
-import { ViewLayout } from '../../components/ViewLayout.js';
-import { useTheme } from '../../contexts/ThemeProvider.js';
-import { Spinner } from '../../components/Spinner.js';
+import { ViewLayout } from '@components/ViewLayout.js';
+import { useTheme } from '@contexts/ThemeProvider.js';
+import { Spinner } from '@components/Spinner.js';
 
 interface ConfirmationViewProps {
   branches: GitBranch[];

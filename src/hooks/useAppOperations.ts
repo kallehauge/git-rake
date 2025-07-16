@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import { GitRepository } from '../services/GitRepository.js';
-import { GitBranch } from '../types/index.js';
-import { useAppUIContext } from '../contexts/AppProviders.js';
+import { GitRepository } from '@services/GitRepository.js';
+import { GitBranch } from '@services/GitRepository.js';
+import { useAppUIContext } from '@contexts/AppProviders.js';
 
 interface UseAppOperationsProps {
   gitRepo: GitRepository;

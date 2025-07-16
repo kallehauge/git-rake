@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
-import { GitRepository } from '../../services/GitRepository.js';
-import { useBranchDataContext, useAppUIContext } from '../../contexts/AppProviders.js';
-import { useTheme } from '../../contexts/ThemeProvider.js';
-import { ViewLayout } from '../../components/ViewLayout.js';
-import { Spinner } from '../../components/Spinner.js';
+import { GitRepository } from '@services/GitRepository.js';
+import { useBranchDataContext, useAppUIContext } from '@contexts/AppProviders.js';
+import { useTheme } from '@contexts/ThemeProvider.js';
+import { ViewLayout } from '@components/ViewLayout.js';
+import { Spinner } from '@components/Spinner.js';
 
 interface BranchViewProps {
   gitRepo: GitRepository;

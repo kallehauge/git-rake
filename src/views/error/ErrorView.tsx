@@ -1,6 +1,6 @@
 import { Box, Text } from 'ink';
-import { useTheme } from '../../contexts/ThemeProvider.js';
-import { ViewLayout } from '../../components/ViewLayout.js';
+import { useTheme } from '@contexts/ThemeProvider.js';
+import { ViewLayout } from '@components/ViewLayout.js';
 
 interface ErrorViewProps {
   error: string;

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { GitBranch } from '../types/index.js';
+import { GitBranch } from '@services/GitRepository.js';
 import { SearchProvider } from './SearchContext.js';
 import { SelectionProvider } from './SelectionContext.js';
 import { AppUIProvider } from './AppUIContext.js';

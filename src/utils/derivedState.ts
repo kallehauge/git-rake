@@ -1,8 +1,9 @@
-import { GitBranch, FilterType } from '../types/index.js';
+import { GitBranch } from '@services/GitRepository.js';
+import { BranchFilter } from '@utils/filters.js';
 import { BranchSearcher, getFilterOptionsForType, filterBranches, sortBranches } from './filters.js';
 
 export interface StatusBarInfo {
-  filterType: FilterType;
+  filterType: BranchFilter;
   totalBranches: number;
   filteredBranches: number;
   selectedCount: number;
@@ -13,7 +14,7 @@ export interface StatusBarInfo {
 export function computeFilteredBranches(
   branches: GitBranch[],
   searchQuery: string,
-  filterType: FilterType
+  filterType: BranchFilter
 ): GitBranch[] {
   let filteredBranches = branches;
 
@@ -38,7 +39,7 @@ export function computeSelectedBranches(
 }
 
 export function computeStatusBarInfo(
-  filterType: FilterType,
+  filterType: BranchFilter,
   totalBranches: number,
   filteredBranches: number,
   selectedCount: number,

@@ -1,9 +1,9 @@
-import { AppProviders } from '../../contexts/AppProviders.js';
+import { AppProviders } from '@contexts/AppProviders.js';
 import { AppContainer } from './AppContainer.js';
-import { useGitRepository } from '../../hooks/useGitRepository.js';
-import { useBranches } from '../../hooks/useBranches.js';
-import { ThemeProvider } from '../../contexts/ThemeProvider.js';
-import { ErrorView } from '../error/ErrorView.js';
+import { useGitRepository } from '@hooks/useGitRepository.js';
+import { useBranches } from '@hooks/useBranches.js';
+import { ThemeProvider } from '@contexts/ThemeProvider.js';
+import { ErrorView } from '@views/error/ErrorView.js';
 
 interface AppProps {
   includeRemote?: boolean;

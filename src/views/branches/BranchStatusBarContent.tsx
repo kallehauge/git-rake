@@ -1,6 +1,6 @@
 import { Text } from 'ink';
-import { useTheme } from '../../contexts/ThemeProvider.js';
-import { useBranchDataContext } from '../../contexts/AppProviders.js';
+import { useTheme } from '@contexts/ThemeProvider.js';
+import { useBranchDataContext } from '@contexts/AppProviders.js';
 
 export function BranchStatusBarContent() {
   const { statusBarInfo } = useBranchDataContext();

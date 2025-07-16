@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactNode, useMemo } from 'react';
-import { GitBranch } from '../types/index.js';
-import { computeFilteredBranches, computeSelectedBranches, computeStatusBarInfo, computeCurrentBranch, StatusBarInfo } from '../utils/derivedState.js';
+import { GitBranch } from '@services/GitRepository.js';
+import { computeFilteredBranches, computeSelectedBranches, computeStatusBarInfo, computeCurrentBranch, StatusBarInfo } from '@utils/derivedState.js';
 import { SearchContext } from './SearchContext.js';
 import { SelectionContext } from './SelectionContext.js';
 
