@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { useInput, useApp, Box } from 'ink'
+import { useInput, Box } from 'ink'
 import { useGitRepository } from '@hooks/useGitRepository.js'
 import { useAppOperations } from '@hooks/useAppOperations.js'
 import { useBranchSelection } from '@hooks/useBranchSelection.js'
@@ -25,7 +25,6 @@ export function AppContainer({
   workingDir,
   onRefreshBranches,
 }: AppContainerProps) {
-  const { exit } = useApp()
   const { state, currentView, setCurrentView } = useAppUIContext()
   const [showExitWarning, setShowExitWarning] = useState(false)
   const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -55,7 +54,13 @@ export function AppContainer({
 
   const handleCtrlC = useCallback(() => {
     if (showExitWarning) {
-      exit()
+      // We use process.exit(0) instead of Ink's exit() because:
+      // 1. Git operations via simple-git cannot be cancelled mid-execution
+      // 2. When branches are loading, Ink's own exit() will wait for operations
+      //    to complete, which can cause the app to appear "stuck"
+      // 3. process.exit(0) forcefully terminates the Node.js process immediately
+      //    without waiting for any operations to complete
+      process.exit(0)
     } else {
       setShowExitWarning(true)
 
@@ -68,7 +73,7 @@ export function AppContainer({
         exitTimeoutRef.current = null
       }, 1000)
     }
-  }, [showExitWarning, exit])
+  }, [showExitWarning])
 
   useEffect(() => {
     return () => {
