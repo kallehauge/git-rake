@@ -29,6 +29,15 @@ export interface GitBranchOperation {
   branch: GitBranch
 }
 
+export interface BranchData {
+  refname: string
+  shortname: string
+  date: Date
+  subject: string
+  hash: string
+  author: string
+}
+
 export class GitRepository {
   private git: SimpleGit
   private config: GitConfig
@@ -58,112 +67,191 @@ export class GitRepository {
   }
 
   async getAllBranches(includeRemote = false): Promise<GitBranch[]> {
-    const branches: GitBranch[] = []
-
-    const localBranches = await this.git.branchLocal()
     const currentBranch = await this.getCurrentBranch()
 
-    for (const branchName of Object.keys(localBranches.branches)) {
-      const branch = await this.getBranchInfo(branchName, true, currentBranch)
+    // Get all branch information in batch operations
+    const [localBranchData, remoteBranchData, mergedBranches] =
+      await Promise.all([
+        this.getBatchBranchInfo('refs/heads'),
+        includeRemote
+          ? this.getBatchBranchInfo('refs/remotes')
+          : Promise.resolve([]),
+        this.getMergedBranches(),
+      ])
+
+    // Get ahead/behind data for all local branches at once
+    const aheadBehindData = await this.getBatchAheadBehindData(
+      localBranchData.map(b => b.shortname),
+      currentBranch,
+    )
+
+    const branches: GitBranch[] = []
+
+    // Process local branches
+    for (const branchData of localBranchData) {
+      const branch = this.createBranchFromBatchData(
+        branchData,
+        true,
+        currentBranch,
+        mergedBranches,
+        aheadBehindData,
+      )
       if (branch) {
         branches.push(branch)
       }
     }
 
-    if (includeRemote) {
-      try {
-        const remoteBranches = await this.git.branch(['-r'])
-        for (const branchName of Object.keys(remoteBranches.branches)) {
-          if (!branchName.includes('HEAD')) {
-            const branch = await this.getBranchInfo(
-              branchName,
-              false,
-              currentBranch,
-            )
-            if (branch) {
-              branches.push(branch)
-            }
-          }
+    // Process remote branches
+    for (const branchData of remoteBranchData) {
+      if (!branchData.refname.includes('HEAD')) {
+        const branch = this.createBranchFromBatchData(
+          branchData,
+          false,
+          currentBranch,
+          mergedBranches,
+        )
+        if (branch) {
+          branches.push(branch)
         }
-      } catch (error) {
-        console.warn('Could not fetch remote branches:', error)
       }
     }
 
     return branches
   }
 
-  private async getBranchInfo(
-    branchName: string,
+  private async getBatchBranchInfo(refsPattern: string): Promise<BranchData[]> {
+    try {
+      const format = [
+        '%(refname)',
+        '%(refname:short)',
+        '%(committerdate:iso)',
+        '%(subject)',
+        '%(objectname:short)',
+        '%(authorname)',
+      ].join('%09') // Tab separator
+
+      const result = await this.git.raw([
+        'for-each-ref',
+        `--format=${format}`,
+        refsPattern,
+      ])
+
+      return result
+        .trim()
+        .split('\n')
+        .filter(Boolean)
+        .map(line => {
+          const [refname, shortname, date, subject, hash, author] =
+            line.split('\t')
+          return {
+            refname,
+            shortname,
+            date: new Date(date),
+            subject: subject || '',
+            hash: hash || '',
+            author: author || '',
+          }
+        })
+    } catch (error) {
+      console.error(
+        `Error getting batch branch info for ${refsPattern}:`,
+        error,
+      )
+      return []
+    }
+  }
+
+  private async getMergedBranches(): Promise<Set<string>> {
+    try {
+      const result = await this.git.raw(['branch', '--merged'])
+      const mergedSet = new Set<string>()
+
+      result
+        .split('\n')
+        .map(line => line.trim().replace(/^\*?\s*/, ''))
+        .filter(Boolean)
+        .forEach(branch => mergedSet.add(branch))
+
+      return mergedSet
+    } catch (error) {
+      console.error('Error getting merged branches:', error)
+      return new Set()
+    }
+  }
+
+  private async getBatchAheadBehindData(
+    branchNames: string[],
+    currentBranch: string,
+  ): Promise<Map<string, { aheadBy: number; behindBy: number }>> {
+    const aheadBehindMap = new Map<
+      string,
+      { aheadBy: number; behindBy: number }
+    >()
+
+    try {
+      const mainBranch = currentBranch === 'main' ? 'main' : 'master'
+
+      // Filter out current branch and non-local branches
+      const branchesToCheck = branchNames.filter(
+        branch => branch !== currentBranch,
+      )
+
+      // Batch process all branches at once using rev-list
+      const promises = branchesToCheck.map(async branchName => {
+        try {
+          const result = await this.git.raw([
+            'rev-list',
+            '--left-right',
+            '--count',
+            `${mainBranch}...${branchName}`,
+          ])
+          const counts = result.trim().split('\t')
+          if (counts.length === 2) {
+            const behindBy = parseInt(counts[0]) || 0
+            const aheadBy = parseInt(counts[1]) || 0
+            aheadBehindMap.set(branchName, { aheadBy, behindBy })
+          }
+        } catch {
+          // Ignore individual branch errors
+        }
+      })
+
+      await Promise.all(promises)
+    } catch (error) {
+      console.error('Error getting batch ahead/behind data:', error)
+    }
+
+    return aheadBehindMap
+  }
+
+  private createBranchFromBatchData(
+    branchData: BranchData,
     isLocal: boolean,
     currentBranch: string,
-  ): Promise<GitBranch | null> {
+    mergedBranches: Set<string>,
+    aheadBehindData?: Map<string, { aheadBy: number; behindBy: number }>,
+  ): GitBranch | null {
     try {
-      const cleanBranchName = branchName.replace('origin/', '')
-      const ref = isLocal
-        ? `refs/heads/${branchName}`
-        : `refs/remotes/${branchName}`
-
-      const log = await this.git.log(['--max-count=1', branchName])
-
-      if (!log.latest) {
-        return null
-      }
-
-      const lastCommitDate = new Date(log.latest.date)
-      const staleDays = differenceInDays(new Date(), lastCommitDate)
+      const cleanBranchName = branchData.shortname.replace('origin/', '')
+      const staleDays = differenceInDays(new Date(), branchData.date)
       const isStale = staleDays > this.config.staleDaysThreshold
+      const isMerged = mergedBranches.has(branchData.shortname)
 
-      // Get author information
-      let lastCommitAuthor: string | undefined
-      try {
-        lastCommitAuthor = log.latest.author_name
-      } catch {
-        // Ignore author fetch errors
-      }
-
-      let isMerged = false
-      let aheadBy: number | undefined
-      let behindBy: number | undefined
-
-      try {
-        if (isLocal && branchName !== currentBranch) {
-          // Check if merged
-          const mergedBranches = await this.git.raw(['branch', '--merged'])
-          isMerged = mergedBranches.includes(branchName)
-
-          // Get ahead/behind counts relative to main/master
-          try {
-            const mainBranch = currentBranch === 'main' ? 'main' : 'master'
-            const aheadBehind = await this.git.raw([
-              'rev-list',
-              '--left-right',
-              '--count',
-              `${mainBranch}...${branchName}`,
-            ])
-            const counts = aheadBehind.trim().split('\t')
-            if (counts.length === 2) {
-              behindBy = parseInt(counts[0]) || 0
-              aheadBy = parseInt(counts[1]) || 0
-            }
-          } catch {
-            // Ignore ahead/behind calculation errors
-          }
-        }
-      } catch {
-        // Ignore merge check errors
-      }
+      // Get ahead/behind counts from pre-computed data
+      const aheadBehindInfo = aheadBehindData?.get(branchData.shortname)
+      const aheadBy = aheadBehindInfo?.aheadBy
+      const behindBy = aheadBehindInfo?.behindBy
 
       return {
         name: cleanBranchName,
-        ref,
-        isCurrent: branchName === currentBranch,
+        ref: branchData.refname,
+        isCurrent: branchData.shortname === currentBranch,
         isLocal,
         isRemote: !isLocal,
-        lastCommitDate,
-        lastCommitMessage: log.latest.message,
-        lastCommitHash: log.latest.hash,
-        lastCommitAuthor,
+        lastCommitDate: branchData.date,
+        lastCommitMessage: branchData.subject,
+        lastCommitHash: branchData.hash,
+        lastCommitAuthor: branchData.author,
         isMerged,
         isStale,
         staleDays,
@@ -171,7 +259,10 @@ export class GitRepository {
         behindBy,
       }
     } catch (error) {
-      console.error(`Error getting info for branch ${branchName}:`, error)
+      console.error(
+        `Error creating branch from batch data for ${branchData.shortname}:`,
+        error,
+      )
       return null
     }
   }
