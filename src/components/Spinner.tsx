@@ -1,17 +1,11 @@
 import { Box, Text } from 'ink'
 import InkSpinner from 'ink-spinner'
+import type { SpinnerName } from 'cli-spinners'
 import { useTheme } from '@contexts/ThemeProvider.js'
 
 interface SpinnerProps {
   text?: string
-  type?:
-    | 'dots'
-    | 'line'
-    | 'pipe'
-    | 'simpleDots'
-    | 'simpleDotsScrolling'
-    | 'star'
-    | 'toggle'
+  type?: SpinnerName
 }
 
 export function Spinner({ text, type = 'dots' }: SpinnerProps) {
