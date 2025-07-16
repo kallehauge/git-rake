@@ -12,7 +12,6 @@ Built with [Ink](https://github.com/vadimdemedes/ink) for React-style terminal i
 - 📊 **Detailed view** - See commit history and branch details
 - ⚡ **Batch Operations** - Select multiple branches for bulk operations
 - 🎨 **Themeable** - Light, dark, and auto themes
-- 🔄 **Dry Run Mode** - Preview operations before executing
 - 📅 **Stale Detection** - Automatically identify old branches
 
 ## Installation
@@ -47,9 +46,6 @@ git-rake clean
 ### Command Line Options
 
 ```bash
-# Clean branches with dry run
-git-rake clean --dry-run
-
 # Include remote tracking branches
 git-rake clean --include-remote
 
@@ -118,7 +114,7 @@ git config --global alias.rake '!git-rake'
 Then use:
 ```bash
 git rake
-git rake clean --dry-run
+git rake clean
 git rake restore
 ```
 

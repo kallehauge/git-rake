@@ -12,7 +12,6 @@ import { ExitWarning } from './ExitWarning.js';
 
 
 interface AppContainerProps {
-  dryRun?: boolean;
   includeRemote?: boolean;
   restoreMode?: boolean;
   workingDir?: string;
@@ -20,7 +19,6 @@ interface AppContainerProps {
 }
 
 export function AppContainer({
-  dryRun = false,
   includeRemote = false,
   restoreMode = false,
   workingDir,
@@ -40,7 +38,6 @@ export function AppContainer({
   const { handleConfirmOperation } = useAppOperations({
     gitRepo,
     restoreMode,
-    dryRun,
     onOperationComplete: async () => {
       if (onRefreshBranches) {
         await onRefreshBranches();
@@ -93,7 +90,6 @@ export function AppContainer({
           <ConfirmationView
             branches={selectedBranches}
             operation={restoreMode ? 'restore' : 'delete'}
-            dryRun={dryRun}
             onConfirm={handleConfirmOperationCallback}
             onCancel={() => setCurrentView('branches')}
             currentPath={currentPath}
@@ -105,7 +101,6 @@ export function AppContainer({
         return (
           <BranchesView
             restoreMode={restoreMode}
-            dryRun={dryRun}
             currentPath={currentPath}
           />
         );

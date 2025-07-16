@@ -238,10 +238,6 @@ export class GitRepository {
 
   async performBatchOperations(operations: BranchOperation[]): Promise<void> {
     for (const operation of operations) {
-      if (operation.dryRun) {
-        continue;
-      }
-
       try {
         switch (operation.type) {
           case 'delete':

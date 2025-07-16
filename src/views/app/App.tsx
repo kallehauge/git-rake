@@ -6,7 +6,6 @@ import { ThemeProvider } from '../../contexts/ThemeProvider.js';
 import { ErrorView } from '../error/ErrorView.js';
 
 interface AppProps {
-  dryRun?: boolean;
   includeRemote?: boolean;
   restoreMode?: boolean;
   workingDir?: string;

@@ -6,7 +6,6 @@ import { useAppUIContext } from '../contexts/AppProviders.js';
 interface UseAppOperationsProps {
   gitRepo: GitRepository;
   restoreMode: boolean;
-  dryRun: boolean;
   onOperationComplete: () => Promise<void>;
   onOperationError: (error: string) => void;
 }
@@ -14,7 +13,6 @@ interface UseAppOperationsProps {
 export function useAppOperations({
   gitRepo,
   restoreMode,
-  dryRun,
   onOperationComplete,
   onOperationError,
 }: UseAppOperationsProps) {
@@ -26,12 +24,9 @@ export function useAppOperations({
       const operations = selectedBranches.map(branch => ({
         type: restoreMode ? 'restore' as const : 'delete' as const,
         branch,
-        dryRun,
       }));
 
-      if (!dryRun) {
-        await gitRepo.performBatchOperations(operations);
-      }
+      await gitRepo.performBatchOperations(operations);
 
       await onOperationComplete();
       setState('ready');
@@ -39,7 +34,7 @@ export function useAppOperations({
       onOperationError(err instanceof Error ? err.message : 'Operation failed');
       setState('error');
     }
-  }, [gitRepo, restoreMode, dryRun, onOperationComplete, onOperationError, setState]);
+  }, [gitRepo, restoreMode, onOperationComplete, onOperationError, setState]);
 
   const handleCancelOperation = useCallback(() => {
     setState('ready');

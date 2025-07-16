@@ -8,7 +8,6 @@ interface ViewLayoutProps {
   children: ReactNode;
   statusBarContent?: ReactNode;
   restoreMode?: boolean;
-  dryRun?: boolean;
   helpText: string;
   currentPath: string;
 }
@@ -17,7 +16,6 @@ export function ViewLayout({
   children,
   statusBarContent,
   restoreMode = false,
-  dryRun = false,
   helpText,
   currentPath
 }: ViewLayoutProps) {
@@ -25,7 +23,7 @@ export function ViewLayout({
 
   return (
     <Box flexDirection="column">
-      <StatusBar restoreMode={restoreMode} dryRun={dryRun}>
+      <StatusBar restoreMode={restoreMode}>
         {statusBarContent}
       </StatusBar>
 

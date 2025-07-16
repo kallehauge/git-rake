@@ -9,13 +9,11 @@ import { Spinner } from '../../components/Spinner.js';
 
 interface BranchesViewProps {
   restoreMode: boolean;
-  dryRun: boolean;
   currentPath: string;
 }
 
 export const BranchesView = React.memo(function BranchesView({
   restoreMode,
-  dryRun,
   currentPath,
 }: BranchesViewProps) {
   const { state, setCurrentView, inputLocked } = useAppUIContext();
@@ -58,7 +56,6 @@ export const BranchesView = React.memo(function BranchesView({
     <ViewLayout
       statusBarContent={<BranchStatusBarContent />}
       restoreMode={restoreMode}
-      dryRun={dryRun}
       helpText={helpText}
       currentPath={currentPath}
     >

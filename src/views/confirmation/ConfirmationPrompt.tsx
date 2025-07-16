@@ -7,12 +7,11 @@ import { useAppUIContext } from '../../contexts/AppProviders.js';
 interface ConfirmationPromptProps {
   branches: GitBranch[];
   operation: 'delete' | 'restore';
-  dryRun?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export function ConfirmationPrompt({ branches, operation, dryRun = false, onConfirm, onCancel }: ConfirmationPromptProps) {
+export function ConfirmationPrompt({ branches, operation, onConfirm, onCancel }: ConfirmationPromptProps) {
   const { theme } = useTheme();
   const { setCurrentView, inputLocked } = useAppUIContext();
   const [selectedOption, setSelectedOption] = useState<'confirm' | 'cancel'>('cancel');
@@ -48,7 +47,7 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
   return (
     <Box flexDirection="column" borderStyle="double" borderColor={warningColor} padding={1}>
       <Text color={warningColor} bold>
-        {dryRun ? `DRY RUN: Would ${operation}` : `Confirm ${operation}`} {branches.length} branch{branches.length > 1 ? 'es' : ''}:
+        Confirm {operation} {branches.length} branch{branches.length > 1 ? 'es' : ''}:
       </Text>
 
       <Box flexDirection="column" height={10} overflow="hidden">
@@ -64,7 +63,7 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
         )}
       </Box>
 
-      {!dryRun && operation === 'delete' && (
+      {operation === 'delete' && (
         <Text color={theme.colors.warning}>
           Note: Branches will be moved to trash and can be restored later.
         </Text>
@@ -78,7 +77,7 @@ export function ConfirmationPrompt({ branches, operation, dryRun = false, onConf
           marginRight={2}
         >
           <Text color={selectedOption === 'confirm' ? theme.colors.success : theme.colors.text}>
-            {dryRun ? 'Preview' : 'Confirm'} (Y)
+            Confirm (Y)
           </Text>
         </Box>
 

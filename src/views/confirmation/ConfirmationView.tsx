@@ -9,7 +9,6 @@ import { Spinner } from '../../components/Spinner.js';
 interface ConfirmationViewProps {
   branches: GitBranch[];
   operation: 'delete' | 'restore';
-  dryRun: boolean;
   onConfirm: () => Promise<void>;
   onCancel: () => void;
   currentPath: string;
@@ -18,7 +17,6 @@ interface ConfirmationViewProps {
 export const ConfirmationView = memo(function ConfirmationView({
   branches,
   operation,
-  dryRun,
   onConfirm,
   onCancel,
   currentPath,
@@ -39,7 +37,7 @@ export const ConfirmationView = memo(function ConfirmationView({
   const statusBarContent = (
     <Text color={theme.colors.primary} bold>
       {isProcessing
-        ? (dryRun ? 'Previewing' : (operation === 'delete' ? 'Deleting' : 'Restoring'))
+        ? (operation === 'delete' ? 'Deleting' : 'Restoring')
         : `Confirm ${operation === 'delete' ? 'Delete' : 'Restore'}`
       }
     </Text>
@@ -48,23 +46,18 @@ export const ConfirmationView = memo(function ConfirmationView({
   return (
     <ViewLayout
       statusBarContent={statusBarContent}
-      dryRun={dryRun}
       helpText={helpText}
       currentPath={currentPath}
     >
       <Box flexGrow={1} flexDirection="column" padding={1}>
         {isProcessing ? (
           <Spinner
-            text={dryRun
-              ? `Previewing ${operation}...`
-              : `${operation === 'delete' ? 'Deleting' : 'Restoring'} ${branches.length} branch${branches.length > 1 ? 'es' : ''}...`
-            }
+            text={`${operation === 'delete' ? 'Deleting' : 'Restoring'} ${branches.length} branch${branches.length > 1 ? 'es' : ''}...`}
           />
         ) : (
           <ConfirmationPrompt
             branches={branches}
             operation={operation}
-            dryRun={dryRun}
             onConfirm={handleConfirmWithLoading}
             onCancel={onCancel}
           />

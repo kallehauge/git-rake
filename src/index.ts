@@ -17,12 +17,10 @@ program
 program
   .command('clean')
   .description('Clean up local branches interactively')
-  .option('-d, --dry-run', 'Show what would be deleted without actually deleting')
   .option('-r, --include-remote', 'Include remote tracking branches')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action((options) => {
     render(React.createElement(App, {
-      dryRun: options.dryRun,
       includeRemote: options.includeRemote,
       workingDir: options.cwd,
     }));

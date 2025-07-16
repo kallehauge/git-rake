@@ -32,7 +32,6 @@ export interface FilterOptions {
 export interface BranchOperation {
   type: 'delete' | 'restore' | 'prune';
   branch: GitBranch;
-  dryRun: boolean;
 }
 
 export interface Theme {
