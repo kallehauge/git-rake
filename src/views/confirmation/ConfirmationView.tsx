@@ -1,17 +1,17 @@
-import { memo, useState, useCallback } from 'react';
-import { Box, Text } from 'ink';
-import { GitBranch } from '@services/GitRepository.js';
-import { ConfirmationPrompt } from './ConfirmationPrompt.js';
-import { ViewLayout } from '@components/ViewLayout.js';
-import { useTheme } from '@contexts/ThemeProvider.js';
-import { Spinner } from '@components/Spinner.js';
+import { memo, useState, useCallback } from 'react'
+import { Box, Text } from 'ink'
+import { GitBranch } from '@services/GitRepository.js'
+import { ConfirmationPrompt } from './ConfirmationPrompt.js'
+import { ViewLayout } from '@components/ViewLayout.js'
+import { useTheme } from '@contexts/ThemeProvider.js'
+import { Spinner } from '@components/Spinner.js'
 
 interface ConfirmationViewProps {
-  branches: GitBranch[];
-  operation: 'delete' | 'restore';
-  onConfirm: () => Promise<void>;
-  onCancel: () => void;
-  currentPath: string;
+  branches: GitBranch[]
+  operation: 'delete' | 'restore'
+  onConfirm: () => Promise<void>
+  onCancel: () => void
+  currentPath: string
 }
 
 export const ConfirmationView = memo(function ConfirmationView({
@@ -21,27 +21,28 @@ export const ConfirmationView = memo(function ConfirmationView({
   onCancel,
   currentPath,
 }: ConfirmationViewProps) {
-  const { theme } = useTheme();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const helpText = '←→: navigate • Enter/Y: confirm • ESC/N: cancel';
+  const { theme } = useTheme()
+  const [isProcessing, setIsProcessing] = useState(false)
+  const helpText = '←→: navigate • Enter/Y: confirm • ESC/N: cancel'
 
   const handleConfirmWithLoading = useCallback(async () => {
-    setIsProcessing(true);
+    setIsProcessing(true)
     try {
-      await onConfirm();
+      await onConfirm()
     } finally {
-      setIsProcessing(false);
+      setIsProcessing(false)
     }
-  }, [onConfirm]);
+  }, [onConfirm])
 
   const statusBarContent = (
     <Text color={theme.colors.primary} bold>
       {isProcessing
-        ? (operation === 'delete' ? 'Deleting' : 'Restoring')
-        : `Confirm ${operation === 'delete' ? 'Delete' : 'Restore'}`
-      }
+        ? operation === 'delete'
+          ? 'Deleting'
+          : 'Restoring'
+        : `Confirm ${operation === 'delete' ? 'Delete' : 'Restore'}`}
     </Text>
-  );
+  )
 
   return (
     <ViewLayout
@@ -64,5 +65,5 @@ export const ConfirmationView = memo(function ConfirmationView({
         )}
       </Box>
     </ViewLayout>
-  );
-});
+  )
+})

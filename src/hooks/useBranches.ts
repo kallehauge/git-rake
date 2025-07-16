@@ -1,20 +1,20 @@
-import { useState, useEffect, useCallback } from 'react';
-import { GitRepository } from '@services/GitRepository.js';
-import { GitBranch } from '@services/GitRepository.js';
+import { useState, useEffect, useCallback } from 'react'
+import { GitRepository } from '@services/GitRepository.js'
+import { GitBranch } from '@services/GitRepository.js'
 
 interface UseBranchesProps {
-  gitRepo: GitRepository;
-  config: any;
-  includeRemote?: boolean;
-  restoreMode?: boolean;
-  currentPath: string;
+  gitRepo: GitRepository
+  config: any
+  includeRemote?: boolean
+  restoreMode?: boolean
+  currentPath: string
 }
 
 interface UseBranchesReturn {
-  branches: GitBranch[];
-  loading: boolean;
-  error: string;
-  loadBranches: () => Promise<void>;
+  branches: GitBranch[]
+  loading: boolean
+  error: string
+  loadBranches: () => Promise<void>
 }
 
 export function useBranches({
@@ -24,27 +24,27 @@ export function useBranches({
   restoreMode = false,
   currentPath,
 }: UseBranchesProps): UseBranchesReturn {
-  const [branches, setBranches] = useState<GitBranch[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>('');
+  const [branches, setBranches] = useState<GitBranch[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string>('')
 
   const loadBranches = useCallback(async () => {
     try {
-      setLoading(true);
-      setError('');
+      setLoading(true)
+      setError('')
 
       if (!(await gitRepo.isGitRepository())) {
-        setError(`Not a git repository: ${currentPath}`);
-        return;
+        setError(`Not a git repository: ${currentPath}`)
+        return
       }
 
       if (config.autoCleanupTrash) {
-        await gitRepo.cleanupTrash();
+        await gitRepo.cleanupTrash()
       }
 
-      let branchList: GitBranch[];
+      let branchList: GitBranch[]
       if (restoreMode) {
-        const trashBranches = await gitRepo.getTrashBranches();
+        const trashBranches = await gitRepo.getTrashBranches()
         branchList = trashBranches.map((name: string) => ({
           name,
           ref: `refs/rake-trash/${name}`,
@@ -56,27 +56,29 @@ export function useBranches({
           lastCommitHash: '',
           isMerged: false,
           isStale: true,
-        }));
+        }))
       } else {
-        branchList = await gitRepo.getAllBranches(includeRemote || config.includeRemote);
+        branchList = await gitRepo.getAllBranches(
+          includeRemote || config.includeRemote,
+        )
       }
 
-      setBranches(branchList);
+      setBranches(branchList)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [gitRepo, config, includeRemote, restoreMode, currentPath]);
+  }, [gitRepo, config, includeRemote, restoreMode, currentPath])
 
   useEffect(() => {
-    loadBranches();
-  }, [loadBranches]);
+    loadBranches()
+  }, [loadBranches])
 
   return {
     branches,
     loading,
     error,
     loadBranches,
-  };
+  }
 }

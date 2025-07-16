@@ -1,24 +1,24 @@
-import { cosmiconfigSync } from 'cosmiconfig';
-import { GitConfig } from '@services/GitRepository.js';
+import { cosmiconfigSync } from 'cosmiconfig'
+import { GitConfig } from '@services/GitRepository.js'
 
 export interface AppTheme {
-  name: string;
+  name: string
   colors: {
-    primary: string;
-    secondary: string;
-    success: string;
-    warning: string;
-    error: string;
-    text: string;
-    background: string;
-    border: string;
-  };
+    primary: string
+    secondary: string
+    success: string
+    warning: string
+    error: string
+    text: string
+    background: string
+    border: string
+  }
 }
 
 export interface GitRakeConfig extends GitConfig {
-  theme: string;
-  includeRemote: boolean;
-  autoCleanupTrash: boolean;
+  theme: string
+  includeRemote: boolean
+  autoCleanupTrash: boolean
 }
 
 const defaultConfig: GitRakeConfig = {
@@ -28,7 +28,7 @@ const defaultConfig: GitRakeConfig = {
   theme: 'auto',
   includeRemote: false,
   autoCleanupTrash: true,
-};
+}
 
 const defaultThemes: Record<string, AppTheme> = {
   light: {
@@ -70,33 +70,33 @@ const defaultThemes: Record<string, AppTheme> = {
       border: 'gray',
     },
   },
-};
+}
 
 export class ConfigLoader {
-  private explorer = cosmiconfigSync('gitrake');
+  private explorer = cosmiconfigSync('gitrake')
 
   loadConfig(): GitRakeConfig {
-    const result = this.explorer.search();
+    const result = this.explorer.search()
 
     if (result) {
-      return { ...defaultConfig, ...result.config };
+      return { ...defaultConfig, ...result.config }
     }
 
-    return defaultConfig;
+    return defaultConfig
   }
 
   getTheme(themeName: string): AppTheme {
-    return defaultThemes[themeName] || defaultThemes.auto;
+    return defaultThemes[themeName] || defaultThemes.auto
   }
 
   getAllThemes(): AppTheme[] {
-    return Object.values(defaultThemes);
+    return Object.values(defaultThemes)
   }
 
   saveConfig(config: Partial<GitRakeConfig>): void {
     // In a real implementation, this would save to .gitrakerc
     // For now, we'll just log what would be saved
-    console.log('Would save config:', config);
+    console.log('Would save config:', config)
   }
 }
 
@@ -121,5 +121,5 @@ includeRemote: false
 
 # Automatically cleanup old trash entries on startup
 autoCleanupTrash: true
-`;
+`
 }

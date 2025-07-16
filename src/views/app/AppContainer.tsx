@@ -1,89 +1,91 @@
-import { useState, useCallback, useRef } from 'react';
-import { useInput, useApp, Box } from 'ink';
-import { useGitRepository } from '@hooks/useGitRepository.js';
-import { useAppOperations } from '@hooks/useAppOperations.js';
-import { useBranchSelection } from '@hooks/useBranchSelection.js';
-import { useAppUIContext, useBranchDataContext } from '@contexts/AppProviders.js';
-import { BranchesView } from '@views/branches/BranchesView.js';
-import { BranchView } from '@views/branch/BranchView.js';
-import { ConfirmationView } from '@views/confirmation/ConfirmationView.js';
-import { ErrorView } from '@views/error/ErrorView.js';
-import { ExitWarning } from './ExitWarning.js';
-
+import { useState, useCallback, useRef } from 'react'
+import { useInput, useApp, Box } from 'ink'
+import { useGitRepository } from '@hooks/useGitRepository.js'
+import { useAppOperations } from '@hooks/useAppOperations.js'
+import { useBranchSelection } from '@hooks/useBranchSelection.js'
+import {
+  useAppUIContext,
+  useBranchDataContext,
+} from '@contexts/AppProviders.js'
+import { BranchesView } from '@views/branches/BranchesView.js'
+import { BranchView } from '@views/branch/BranchView.js'
+import { ConfirmationView } from '@views/confirmation/ConfirmationView.js'
+import { ErrorView } from '@views/error/ErrorView.js'
+import { ExitWarning } from './ExitWarning.js'
 
 interface AppContainerProps {
-  includeRemote?: boolean;
-  restoreMode?: boolean;
-  workingDir?: string;
-  onRefreshBranches?: () => Promise<void>;
+  includeRemote?: boolean
+  restoreMode?: boolean
+  workingDir?: string
+  onRefreshBranches?: () => Promise<void>
 }
 
 export function AppContainer({
   includeRemote = false,
   restoreMode = false,
   workingDir,
-  onRefreshBranches
+  onRefreshBranches,
 }: AppContainerProps) {
-  const { exit } = useApp();
-  const { state, currentView, setCurrentView } = useAppUIContext();
-  const [showExitWarning, setShowExitWarning] = useState(false);
-  const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { exit } = useApp()
+  const { state, currentView, setCurrentView } = useAppUIContext()
+  const [showExitWarning, setShowExitWarning] = useState(false)
+  const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const { selectedBranches } = useBranchDataContext();
-  const { clearSelection } = useBranchSelection();
-  const [error, setError] = useState<string>('');
+  const { selectedBranches } = useBranchDataContext()
+  const { clearSelection } = useBranchSelection()
+  const [error, setError] = useState<string>('')
 
-  const { gitRepo, currentPath } = useGitRepository({ workingDir });
+  const { gitRepo, currentPath } = useGitRepository({ workingDir })
 
   const { handleConfirmOperation } = useAppOperations({
     gitRepo,
     restoreMode,
     onOperationComplete: async () => {
       if (onRefreshBranches) {
-        await onRefreshBranches();
+        await onRefreshBranches()
       }
-      clearSelection();
-      setCurrentView('branches');
+      clearSelection()
+      setCurrentView('branches')
     },
     onOperationError: setError,
-  });
+  })
 
   const handleConfirmOperationCallback = useCallback(async () => {
-    return handleConfirmOperation(selectedBranches);
-  }, [handleConfirmOperation, selectedBranches]);
+    return handleConfirmOperation(selectedBranches)
+  }, [handleConfirmOperation, selectedBranches])
 
   const handleCtrlC = useCallback(() => {
     if (showExitWarning) {
-      process.stdout.write('\x1b[2J\x1b[0f');
-      exit();
+      process.stdout.write('\x1b[2J\x1b[0f')
+      exit()
     } else {
-      setShowExitWarning(true);
+      setShowExitWarning(true)
 
       if (exitTimeoutRef.current) {
-        clearTimeout(exitTimeoutRef.current);
+        clearTimeout(exitTimeoutRef.current)
       }
 
       exitTimeoutRef.current = setTimeout(() => {
-        setShowExitWarning(false);
-        exitTimeoutRef.current = null;
-      }, 2000);
+        setShowExitWarning(false)
+        exitTimeoutRef.current = null
+      }, 2000)
     }
-  }, [showExitWarning, exit]);
+  }, [showExitWarning, exit])
 
   useInput((input, key) => {
     if (key.ctrl && input === 'c') {
-      handleCtrlC();
+      handleCtrlC()
     }
-  });
+  })
 
   const renderCurrentView = () => {
     if (state === 'error') {
-      return <ErrorView error={error} currentPath={currentPath} />;
+      return <ErrorView error={error} currentPath={currentPath} />
     }
 
     switch (currentView) {
       case 'branch':
-        return <BranchView gitRepo={gitRepo} currentPath={currentPath} />;
+        return <BranchView gitRepo={gitRepo} currentPath={currentPath} />
 
       case 'confirmation':
         return (
@@ -94,23 +96,20 @@ export function AppContainer({
             onCancel={() => setCurrentView('branches')}
             currentPath={currentPath}
           />
-        );
+        )
 
       case 'branches':
       default:
         return (
-          <BranchesView
-            restoreMode={restoreMode}
-            currentPath={currentPath}
-          />
-        );
+          <BranchesView restoreMode={restoreMode} currentPath={currentPath} />
+        )
     }
-  };
+  }
 
   return (
     <Box flexDirection="column">
       {renderCurrentView()}
       {showExitWarning && <ExitWarning />}
     </Box>
-  );
+  )
 }

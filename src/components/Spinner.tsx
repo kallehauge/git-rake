@@ -1,15 +1,22 @@
-import React from 'react';
-import { Box, Text } from 'ink';
-import InkSpinner from 'ink-spinner';
-import { useTheme } from '@contexts/ThemeProvider.js';
+import React from 'react'
+import { Box, Text } from 'ink'
+import InkSpinner from 'ink-spinner'
+import { useTheme } from '@contexts/ThemeProvider.js'
 
 interface SpinnerProps {
-  text?: string;
-  type?: 'dots' | 'line' | 'pipe' | 'simpleDots' | 'simpleDotsScrolling' | 'star' | 'toggle';
+  text?: string
+  type?:
+    | 'dots'
+    | 'line'
+    | 'pipe'
+    | 'simpleDots'
+    | 'simpleDotsScrolling'
+    | 'star'
+    | 'toggle'
 }
 
 export function Spinner({ text, type = 'dots' }: SpinnerProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
 
   return (
     <Box>
@@ -17,5 +24,5 @@ export function Spinner({ text, type = 'dots' }: SpinnerProps) {
         <InkSpinner type={type} /> {text}
       </Text>
     </Box>
-  );
+  )
 }

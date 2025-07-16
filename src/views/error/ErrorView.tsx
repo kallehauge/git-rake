@@ -1,21 +1,21 @@
-import { Box, Text } from 'ink';
-import { useTheme } from '@contexts/ThemeProvider.js';
-import { ViewLayout } from '@components/ViewLayout.js';
+import { Box, Text } from 'ink'
+import { useTheme } from '@contexts/ThemeProvider.js'
+import { ViewLayout } from '@components/ViewLayout.js'
 
 interface ErrorViewProps {
-  error: string;
-  currentPath: string;
+  error: string
+  currentPath: string
 }
 
 export function ErrorView({ error, currentPath }: ErrorViewProps) {
-  const { theme } = useTheme();
-  const helpText = 'ESC: exit • Ctrl+C: force exit';
+  const { theme } = useTheme()
+  const helpText = 'ESC: exit • Ctrl+C: force exit'
 
   const statusBarContent = (
     <Text color={theme.colors.error} bold>
       Error
     </Text>
-  );
+  )
 
   return (
     <ViewLayout
@@ -28,5 +28,5 @@ export function ErrorView({ error, currentPath }: ErrorViewProps) {
         <Text color={theme.colors.secondary}>Press ESC to exit</Text>
       </Box>
     </ViewLayout>
-  );
+  )
 }

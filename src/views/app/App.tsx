@@ -1,32 +1,34 @@
-import { AppProviders } from '@contexts/AppProviders.js';
-import { AppContainer } from './AppContainer.js';
-import { useGitRepository } from '@hooks/useGitRepository.js';
-import { useBranches } from '@hooks/useBranches.js';
-import { ThemeProvider } from '@contexts/ThemeProvider.js';
-import { ErrorView } from '@views/error/ErrorView.js';
+import { AppProviders } from '@contexts/AppProviders.js'
+import { AppContainer } from './AppContainer.js'
+import { useGitRepository } from '@hooks/useGitRepository.js'
+import { useBranches } from '@hooks/useBranches.js'
+import { ThemeProvider } from '@contexts/ThemeProvider.js'
+import { ErrorView } from '@views/error/ErrorView.js'
 
 interface AppProps {
-  includeRemote?: boolean;
-  restoreMode?: boolean;
-  workingDir?: string;
+  includeRemote?: boolean
+  restoreMode?: boolean
+  workingDir?: string
 }
 
 export function App(props: AppProps) {
-  const { gitRepo, config, theme, currentPath } = useGitRepository({ workingDir: props.workingDir });
+  const { gitRepo, config, theme, currentPath } = useGitRepository({
+    workingDir: props.workingDir,
+  })
   const { branches, error, loadBranches } = useBranches({
     gitRepo,
     config,
     includeRemote: props.includeRemote || false,
     restoreMode: props.restoreMode || false,
     currentPath,
-  });
+  })
 
   if (error) {
     return (
       <ThemeProvider theme={theme}>
         <ErrorView error={error} currentPath={currentPath} />
       </ThemeProvider>
-    );
+    )
   }
 
   return (
@@ -35,5 +37,5 @@ export function App(props: AppProps) {
         <AppContainer {...props} onRefreshBranches={loadBranches} />
       </AppProviders>
     </ThemeProvider>
-  );
+  )
 }

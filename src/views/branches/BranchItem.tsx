@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
-import { Box, Text } from 'ink';
-import { GitBranch } from '@services/GitRepository.js';
-import { useTheme } from '@contexts/ThemeProvider.js';
+import React, { useMemo } from 'react'
+import { Box, Text } from 'ink'
+import { GitBranch } from '@services/GitRepository.js'
+import { useTheme } from '@contexts/ThemeProvider.js'
 import {
   getCompactTimeAgo,
   truncateCommitMessage,
@@ -9,59 +9,59 @@ import {
   truncateAuthorName,
   getBranchStatus,
   getSelectionIndicator,
-} from '@utils/branchUtils.js';
+} from '@utils/branchUtils.js'
 
 interface BranchItemProps {
-  branch: GitBranch;
-  isSelected: boolean;
-  isMarked: boolean;
-  showSelection: boolean;
+  branch: GitBranch
+  isSelected: boolean
+  isMarked: boolean
+  showSelection: boolean
 }
 
 export const BranchItem = React.memo(function BranchItem({
   branch,
   isSelected,
   isMarked,
-  showSelection
+  showSelection,
 }: BranchItemProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
 
-  const selectionIndicator = useMemo(() =>
-    getSelectionIndicator(branch, isMarked, showSelection),
-    [branch, isMarked, showSelection]
-  );
+  const selectionIndicator = useMemo(
+    () => getSelectionIndicator(branch, isMarked, showSelection),
+    [branch, isMarked, showSelection],
+  )
 
-  const textColor = isSelected ? 'white' : theme.colors.text;
+  const textColor = isSelected ? 'white' : theme.colors.text
   const branchNameColor = isSelected
     ? 'white'
     : branch.isCurrent
-    ? theme.colors.primary
-    : theme.colors.text;
+      ? theme.colors.primary
+      : theme.colors.text
 
-  const timeAgo = useMemo(() =>
-    getCompactTimeAgo(branch.lastCommitDate),
-    [branch.lastCommitDate]
-  );
+  const timeAgo = useMemo(
+    () => getCompactTimeAgo(branch.lastCommitDate),
+    [branch.lastCommitDate],
+  )
 
-  const commitMessage = useMemo(() =>
-    truncateCommitMessage(branch.lastCommitMessage),
-    [branch.lastCommitMessage]
-  );
+  const commitMessage = useMemo(
+    () => truncateCommitMessage(branch.lastCommitMessage),
+    [branch.lastCommitMessage],
+  )
 
-  const branchName = useMemo(() =>
-    truncateBranchName(branch.name),
-    [branch.name]
-  );
+  const branchName = useMemo(
+    () => truncateBranchName(branch.name),
+    [branch.name],
+  )
 
-  const authorName = useMemo(() =>
-    truncateAuthorName(branch.lastCommitAuthor || ''),
-    [branch.lastCommitAuthor]
-  );
+  const authorName = useMemo(
+    () => truncateAuthorName(branch.lastCommitAuthor || ''),
+    [branch.lastCommitAuthor],
+  )
 
-  const statusInfo = useMemo(() =>
-    getBranchStatus(branch, theme.colors),
-    [branch, theme.colors]
-  );
+  const statusInfo = useMemo(
+    () => getBranchStatus(branch, theme.colors),
+    [branch, theme.colors],
+  )
 
   return (
     <Box paddingX={1} paddingY={0}>
@@ -105,5 +105,5 @@ export const BranchItem = React.memo(function BranchItem({
         </Text>
       </Box>
     </Box>
-  );
-});
+  )
+})

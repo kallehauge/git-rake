@@ -1,14 +1,14 @@
-import { ReactNode } from 'react';
-import { Box, Text } from 'ink';
-import { useTheme } from '@contexts/ThemeProvider.js';
+import { ReactNode } from 'react'
+import { Box, Text } from 'ink'
+import { useTheme } from '@contexts/ThemeProvider.js'
 
 interface StatusBarProps {
-  children?: ReactNode;
-  restoreMode?: boolean;
+  children?: ReactNode
+  restoreMode?: boolean
 }
 
 export function StatusBar({ children, restoreMode = false }: StatusBarProps) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
 
   return (
     <Box borderStyle="single" borderColor={theme.colors.primary} paddingX={1}>
@@ -23,5 +23,5 @@ export function StatusBar({ children, restoreMode = false }: StatusBarProps) {
         </>
       )}
     </Box>
-  );
+  )
 }

@@ -1,11 +1,16 @@
-import { Box, Text } from 'ink';
-import { useTheme } from '@contexts/ThemeProvider.js';
+import { Box, Text } from 'ink'
+import { useTheme } from '@contexts/ThemeProvider.js'
 
 export function BranchListHeader() {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
 
   return (
-    <Box paddingX={1} paddingY={0} borderBottom={true} borderColor={theme.colors.border}>
+    <Box
+      paddingX={1}
+      paddingY={0}
+      borderBottom={true}
+      borderColor={theme.colors.border}
+    >
       {/* Selection indicator space */}
       <Box width={3}>
         <Text color={theme.colors.secondary}> </Text>
@@ -47,5 +52,5 @@ export function BranchListHeader() {
         </Text>
       </Box>
     </Box>
-  );
+  )
 }

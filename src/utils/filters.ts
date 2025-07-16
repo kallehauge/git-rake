@@ -1,29 +1,34 @@
-import Fuse from 'fuse.js';
-import { GitBranch } from '@services/GitRepository.js';
+import Fuse from 'fuse.js'
+import { GitBranch } from '@services/GitRepository.js'
 
 export interface BranchFilterOptions {
-  showMerged: boolean;
-  showUnmerged: boolean;
-  showStale: boolean;
-  showLocal: boolean;
-  showRemote: boolean;
+  showMerged: boolean
+  showUnmerged: boolean
+  showStale: boolean
+  showLocal: boolean
+  showRemote: boolean
 }
 
-export type BranchFilter = 'all' | 'merged' | 'stale' | 'unmerged';
+export type BranchFilter = 'all' | 'merged' | 'stale' | 'unmerged'
 
-export function filterBranches(branches: GitBranch[], options: BranchFilterOptions): GitBranch[] {
+export function filterBranches(
+  branches: GitBranch[],
+  options: BranchFilterOptions,
+): GitBranch[] {
   return branches.filter(branch => {
-    if (branch.isLocal && !options.showLocal) return false;
-    if (branch.isRemote && !options.showRemote) return false;
-    if (branch.isMerged && !options.showMerged) return false;
-    if (!branch.isMerged && !options.showUnmerged) return false;
-    if (branch.isStale && !options.showStale) return false;
+    if (branch.isLocal && !options.showLocal) return false
+    if (branch.isRemote && !options.showRemote) return false
+    if (branch.isMerged && !options.showMerged) return false
+    if (!branch.isMerged && !options.showUnmerged) return false
+    if (branch.isStale && !options.showStale) return false
 
-    return true;
-  });
+    return true
+  })
 }
 
-export function getFilterOptionsForType(filterType: BranchFilter): BranchFilterOptions {
+export function getFilterOptionsForType(
+  filterType: BranchFilter,
+): BranchFilterOptions {
   switch (filterType) {
     case 'all':
       return {
@@ -32,7 +37,7 @@ export function getFilterOptionsForType(filterType: BranchFilter): BranchFilterO
         showStale: true,
         showLocal: true,
         showRemote: false,
-      };
+      }
     case 'merged':
       return {
         showMerged: true,
@@ -40,7 +45,7 @@ export function getFilterOptionsForType(filterType: BranchFilter): BranchFilterO
         showStale: true,
         showLocal: true,
         showRemote: false,
-      };
+      }
     case 'stale':
       return {
         showMerged: true,
@@ -48,7 +53,7 @@ export function getFilterOptionsForType(filterType: BranchFilter): BranchFilterO
         showStale: true,
         showLocal: true,
         showRemote: false,
-      };
+      }
     case 'unmerged':
       return {
         showMerged: false,
@@ -56,14 +61,14 @@ export function getFilterOptionsForType(filterType: BranchFilter): BranchFilterO
         showStale: true,
         showLocal: true,
         showRemote: false,
-      };
+      }
     default:
-      return getFilterOptionsForType('all');
+      return getFilterOptionsForType('all')
   }
 }
 
 export class BranchSearcher {
-  private fuse: Fuse<GitBranch>;
+  private fuse: Fuse<GitBranch>
 
   constructor(branches: GitBranch[]) {
     this.fuse = new Fuse(branches, {
@@ -73,30 +78,30 @@ export class BranchSearcher {
       ],
       threshold: 0.4,
       includeScore: true,
-    });
+    })
   }
 
   search(query: string): GitBranch[] {
     if (!query.trim()) {
-      return [];
+      return []
     }
 
-    const results = this.fuse.search(query);
-    return results.map(result => result.item);
+    const results = this.fuse.search(query)
+    return results.map(result => result.item)
   }
 
   updateBranches(branches: GitBranch[]): void {
-    this.fuse.setCollection(branches);
+    this.fuse.setCollection(branches)
   }
 }
 
 export function sortBranches(branches: GitBranch[]): GitBranch[] {
   return [...branches].sort((a, b) => {
     // Current branch first
-    if (a.isCurrent) return -1;
-    if (b.isCurrent) return 1;
+    if (a.isCurrent) return -1
+    if (b.isCurrent) return 1
 
     // Then by last commit date (newest first)
-    return b.lastCommitDate.getTime() - a.lastCommitDate.getTime();
-  });
+    return b.lastCommitDate.getTime() - a.lastCommitDate.getTime()
+  })
 }
