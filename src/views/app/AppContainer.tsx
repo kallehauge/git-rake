@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useInput, useApp, Box } from 'ink'
 import { useGitRepository } from '@hooks/useGitRepository.js'
 import { useAppOperations } from '@hooks/useAppOperations.js'
@@ -55,7 +55,6 @@ export function AppContainer({
 
   const handleCtrlC = useCallback(() => {
     if (showExitWarning) {
-      process.stdout.write('\x1b[2J\x1b[0f')
       exit()
     } else {
       setShowExitWarning(true)
@@ -67,9 +66,17 @@ export function AppContainer({
       exitTimeoutRef.current = setTimeout(() => {
         setShowExitWarning(false)
         exitTimeoutRef.current = null
-      }, 2000)
+      }, 1000)
     }
   }, [showExitWarning, exit])
+
+  useEffect(() => {
+    return () => {
+      if (exitTimeoutRef.current) {
+        clearTimeout(exitTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useInput((input, key) => {
     if (key.ctrl && input === 'c') {
