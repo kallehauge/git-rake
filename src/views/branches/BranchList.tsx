@@ -39,7 +39,7 @@ export const BranchList = React.memo(function BranchList() {
 
       <Box flexDirection="column" flexGrow={1} overflow="hidden">
         {filteredBranches.length === 0 ? (
-          <Box flexGrow={1} justifyContent="center" alignItems="center">
+          <Box justifyContent="center" alignItems="center" height={10}>
             <Text color={theme.colors.secondary}>
               {searchQuery
                 ? `No branches found for "${searchQuery}"`
