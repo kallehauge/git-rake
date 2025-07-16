@@ -8,6 +8,7 @@ import {
 import { useTheme } from '@contexts/ThemeProvider.js'
 import { ViewLayout } from '@components/ViewLayout.js'
 import { Spinner } from '@components/Spinner.js'
+import { TrackingStatus } from './TrackingStatus.js'
 
 interface BranchViewProps {
   gitRepo: GitRepository
@@ -23,10 +24,20 @@ export const BranchView = React.memo(function BranchView({
   const { setCurrentView, inputLocked } = useAppUIContext()
   const [gitLog, setGitLog] = useState<string>('')
   const [loadingGitLog, setLoadingGitLog] = useState(false)
+  const [aheadBehindData, setAheadBehindData] = useState<
+    | {
+        aheadBy: number
+        behindBy: number
+      }
+    | null
+    | 'not-applicable'
+  >(null)
+  const [loadingAheadBehind, setLoadingAheadBehind] = useState(false)
 
   useEffect(() => {
     if (!currentBranch) {
       setGitLog('')
+      setAheadBehindData(null)
       return
     }
 
@@ -36,6 +47,20 @@ export const BranchView = React.memo(function BranchView({
       .then(setGitLog)
       .catch(() => setGitLog('Failed to load branch log'))
       .finally(() => setLoadingGitLog(false))
+  }, [currentBranch, gitRepo])
+
+  useEffect(() => {
+    if (!currentBranch || !currentBranch.isLocal) {
+      setAheadBehindData('not-applicable')
+      return
+    }
+
+    setLoadingAheadBehind(true)
+    gitRepo
+      .getBranchAheadBehind(currentBranch.name)
+      .then(data => setAheadBehindData(data || 'not-applicable'))
+      .catch(() => setAheadBehindData(null))
+      .finally(() => setLoadingAheadBehind(false))
   }, [currentBranch, gitRepo])
 
   useInput(
@@ -128,29 +153,13 @@ export const BranchView = React.memo(function BranchView({
             </Text>
           )}
 
-          {(currentBranch.aheadBy !== undefined ||
-            currentBranch.behindBy !== undefined) && (
+          {currentBranch.isLocal && (
             <Text color={theme.colors.text}>
-              <Text color={theme.colors.secondary}>Relationship: </Text>
-              {currentBranch.aheadBy !== undefined &&
-                currentBranch.aheadBy > 0 && (
-                  <Text color={theme.colors.success}>
-                    +{currentBranch.aheadBy} ahead
-                  </Text>
-                )}
-              {currentBranch.aheadBy !== undefined &&
-                currentBranch.behindBy !== undefined &&
-                currentBranch.aheadBy > 0 &&
-                currentBranch.behindBy > 0 && <Text>, </Text>}
-              {currentBranch.behindBy !== undefined &&
-                currentBranch.behindBy > 0 && (
-                  <Text color={theme.colors.warning}>
-                    -{currentBranch.behindBy} behind
-                  </Text>
-                )}
-              {currentBranch.aheadBy === 0 && currentBranch.behindBy === 0 && (
-                <Text color={theme.colors.success}>up to date</Text>
-              )}
+              <Text color={theme.colors.secondary}>Tracking: </Text>
+              <TrackingStatus
+                loading={loadingAheadBehind}
+                data={aheadBehindData}
+              />
             </Text>
           )}
         </Box>

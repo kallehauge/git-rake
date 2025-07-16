@@ -22,6 +22,7 @@ export interface GitConfig {
   staleDaysThreshold: number
   trashNamespace: string
   trashTtlDays: number
+  mainBranch: string
 }
 
 export interface GitBranchOperation {
@@ -48,6 +49,7 @@ export class GitRepository {
       staleDaysThreshold: 30,
       trashNamespace: 'refs/rake-trash',
       trashTtlDays: 90,
+      mainBranch: 'main',
       ...config,
     }
   }
@@ -79,12 +81,6 @@ export class GitRepository {
         this.getMergedBranches(),
       ])
 
-    // Get ahead/behind data for all local branches at once
-    const aheadBehindData = await this.getBatchAheadBehindData(
-      localBranchData.map(b => b.shortname),
-      currentBranch,
-    )
-
     const branches: GitBranch[] = []
 
     // Process local branches
@@ -94,7 +90,6 @@ export class GitRepository {
         true,
         currentBranch,
         mergedBranches,
-        aheadBehindData,
       )
       if (branch) {
         branches.push(branch)
@@ -179,49 +174,40 @@ export class GitRepository {
     }
   }
 
-  private async getBatchAheadBehindData(
-    branchNames: string[],
-    currentBranch: string,
-  ): Promise<Map<string, { aheadBy: number; behindBy: number }>> {
-    const aheadBehindMap = new Map<
-      string,
-      { aheadBy: number; behindBy: number }
-    >()
-
+  async getBranchAheadBehind(
+    branchName: string,
+    currentBranch?: string,
+  ): Promise<{ aheadBy: number; behindBy: number } | null> {
     try {
-      const mainBranch = currentBranch === 'main' ? 'main' : 'master'
+      const baseBranch = currentBranch || (await this.getCurrentBranch())
+      const mainBranch = this.config.mainBranch
 
-      // Filter out current branch and non-local branches
-      const branchesToCheck = branchNames.filter(
-        branch => branch !== currentBranch,
-      )
+      if (branchName === baseBranch || branchName === mainBranch) {
+        return null
+      }
 
-      // Batch process all branches at once using rev-list
-      const promises = branchesToCheck.map(async branchName => {
-        try {
-          const result = await this.git.raw([
-            'rev-list',
-            '--left-right',
-            '--count',
-            `${mainBranch}...${branchName}`,
-          ])
-          const counts = result.trim().split('\t')
-          if (counts.length === 2) {
-            const behindBy = parseInt(counts[0]) || 0
-            const aheadBy = parseInt(counts[1]) || 0
-            aheadBehindMap.set(branchName, { aheadBy, behindBy })
-          }
-        } catch {
-          // Ignore individual branch errors
-        }
-      })
+      const result = await this.git.raw([
+        'rev-list',
+        '--left-right',
+        '--count',
+        `${mainBranch}...${branchName}`,
+      ])
 
-      await Promise.all(promises)
+      const counts = result.trim().split('\t')
+      if (counts.length === 2) {
+        const behindBy = parseInt(counts[0]) || 0
+        const aheadBy = parseInt(counts[1]) || 0
+        return { aheadBy, behindBy }
+      }
+
+      return null
     } catch (error) {
-      console.error('Error getting batch ahead/behind data:', error)
+      console.error(
+        `Error getting ahead/behind data for branch ${branchName}:`,
+        error,
+      )
+      return null
     }
-
-    return aheadBehindMap
   }
 
   private createBranchFromBatchData(
@@ -229,18 +215,12 @@ export class GitRepository {
     isLocal: boolean,
     currentBranch: string,
     mergedBranches: Set<string>,
-    aheadBehindData?: Map<string, { aheadBy: number; behindBy: number }>,
   ): GitBranch | null {
     try {
       const cleanBranchName = branchData.shortname.replace('origin/', '')
       const staleDays = differenceInDays(new Date(), branchData.date)
       const isStale = staleDays > this.config.staleDaysThreshold
       const isMerged = mergedBranches.has(branchData.shortname)
-
-      // Get ahead/behind counts from pre-computed data
-      const aheadBehindInfo = aheadBehindData?.get(branchData.shortname)
-      const aheadBy = aheadBehindInfo?.aheadBy
-      const behindBy = aheadBehindInfo?.behindBy
 
       return {
         name: cleanBranchName,
@@ -255,8 +235,8 @@ export class GitRepository {
         isMerged,
         isStale,
         staleDays,
-        aheadBy,
-        behindBy,
+        aheadBy: undefined,
+        behindBy: undefined,
       }
     } catch (error) {
       console.error(

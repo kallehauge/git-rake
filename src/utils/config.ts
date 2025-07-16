@@ -25,6 +25,7 @@ const defaultConfig: GitRakeConfig = {
   staleDaysThreshold: 30,
   trashNamespace: 'refs/rake-trash',
   trashTtlDays: 90,
+  mainBranch: 'main',
   theme: 'auto',
   includeRemote: false,
   autoCleanupTrash: true,
@@ -112,6 +113,9 @@ trashNamespace: "refs/rake-trash"
 
 # Number of days to keep deleted branches in trash
 trashTtlDays: 90
+
+# Main branch name for merge comparison (typically "main" or "master")
+mainBranch: "main"
 
 # Theme: "light", "dark", or "auto"
 theme: "auto"
