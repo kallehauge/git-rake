@@ -75,9 +75,7 @@ export const BranchView = React.memo(function BranchView({
   const helpText = 'ESC: back to branches'
 
   const statusBarContent = (
-    <Text color={theme.colors.primary} bold>
-      Branch Details
-    </Text>
+    <Text color={theme.colors.text}>{currentBranch?.name}</Text>
   )
 
   if (!currentBranch) {
@@ -110,12 +108,6 @@ export const BranchView = React.memo(function BranchView({
       currentPath={currentPath}
     >
       <Box flexDirection="column" height="100%">
-        <Box paddingX={1} paddingY={1}>
-          <Text color={theme.colors.primary} bold>
-            {currentBranch.name}
-          </Text>
-        </Box>
-
         <Box flexDirection="column" paddingX={1} paddingY={1}>
           <Text color={theme.colors.text}>
             <Text color={theme.colors.secondary}>Status: </Text>
