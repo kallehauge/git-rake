@@ -21,14 +21,12 @@ export function computeFilteredBranches(
   searchQuery: string,
   filterType: BranchFilter,
 ): GitBranch[] {
-  let filteredBranches = branches
+  const filterOptions = getFilterOptionsForType(filterType)
+  let filteredBranches = filterBranches(branches, filterOptions)
 
   if (searchQuery.trim()) {
-    const searcher = new BranchSearcher(branches)
+    const searcher = new BranchSearcher(filteredBranches)
     filteredBranches = searcher.search(searchQuery)
-  } else {
-    const filterOptions = getFilterOptionsForType(filterType)
-    filteredBranches = filterBranches(branches, filterOptions)
   }
 
   return sortBranches(filteredBranches)
