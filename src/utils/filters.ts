@@ -69,15 +69,11 @@ export function getFilterOptionsForType(
 
 export class BranchSearcher {
   private fuse: Fuse<GitBranch>
-
   constructor(branches: GitBranch[]) {
     this.fuse = new Fuse(branches, {
       keys: [
-        { name: 'name', weight: 0.7 },
-        { name: 'lastCommitMessage', weight: 0.3 },
+        { name: 'name', weight: 1 },
       ],
-      threshold: 0.4,
-      includeScore: true,
     })
   }
 
