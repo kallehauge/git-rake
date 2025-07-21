@@ -25,15 +25,31 @@ export function ViewLayout({
 
   return (
     <Box flexDirection="column" height="100%" width="100%">
-      <Box paddingX={1}>
+      <Box paddingX={1} flexShrink={0}>
         <Text color={theme.colors.secondary}>Cwd: {currentPath}</Text>
       </Box>
 
-      <StatusBar restoreMode={restoreMode}>{statusBarContent}</StatusBar>
+      <Box
+        flexShrink={0}
+        borderStyle="single"
+        borderColor={theme.colors.primary}
+        paddingX={1}
+      >
+        <StatusBar restoreMode={restoreMode}>{statusBarContent}</StatusBar>
+      </Box>
 
-      {children}
+      <Box flexGrow={1} flexShrink={1} overflow="hidden">
+        {children}
+      </Box>
 
-      <HelpBar helpText={helpText} showExitWarning={showExitWarning} />
+      <Box
+        flexShrink={0}
+        borderStyle="single"
+        borderColor={theme.colors.secondary}
+        paddingX={1}
+      >
+        <HelpBar helpText={helpText} showExitWarning={showExitWarning} />
+      </Box>
     </Box>
   )
 }
