@@ -1,8 +1,8 @@
 import { Box, Text } from 'ink'
-import { useTheme } from '@contexts/ThemeProvider.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 
 export function BranchListHeader() {
-  const { theme } = useTheme()
+  const { theme } = useAppUIContext()
 
   return (
     <Box

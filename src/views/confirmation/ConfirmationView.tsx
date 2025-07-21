@@ -3,7 +3,7 @@ import { Box, Text } from 'ink'
 import { GitBranch } from '@services/GitRepository.js'
 import { ConfirmationPrompt } from './ConfirmationPrompt.js'
 import { ViewLayout } from '@views/app/ViewLayout.js'
-import { useTheme } from '@contexts/ThemeProvider.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { Spinner } from '@components/Spinner.js'
 
 interface ConfirmationViewProps {
@@ -21,7 +21,7 @@ export const ConfirmationView = memo(function ConfirmationView({
   onCancel,
   currentPath,
 }: ConfirmationViewProps) {
-  const { theme } = useTheme()
+  const { theme } = useAppUIContext()
   const [isProcessing, setIsProcessing] = useState(false)
   const helpText = '←→: navigate • Enter/Y: confirm • ESC/N: cancel'
 

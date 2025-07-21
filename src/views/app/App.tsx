@@ -1,10 +1,12 @@
-import { AppProviders } from '@contexts/AppProviders.js'
-import { AppContainer } from './AppContainer.js'
-import { useGitRepository } from '@hooks/useGitRepository.js'
+import { ViewManager } from './ViewManager.js'
+import { GitRepository } from '@services/GitRepository.js'
 import { useBranches } from '@hooks/useBranches.js'
-import { ThemeProvider } from '@contexts/ThemeProvider.js'
+import { AppUIProvider, useAppUIContext } from '@contexts/AppUIContext.js'
+import { SearchProvider } from '@contexts/SearchContext.js'
+import { SelectionProvider } from '@contexts/SelectionContext.js'
+import { BranchDataProvider } from '@contexts/BranchDataContext.js'
 import { ErrorView } from '@views/error/ErrorView.js'
-import { StrictMode } from 'react'
+import { StrictMode, useMemo } from 'react'
 
 interface AppProps {
   includeRemote?: boolean
@@ -13,32 +15,43 @@ interface AppProps {
 }
 
 export function App(props: AppProps) {
-  const { gitRepo, config, theme, currentPath } = useGitRepository({
-    workingDir: props.workingDir,
-  })
+  const { config } = useAppUIContext()
+
+  const gitRepo = useMemo(
+    () => new GitRepository(props.workingDir),
+    [props.workingDir],
+  )
+  const currentPath = props.workingDir || process.cwd()
+  const restoreMode = props.restoreMode || false
+
   const { branches, error, loadBranches } = useBranches({
     gitRepo,
     config,
     includeRemote: props.includeRemote || false,
-    restoreMode: props.restoreMode || false,
+    restoreMode,
     currentPath,
   })
 
   if (error) {
-    return (
-      <ThemeProvider theme={theme}>
-        <ErrorView error={error} currentPath={currentPath} />
-      </ThemeProvider>
-    )
+    return <ErrorView error={error} currentPath={currentPath} />
   }
 
-  const content = (
-    <ThemeProvider theme={theme}>
-      <AppProviders branches={branches}>
-        <AppContainer {...props} onRefreshBranches={loadBranches} />
-      </AppProviders>
-    </ThemeProvider>
+  return (
+    <StrictMode>
+      <AppUIProvider>
+        <SearchProvider>
+          <SelectionProvider>
+            <BranchDataProvider branches={branches}>
+              <ViewManager
+                restoreMode={restoreMode}
+                gitRepo={gitRepo}
+                currentPath={currentPath}
+                onRefreshBranches={loadBranches}
+              />
+            </BranchDataProvider>
+          </SelectionProvider>
+        </SearchProvider>
+      </AppUIProvider>
+    </StrictMode>
   )
-
-  return <StrictMode>{content}</StrictMode>
 }

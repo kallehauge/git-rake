@@ -1,9 +1,7 @@
 import React from 'react'
 import { Box, useInput } from 'ink'
-import {
-  useAppUIContext,
-  useBranchDataContext,
-} from '@contexts/AppProviders.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
+import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 import { useSearch } from '@hooks/useSearch.js'
 import { BranchList } from './BranchList.js'
 import { ViewLayout } from '@views/app/ViewLayout.js'

@@ -1,22 +1,18 @@
 import React from 'react'
 import { Box, Text, useInput } from 'ink'
-import { useTheme } from '@contexts/ThemeProvider.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { BranchItem } from './BranchItem.js'
 import { BranchListHeader } from './BranchListHeader.js'
-import {
-  useBranchDataContext,
-  useSelectionContext,
-  useSearchContext,
-  useAppUIContext,
-} from '@contexts/AppProviders.js'
+import { useBranchDataContext } from '@contexts/BranchDataContext.js'
+import { useSelectionContext } from '@contexts/SelectionContext.js'
+import { useSearchContext } from '@contexts/SearchContext.js'
 import { useBranchSelection } from '@hooks/useBranchSelection.js'
 
 export const BranchList = React.memo(function BranchList() {
-  const { theme } = useTheme()
+  const { theme, state, inputLocked } = useAppUIContext()
   const { filteredBranches, currentBranch } = useBranchDataContext()
   const { selectedIndex, selectedBranchNames } = useSelectionContext()
   const { searchQuery } = useSearchContext()
-  const { state, inputLocked } = useAppUIContext()
   const { toggleBranchSelection, handleListNavigation } = useBranchSelection()
 
   useInput(

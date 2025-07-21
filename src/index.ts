@@ -159,14 +159,6 @@ program
     }
   })
 
-program
-  .command('config')
-  .description('Generate example configuration file')
-  .action(async () => {
-    const { createExampleConfig } = await import('@utils/config.js')
-    console.log(createExampleConfig())
-  })
-
 program.parse()
 
 export { App }

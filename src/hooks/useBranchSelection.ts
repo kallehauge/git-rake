@@ -1,10 +1,8 @@
 import { useCallback } from 'react'
 import { Key } from 'ink'
 import { GitBranch } from '@services/GitRepository.js'
-import {
-  useSelectionContext,
-  useBranchDataContext,
-} from '@contexts/AppProviders.js'
+import { useSelectionContext } from '@contexts/SelectionContext.js'
+import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 
 interface UseBranchSelectionReturn {
   toggleBranchSelection: (branch: GitBranch) => void

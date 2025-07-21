@@ -1,6 +1,6 @@
 import { Text } from 'ink'
-import { useTheme } from '@contexts/ThemeProvider.js'
-import { useBranchDataContext } from '@contexts/AppProviders.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
+import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 
 export function BranchStatusBarContent() {
   const { statusBarInfo } = useBranchDataContext()
@@ -12,7 +12,7 @@ export function BranchStatusBarContent() {
     searchMode,
     searchQuery,
   } = statusBarInfo
-  const { theme } = useTheme()
+  const { theme } = useAppUIContext()
 
   const getFilterDisplay = () => {
     switch (filterType) {

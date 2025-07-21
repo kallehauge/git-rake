@@ -1,7 +1,7 @@
 import { Box, Text } from 'ink'
 import InkSpinner from 'ink-spinner'
 import type { SpinnerName } from 'cli-spinners'
-import { useTheme } from '@contexts/ThemeProvider.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 
 interface SpinnerProps {
   text?: string
@@ -9,7 +9,7 @@ interface SpinnerProps {
 }
 
 export function Spinner({ text, type = 'dots' }: SpinnerProps) {
-  const { theme } = useTheme()
+  const { theme } = useAppUIContext()
 
   return (
     <Box justifyContent="center" alignItems="center" height={6}>

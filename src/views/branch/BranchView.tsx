@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { GitRepository } from '@services/GitRepository.js'
-import {
-  useBranchDataContext,
-  useAppUIContext,
-} from '@contexts/AppProviders.js'
-import { useTheme } from '@contexts/ThemeProvider.js'
+import { useBranchDataContext } from '@contexts/BranchDataContext.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { ViewLayout } from '@views/app/ViewLayout.js'
 import { Spinner } from '@components/Spinner.js'
 import { TrackingStatus } from './TrackingStatus.js'
@@ -19,9 +16,8 @@ export const BranchView = React.memo(function BranchView({
   gitRepo,
   currentPath,
 }: BranchViewProps) {
-  const { theme } = useTheme()
+  const { theme, setCurrentView, inputLocked } = useAppUIContext()
   const { currentBranch } = useBranchDataContext()
-  const { setCurrentView, inputLocked } = useAppUIContext()
   const [gitLog, setGitLog] = useState<string>('')
   const [loadingGitLog, setLoadingGitLog] = useState(false)
   const [aheadBehindData, setAheadBehindData] = useState<

@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { GitBranch } from '@services/GitRepository.js'
-import { useTheme } from '@contexts/ThemeProvider.js'
-import { useAppUIContext } from '@contexts/AppProviders.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 
 interface ConfirmationPromptProps {
   branches: GitBranch[]
@@ -17,8 +16,7 @@ export function ConfirmationPrompt({
   onConfirm,
   onCancel,
 }: ConfirmationPromptProps) {
-  const { theme } = useTheme()
-  const { setCurrentView, inputLocked } = useAppUIContext()
+  const { theme, setCurrentView, inputLocked } = useAppUIContext()
   const [selectedOption, setSelectedOption] = useState<'confirm' | 'cancel'>(
     'cancel',
   )

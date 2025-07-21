@@ -1,7 +1,6 @@
 import { ReactNode } from 'react'
 import { Box, Text } from 'ink'
-import { useTheme } from '@contexts/ThemeProvider.js'
-import { useAppUIContext } from '@contexts/AppProviders.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { StatusBar } from '@components/StatusBar.js'
 import { HelpBar } from '@components/HelpBar.js'
 
@@ -20,8 +19,7 @@ export function ViewLayout({
   helpText,
   currentPath,
 }: ViewLayoutProps) {
-  const { theme } = useTheme()
-  const { showExitWarning } = useAppUIContext()
+  const { theme, showExitWarning } = useAppUIContext()
 
   return (
     <Box flexDirection="column" height="100%" width="100%">

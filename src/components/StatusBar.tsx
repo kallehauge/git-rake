@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { Text } from 'ink'
-import { useTheme } from '@contexts/ThemeProvider.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 
 interface StatusBarProps {
   children?: ReactNode
@@ -8,7 +8,7 @@ interface StatusBarProps {
 }
 
 export function StatusBar({ children, restoreMode = false }: StatusBarProps) {
-  const { theme } = useTheme()
+  const { theme } = useAppUIContext()
 
   return (
     <>

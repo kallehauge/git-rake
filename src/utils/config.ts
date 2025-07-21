@@ -1,19 +1,6 @@
 import { cosmiconfigSync } from 'cosmiconfig'
 import { GitConfig } from '@services/GitRepository.js'
-
-export interface AppTheme {
-  name: string
-  colors: {
-    primary: string
-    secondary: string
-    success: string
-    warning: string
-    error: string
-    text: string
-    background: string
-    border: string
-  }
-}
+import { homedir } from 'os'
 
 export interface GitRakeConfig extends GitConfig {
   theme: string
@@ -31,99 +18,31 @@ const defaultConfig: GitRakeConfig = {
   autoCleanupTrash: true,
 }
 
-const defaultThemes: Record<string, AppTheme> = {
-  light: {
-    name: 'light',
-    colors: {
-      primary: '#0066cc',
-      secondary: '#6c757d',
-      success: '#28a745',
-      warning: '#ffc107',
-      error: '#dc3545',
-      text: '#212529',
-      background: '#ffffff',
-      border: '#dee2e6',
-    },
-  },
-  dark: {
-    name: 'dark',
-    colors: {
-      primary: '#66b3ff',
-      secondary: '#adb5bd',
-      success: '#40d167',
-      warning: '#ffdd57',
-      error: '#ff6b8a',
-      text: '#f8f9fa',
-      background: '#212529',
-      border: '#495057',
-    },
-  },
-  auto: {
-    name: 'auto',
-    colors: {
-      primary: 'blue',
-      secondary: 'gray',
-      success: 'green',
-      warning: 'yellow',
-      error: 'red',
-      text: 'white',
-      background: 'black',
-      border: 'gray',
-    },
-  },
-}
+/**
+ * Load configuration
+ *
+ * This will load configuration in the following order, and override the
+ * values with the ones from the next source if there are duplicates:
+ *   1. Default config (defined in this file)
+ *   2. User config (in the user's home directory)
+ *   3. Project config (in the project directory)
+ */
+export function loadConfig(): GitRakeConfig {
+  let userConfig: Partial<GitRakeConfig> = {}
+  const homeDir = homedir()
 
-export class ConfigLoader {
-  private explorer = cosmiconfigSync('gitrake')
+  const userExplorer = cosmiconfigSync('gitrake', {
+    stopDir: homeDir,
+  })
 
-  loadConfig(): GitRakeConfig {
-    const result = this.explorer.search()
-
-    if (result) {
-      return { ...defaultConfig, ...result.config }
-    }
-
-    return defaultConfig
+  const userResult = userExplorer.search(homeDir)
+  if (userResult && !userResult.isEmpty) {
+    userConfig = userResult.config
   }
 
-  getTheme(themeName: string): AppTheme {
-    return defaultThemes[themeName] || defaultThemes.auto
-  }
+  const projectExplorer = cosmiconfigSync('gitrake')
+  const projectResult = projectExplorer.search()
+  const projectConfig = projectResult ? projectResult.config : {}
 
-  getAllThemes(): AppTheme[] {
-    return Object.values(defaultThemes)
-  }
-
-  saveConfig(config: Partial<GitRakeConfig>): void {
-    // In a real implementation, this would save to .gitrakerc
-    // For now, we'll just log what would be saved
-    console.log('Would save config:', config)
-  }
-}
-
-export function createExampleConfig(): string {
-  return `# Git Rake Configuration
-# This file can be named .gitrakerc, .gitrakerc.yml, or .gitrakerc.yaml
-
-# Number of days before a branch is considered stale
-staleDaysThreshold: 30
-
-# Namespace for storing deleted branches
-trashNamespace: "refs/rake-trash"
-
-# Number of days to keep deleted branches in trash
-trashTtlDays: 90
-
-# Main branch name for merge comparison (typically "main" or "master")
-mainBranch: "main"
-
-# Theme: "light", "dark", or "auto"
-theme: "auto"
-
-# Include remote tracking branches in the list
-includeRemote: false
-
-# Automatically cleanup old trash entries on startup
-autoCleanupTrash: true
-`
+  return { ...defaultConfig, ...userConfig, ...projectConfig }
 }

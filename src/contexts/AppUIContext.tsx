@@ -1,4 +1,6 @@
 import { createContext, useContext, ReactNode, useState, useMemo } from 'react'
+import { loadConfig, GitRakeConfig } from '@utils/config.js'
+import { getTheme, AppTheme } from '@utils/themes.js'
 
 export type AppState = 'ready' | 'error'
 export type ViewState = 'branches' | 'branch' | 'confirmation'
@@ -8,6 +10,8 @@ export interface AppUIState {
   currentView: ViewState
   inputLocked: boolean
   showExitWarning: boolean
+  config: GitRakeConfig
+  theme: AppTheme
 }
 
 export interface AppUIActions {
@@ -19,11 +23,16 @@ export interface AppUIActions {
 
 type AppUIContextType = AppUIState & AppUIActions
 
+const defaultConfig = loadConfig()
+const defaultTheme = getTheme(defaultConfig.theme)
+
 const defaultAppUIState: AppUIContextType = {
   state: 'ready',
   currentView: 'branches',
   inputLocked: false,
   showExitWarning: false,
+  config: defaultConfig,
+  theme: defaultTheme,
   setState: () => {},
   setCurrentView: () => {},
   setInputLocked: () => {},
@@ -42,6 +51,9 @@ export function AppUIProvider({ children }: AppUIProviderProps) {
   const [inputLocked, setInputLocked] = useState<boolean>(false)
   const [showExitWarning, setShowExitWarning] = useState<boolean>(false)
 
+  const config = useMemo(loadConfig, [])
+  const theme = useMemo(() => getTheme(config.theme), [config.theme])
+
   const contextValue = useMemo(
     () => ({
       state,
@@ -52,8 +64,10 @@ export function AppUIProvider({ children }: AppUIProviderProps) {
       setInputLocked,
       showExitWarning,
       setShowExitWarning,
+      config,
+      theme,
     }),
-    [state, currentView, inputLocked, showExitWarning],
+    [state, currentView, inputLocked, showExitWarning, config, theme],
   )
 
   return (

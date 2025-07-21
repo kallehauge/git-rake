@@ -1,5 +1,5 @@
 import { Box, Text } from 'ink'
-import { useTheme } from '@contexts/ThemeProvider.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { ViewLayout } from '@views/app/ViewLayout.js'
 
 interface ErrorViewProps {
@@ -8,7 +8,7 @@ interface ErrorViewProps {
 }
 
 export function ErrorView({ error, currentPath }: ErrorViewProps) {
-  const { theme } = useTheme()
+  const { theme } = useAppUIContext()
   const helpText = 'ESC: exit • Ctrl+C: force exit'
 
   const statusBarContent = (

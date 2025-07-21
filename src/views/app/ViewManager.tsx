@@ -1,29 +1,28 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useInput, useApp } from 'ink'
-import { useGitRepository } from '@hooks/useGitRepository.js'
+import { GitRepository } from '@services/GitRepository.js'
 import { useAppOperations } from '@hooks/useAppOperations.js'
 import { useBranchSelection } from '@hooks/useBranchSelection.js'
-import {
-  useAppUIContext,
-  useBranchDataContext,
-} from '@contexts/AppProviders.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
+import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 import { BranchesView } from '@views/branches/BranchesView.js'
 import { BranchView } from '@views/branch/BranchView.js'
 import { ConfirmationView } from '@views/confirmation/ConfirmationView.js'
 import { ErrorView } from '@views/error/ErrorView.js'
 
-interface AppContainerProps {
-  includeRemote?: boolean
+interface ViewManagerProps {
   restoreMode?: boolean
-  workingDir?: string
+  gitRepo: GitRepository
+  currentPath: string
   onRefreshBranches?: () => Promise<void>
 }
 
-export function AppContainer({
+export function ViewManager({
   restoreMode = false,
-  workingDir,
+  gitRepo,
+  currentPath,
   onRefreshBranches,
-}: AppContainerProps) {
+}: ViewManagerProps) {
   const {
     state,
     currentView,
@@ -37,8 +36,6 @@ export function AppContainer({
   const { selectedBranches } = useBranchDataContext()
   const { clearSelection } = useBranchSelection()
   const [error, setError] = useState<string>('')
-
-  const { gitRepo, currentPath } = useGitRepository({ workingDir })
 
   const { handleConfirmOperation } = useAppOperations({
     gitRepo,

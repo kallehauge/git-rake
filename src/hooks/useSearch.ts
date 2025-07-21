@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { Key } from 'ink'
-import { useSearchContext, useAppUIContext } from '@contexts/AppProviders.js'
+import { useSearchContext } from '@contexts/SearchContext.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { BranchFilter } from '@utils/filters.js'
 
 interface UseSearchReturn {

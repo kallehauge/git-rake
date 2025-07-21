@@ -1,5 +1,5 @@
 import { Text } from 'ink'
-import { useTheme } from '@contexts/ThemeProvider.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 
 interface HelpBarProps {
   helpText: string
@@ -7,7 +7,7 @@ interface HelpBarProps {
 }
 
 export function HelpBar({ helpText, showExitWarning }: HelpBarProps) {
-  const { theme } = useTheme()
+  const { theme } = useAppUIContext()
 
   return (
     <>

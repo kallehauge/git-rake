@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { Box, Text } from 'ink'
 import { GitBranch } from '@services/GitRepository.js'
-import { useTheme } from '@contexts/ThemeProvider.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 import {
   getCompactTimeAgo,
   truncateCommitMessage,
@@ -24,7 +24,7 @@ export const BranchItem = React.memo(function BranchItem({
   isMarked,
   showSelection,
 }: BranchItemProps) {
-  const { theme } = useTheme()
+  const { theme } = useAppUIContext()
 
   const selectionIndicator = useMemo(
     () => getSelectionIndicator(branch, isMarked, showSelection),

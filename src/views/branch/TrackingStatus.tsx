@@ -1,6 +1,6 @@
 import React from 'react'
 import { Text } from 'ink'
-import { useTheme } from '@contexts/ThemeProvider.js'
+import { useAppUIContext } from '@contexts/AppUIContext.js'
 
 interface TrackingStatusProps {
   loading: boolean
@@ -11,7 +11,7 @@ export const TrackingStatus = React.memo(function TrackingStatus({
   loading,
   data,
 }: TrackingStatusProps) {
-  const { theme } = useTheme()
+  const { theme } = useAppUIContext()
 
   if (loading) {
     return <Text color={theme.colors.secondary}>fetching...</Text>
