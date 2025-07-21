@@ -14,15 +14,15 @@ export const TrackingStatus = React.memo(function TrackingStatus({
   const { theme } = useAppUIContext()
 
   if (loading) {
-    return <Text color={theme.colors.secondary}>fetching...</Text>
+    return <Text color={theme.colors.muted}>fetching...</Text>
   }
 
   if (data === 'not-applicable') {
-    return <Text color={theme.colors.secondary}>not applicable</Text>
+    return <Text color={theme.colors.muted}>not applicable</Text>
   }
 
   if (!data) {
-    return <Text color={theme.colors.secondary}>calculating...</Text>
+    return <Text color={theme.colors.muted}>calculating...</Text>
   }
 
   const { aheadBy, behindBy } = data

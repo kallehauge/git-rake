@@ -1,5 +1,5 @@
 import { GitBranch } from '@services/GitRepository.js'
-import { AppTheme } from '@utils/themes.js'
+import { AppTheme } from '@utils/themes/index.js'
 
 export function getCompactTimeAgo(date: Date): string {
   const now = new Date()

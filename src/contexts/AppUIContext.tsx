@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactNode, useState, useMemo } from 'react'
 import { loadConfig, GitRakeConfig } from '@utils/config.js'
-import { getTheme, AppTheme } from '@utils/themes.js'
+import { getTheme, AppTheme } from '@utils/themes/index.js'
 
 export type AppState = 'ready' | 'error'
 export type ViewState = 'branches' | 'branch' | 'confirmation'

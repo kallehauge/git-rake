@@ -14,7 +14,7 @@ export function HelpBar({ helpText, showExitWarning }: HelpBarProps) {
       {showExitWarning ? (
         <Text color={theme.colors.warning}>Press Ctrl+C again to exit</Text>
       ) : (
-        <Text color={theme.colors.secondary}>{helpText} • ctrl+c: exit</Text>
+        <Text color={theme.colors.muted}>{helpText} • ctrl+c: exit</Text>
       )}
     </>
   )

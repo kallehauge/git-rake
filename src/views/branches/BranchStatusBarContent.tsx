@@ -48,7 +48,7 @@ export function BranchStatusBarContent() {
           <Text color={theme.colors.text}> • </Text>
           <Text color={theme.colors.text}>
             Search: <Text color={theme.colors.primary}>{searchQuery}</Text>
-            {searchMode && <Text color={theme.colors.primary}>|</Text>}
+            {searchMode && <Text color={theme.colors.accent}>|</Text>}
           </Text>
         </>
       )}

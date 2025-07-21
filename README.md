@@ -11,7 +11,7 @@ Built with [Ink](https://github.com/vadimdemedes/ink) for React-style terminal i
 - 🔍 **Fuzzy Search** - Quick branch finding with `/` key
 - 📊 **Detailed view** - See commit history and branch details
 - ⚡ **Batch Operations** - Select multiple branches for bulk operations
-- 🎨 **Themeable** - Light, dark, and auto themes
+- 🎨 **Themes** - Popular themes inspired by programs like VS Code, GitHub, Atom, and general themes like Tokyo Night, Catppuccin, and Gruvbox
 - 📅 **Stale Detection** - Automatically identify old branches
 
 ## Installation
@@ -65,6 +65,33 @@ git-rake cleanup
 git-rake config
 ```
 
+## Themes
+
+Git Rake comes with themes inspired by popular editors and terminal color schemes:
+
+### Adaptive
+- **Auto** - Adapts to your terminal colors
+
+### Light Themes
+- **One (light)** - Atom's beloved light theme with perfect contrast
+- **GitHub (light)** - GitHub's clean design system
+- **Catppuccin (latte)** - Warm soothing pastels
+- **Gruvbox (light)** - Retro warm colors
+- **Tokyo Night (day)** - Popular VS Code light theme
+- **Ayu (light)** - Clean minimalist design
+- **VS Code (light)** - Visual Studio Code's default light theme
+
+### Dark Themes
+- **One (dark)** - Atom's iconic dark theme loved by millions
+- **GitHub (dark)** - GitHub's modern dark design
+- **Catppuccin (mocha)** - Trendy 2025 pastel dark theme
+- **Gruvbox (dark)** - Beloved retro community favorite
+- **Tokyo Night** - Most popular VS Code/Vim theme
+- **Ayu (dark)** - Minimalist dark elegance
+- **Ayu (mirage)** - Unique balanced variant
+- **Dracula** - Vibrant purple/pink classic
+- **VS Code (dark)** - Visual Studio Code's default dark theme
+
 ## Configuration
 
 Create a `.gitrakerc`, `.gitrakerc.yml`, or `.gitrakerc.yaml` file:
@@ -79,7 +106,9 @@ trashNamespace: "refs/rake-trash"
 # Number of days to keep deleted branches in trash
 trashTtlDays: 90
 
-# Theme: "light", "dark", or "auto"
+# Theme: Choose from 17 beautiful themes
+# Light themes: "auto", "one-light", "github-light", "catppuccin-latte", "gruvbox-light", "tokyo-night-day", "ayu-light", "vscode-light"
+# Dark themes: "one-dark", "github-dark", "catppuccin-mocha", "gruvbox-dark", "tokyo-night", "ayu-dark", "ayu-mirage", "dracula", "vscode-dark"
 theme: "auto"
 
 # Include remote tracking branches in the list

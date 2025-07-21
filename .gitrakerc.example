@@ -1,17 +1,16 @@
 # Git Rake Configuration
-# This file can be named .gitrakerc, .gitrakerc.yml, or .gitrakerc.yaml
+# This file can be named anything supported by cosmiconfig (e.g .gitrakerc, gitrake.config.js, .gitrakerc.yml)
+
+# Theme: Choose from available themes
+# Light themes: "auto", "one-light", "github-light", "catppuccin-latte", "gruvbox-light", "tokyo-night-day", "ayu-light", "vscode-light"
+# Dark themes: "one-dark", "github-dark", "catppuccin-mocha", "gruvbox-dark", "tokyo-night", "ayu-dark", "ayu-mirage", "dracula", "vscode-dark"
+theme: "auto"
 
 # Number of days before a branch is considered stale
 staleDaysThreshold: 30
 
-# Namespace for storing deleted branches
-trashNamespace: "refs/rake-trash"
-
 # Number of days to keep deleted branches in trash
 trashTtlDays: 90
-
-# Theme: "light", "dark", or "auto"
-theme: "auto"
 
 # Include remote tracking branches in the list
 includeRemote: false

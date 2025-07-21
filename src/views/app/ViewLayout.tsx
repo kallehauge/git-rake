@@ -24,7 +24,7 @@ export function ViewLayout({
   return (
     <Box flexDirection="column" height="100%" width="100%">
       <Box paddingX={1} flexShrink={0}>
-        <Text color={theme.colors.secondary}>Cwd: {currentPath}</Text>
+        <Text color={theme.colors.muted}>Cwd: {currentPath}</Text>
       </Box>
 
       <Box

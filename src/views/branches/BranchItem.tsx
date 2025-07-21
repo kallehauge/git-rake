@@ -31,9 +31,9 @@ export const BranchItem = React.memo(function BranchItem({
     [branch, isMarked, showSelection],
   )
 
-  const textColor = isSelected ? 'white' : theme.colors.text
+  const textColor = isSelected ? theme.colors.selection : theme.colors.text
   const branchNameColor = isSelected
-    ? 'white'
+    ? theme.colors.selection
     : branch.isCurrent
       ? theme.colors.primary
       : theme.colors.text
@@ -76,31 +76,39 @@ export const BranchItem = React.memo(function BranchItem({
       </Box>
 
       <Box width={10} marginRight={1}>
-        <Text color={isSelected ? 'white' : statusInfo.color}>
+        <Text color={isSelected ? theme.colors.selection : statusInfo.color}>
           {statusInfo.text}
         </Text>
       </Box>
 
       <Box width={8} marginRight={1}>
-        <Text color={isSelected ? 'white' : theme.colors.secondary}>
+        <Text
+          color={isSelected ? theme.colors.selection : theme.colors.secondary}
+        >
           {timeAgo}
         </Text>
       </Box>
 
       <Box width={8} marginRight={1}>
-        <Text color={isSelected ? 'white' : theme.colors.secondary}>
+        <Text
+          color={isSelected ? theme.colors.selection : theme.colors.secondary}
+        >
           {branch.lastCommitHash.substring(0, 7)}
         </Text>
       </Box>
 
       <Box width={12} marginRight={1}>
-        <Text color={isSelected ? 'white' : theme.colors.secondary}>
+        <Text
+          color={isSelected ? theme.colors.selection : theme.colors.secondary}
+        >
           {authorName}
         </Text>
       </Box>
 
       <Box flexGrow={1}>
-        <Text color={isSelected ? 'white' : theme.colors.secondary}>
+        <Text
+          color={isSelected ? theme.colors.selection : theme.colors.secondary}
+        >
           {commitMessage}
         </Text>
       </Box>
