@@ -85,7 +85,7 @@ export const BranchView = React.memo(function BranchView({
         helpText={helpText}
         currentPath={currentPath}
       >
-        <Box flexDirection="column" height="100%">
+        <Box flexDirection="column">
           <Box paddingX={1} paddingY={1}>
             <Text color={theme.colors.primary} bold>
               Branch Preview
@@ -107,7 +107,7 @@ export const BranchView = React.memo(function BranchView({
       helpText={helpText}
       currentPath={currentPath}
     >
-      <Box flexDirection="column" height="100%">
+      <Box flexDirection="column">
         <Box flexDirection="column" paddingX={1} paddingY={1}>
           <Text color={theme.colors.text}>
             <Text color={theme.colors.secondary}>Status: </Text>

@@ -34,7 +34,7 @@ export const BranchList = React.memo(function BranchList() {
   )
 
   return (
-    <Box flexDirection="column" height="100%">
+    <Box flexDirection="column">
       <BranchListHeader />
 
       <Box flexDirection="column" flexGrow={1} overflow="hidden">
