@@ -71,9 +71,7 @@ export class BranchSearcher {
   private fuse: Fuse<GitBranch>
   constructor(branches: GitBranch[]) {
     this.fuse = new Fuse(branches, {
-      keys: [
-        { name: 'name', weight: 1 },
-      ],
+      keys: [{ name: 'name', weight: 1 }],
     })
   }
 
