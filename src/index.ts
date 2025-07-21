@@ -96,7 +96,9 @@ program
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async (branchName, options) => {
     const { GitRepository } = await import('@services/GitRepository.js')
-    const gitRepo = new GitRepository(options.cwd)
+    const { loadConfig } = await import('@utils/config.js')
+    const config = loadConfig()
+    const gitRepo = new GitRepository(options.cwd, config)
 
     try {
       await gitRepo.restoreBranchFromTrash(branchName)
@@ -116,7 +118,9 @@ program
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async options => {
     const { GitRepository } = await import('@services/GitRepository.js')
-    const gitRepo = new GitRepository(options.cwd)
+    const { loadConfig } = await import('@utils/config.js')
+    const config = loadConfig()
+    const gitRepo = new GitRepository(options.cwd, config)
 
     try {
       const trashBranches = await gitRepo.getTrashBranches()
@@ -145,7 +149,9 @@ program
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async options => {
     const { GitRepository } = await import('@services/GitRepository.js')
-    const gitRepo = new GitRepository(options.cwd)
+    const { loadConfig } = await import('@utils/config.js')
+    const config = loadConfig()
+    const gitRepo = new GitRepository(options.cwd, config)
 
     try {
       await gitRepo.cleanupTrash()

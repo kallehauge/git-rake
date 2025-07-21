@@ -23,6 +23,7 @@ export interface GitConfig {
   trashNamespace: string
   trashTtlDays: number
   mainBranch: string
+  excludedBranches: string[]
 }
 
 export interface GitBranchOperation {
@@ -50,6 +51,7 @@ export class GitRepository {
       trashNamespace: 'refs/rake-trash',
       trashTtlDays: 90,
       mainBranch: 'main',
+      excludedBranches: [],
       ...config,
     }
   }
@@ -218,6 +220,12 @@ export class GitRepository {
   ): GitBranch | null {
     try {
       const cleanBranchName = branchData.shortname.replace('origin/', '')
+
+      // Filter out excluded branches
+      if (this.config.excludedBranches.includes(cleanBranchName)) {
+        return null
+      }
+
       const staleDays = differenceInDays(new Date(), branchData.date)
       const isStale = staleDays > this.config.staleDaysThreshold
       const isMerged = mergedBranches.has(branchData.shortname)

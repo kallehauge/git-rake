@@ -6,6 +6,7 @@ export interface GitRakeConfig extends GitConfig {
   theme: string
   includeRemote: boolean
   autoCleanupTrash: boolean
+  excludedBranches: string[]
 }
 
 const defaultConfig: GitRakeConfig = {
@@ -16,6 +17,17 @@ const defaultConfig: GitRakeConfig = {
   theme: 'auto',
   includeRemote: false,
   autoCleanupTrash: true,
+  excludedBranches: [
+    'main',
+    'master',
+    'trunk',
+    'develop',
+    'dev',
+    'release',
+    'production',
+    'prod',
+    'staging',
+  ],
 }
 
 /**

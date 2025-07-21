@@ -17,3 +17,7 @@ includeRemote: false
 
 # Automatically cleanup old trash entries on startup
 autoCleanupTrash: true
+
+# Branches to exclude from git rake operations (never shown or selectable)
+# These branches will be completely filtered out and cannot be deleted
+excludedBranches: ["main", "master", "develop", "staging"]

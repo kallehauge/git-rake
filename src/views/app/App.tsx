@@ -18,8 +18,8 @@ export function App(props: AppProps) {
   const { config } = useAppUIContext()
 
   const gitRepo = useMemo(
-    () => new GitRepository(props.workingDir),
-    [props.workingDir],
+    () => new GitRepository(props.workingDir, config),
+    [props.workingDir, config],
   )
   const currentPath = props.workingDir || process.cwd()
   const restoreMode = props.restoreMode || false
