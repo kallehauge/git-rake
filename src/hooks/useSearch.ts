@@ -23,11 +23,20 @@ export function useSearch(): UseSearchReturn {
 
   const handleSearchInput = useCallback(
     (input: string, key: Key): boolean => {
-      if (!searchMode) return false
+      // Clear search query on escape no matter which screen the user is on
+      // One case this is useful is when the user is focusing the Branches
+      // screen and they want to clear search query filtering
+      if (key.escape) {
+        setSearchQuery('')
+      }
+
+      // (I) Bail early for any other operations if we're not in active search input mode
+      if (!searchMode) {
+        return false
+      }
 
       if (key.escape) {
         setSearchMode(false)
-        setSearchQuery('')
         setInputLocked(false)
         return true
       }
