@@ -6,7 +6,7 @@ import {
 } from '@contexts/AppProviders.js'
 import { useSearch } from '@hooks/useSearch.js'
 import { BranchList } from './BranchList.js'
-import { ViewLayout } from '@components/ViewLayout.js'
+import { ViewLayout } from '@views/app/ViewLayout.js'
 import { BranchStatusBarContent } from './BranchStatusBarContent.js'
 import { Spinner } from '@components/Spinner.js'
 

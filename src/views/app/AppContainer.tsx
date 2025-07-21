@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { useInput, Box, useApp } from 'ink'
+import { useInput, useApp } from 'ink'
 import { useGitRepository } from '@hooks/useGitRepository.js'
 import { useAppOperations } from '@hooks/useAppOperations.js'
 import { useBranchSelection } from '@hooks/useBranchSelection.js'
@@ -11,7 +11,6 @@ import { BranchesView } from '@views/branches/BranchesView.js'
 import { BranchView } from '@views/branch/BranchView.js'
 import { ConfirmationView } from '@views/confirmation/ConfirmationView.js'
 import { ErrorView } from '@views/error/ErrorView.js'
-import { ExitWarning } from './ExitWarning.js'
 
 interface AppContainerProps {
   includeRemote?: boolean
@@ -25,8 +24,13 @@ export function AppContainer({
   workingDir,
   onRefreshBranches,
 }: AppContainerProps) {
-  const { state, currentView, setCurrentView } = useAppUIContext()
-  const [showExitWarning, setShowExitWarning] = useState(false)
+  const {
+    state,
+    currentView,
+    setCurrentView,
+    showExitWarning,
+    setShowExitWarning,
+  } = useAppUIContext()
   const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { exit } = useApp()
 
@@ -112,10 +116,5 @@ export function AppContainer({
     }
   }
 
-  return (
-    <Box flexDirection="column">
-      {renderCurrentView()}
-      {showExitWarning && <ExitWarning />}
-    </Box>
-  )
+  return renderCurrentView()
 }

@@ -2,7 +2,7 @@ import { memo, useState, useCallback } from 'react'
 import { Box, Text } from 'ink'
 import { GitBranch } from '@services/GitRepository.js'
 import { ConfirmationPrompt } from './ConfirmationPrompt.js'
-import { ViewLayout } from '@components/ViewLayout.js'
+import { ViewLayout } from '@views/app/ViewLayout.js'
 import { useTheme } from '@contexts/ThemeProvider.js'
 import { Spinner } from '@components/Spinner.js'
 

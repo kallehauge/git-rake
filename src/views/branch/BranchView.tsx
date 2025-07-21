@@ -6,7 +6,7 @@ import {
   useAppUIContext,
 } from '@contexts/AppProviders.js'
 import { useTheme } from '@contexts/ThemeProvider.js'
-import { ViewLayout } from '@components/ViewLayout.js'
+import { ViewLayout } from '@views/app/ViewLayout.js'
 import { Spinner } from '@components/Spinner.js'
 import { TrackingStatus } from './TrackingStatus.js'
 

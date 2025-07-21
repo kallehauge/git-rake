@@ -1,6 +1,6 @@
 import { Box, Text } from 'ink'
 import { useTheme } from '@contexts/ThemeProvider.js'
-import { ViewLayout } from '@components/ViewLayout.js'
+import { ViewLayout } from '@views/app/ViewLayout.js'
 
 interface ErrorViewProps {
   error: string
@@ -25,7 +25,6 @@ export function ErrorView({ error, currentPath }: ErrorViewProps) {
     >
       <Box flexDirection="column" padding={1}>
         <Text color={theme.colors.error}>Error: {error}</Text>
-        <Text color={theme.colors.secondary}>Press ESC to exit</Text>
       </Box>
     </ViewLayout>
   )
