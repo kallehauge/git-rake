@@ -4,6 +4,7 @@ import { useGitRepository } from '@hooks/useGitRepository.js'
 import { useBranches } from '@hooks/useBranches.js'
 import { ThemeProvider } from '@contexts/ThemeProvider.js'
 import { ErrorView } from '@views/error/ErrorView.js'
+import React, { StrictMode } from 'react'
 
 interface AppProps {
   includeRemote?: boolean
@@ -31,11 +32,34 @@ export function App(props: AppProps) {
     )
   }
 
-  return (
+  const onRender = (
+    id: string,
+    phase: string,
+    actualDuration: number,
+    baseDuration: number,
+    startTime: number,
+    commitTime: number,
+  ) => {
+    console.log(id, phase, actualDuration, baseDuration, startTime, commitTime)
+  }
+
+  const content = (
     <ThemeProvider theme={theme}>
       <AppProviders branches={branches}>
         <AppContainer {...props} onRefreshBranches={loadBranches} />
       </AppProviders>
     </ThemeProvider>
+  )
+
+  return (
+    <StrictMode>
+      {process.env.DEV ? (
+        <React.Profiler id="app" onRender={onRender}>
+          {content}
+        </React.Profiler>
+      ) : (
+        content
+      )}
+    </StrictMode>
   )
 }

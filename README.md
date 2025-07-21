@@ -125,7 +125,10 @@ git rake restore
 npm install
 
 # Development mode
+# Using "dev", the app enables React DevTools integration and profiling.
+When DEV=true is set, the app enables React DevTools integration and profiling.
 npm run dev
+npx react-devtools
 
 # Run development mode against different Git repo
 npm run dev -- --cwd /path/to/repo

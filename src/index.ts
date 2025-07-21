@@ -19,6 +19,17 @@ program
     )
     await ink.start()
     await ink.waitUntilExit()
+
+    // DEVELOPMENT MODE CLEANUP:
+    // When DEV=true, Ink automatically imports react-devtools-core and calls connectToDevTools()
+    // This creates a WebSocket server connection for DevTools communication.
+    // The WebSocket connection has active listeners that keep the Node.js event loop alive when
+    // we unmount the process. There's a realistic chance that our unmount logic has something to
+    // do with this issue, so we should look into it in the future. For now, we exit with
+    // process.exit(0) to terminate the WebSocket and close the process.
+    if (process.env.DEV) {
+      process.exit(0)
+    }
   })
 
 program
@@ -36,6 +47,18 @@ program
     )
     await ink.start()
     await ink.waitUntilExit()
+
+    // DEVELOPMENT MODE CLEANUP:
+    // When DEV=true, Ink automatically imports react-devtools-core and calls connectToDevTools()
+    // This creates a WebSocket server connection for DevTools communication.
+    // The WebSocket connection has active listeners that keep the Node.js event loop alive when
+    // we unmount the process. There's a realistic chance that our unmount logic has something to
+    // do with this issue, so we should look into it in the future. For now, we exit with
+    // process.exit(0) to terminate the WebSocket and close the process.
+    // @todo id:dev-mode-cleanup
+    if (process.env.DEV) {
+      process.exit(0)
+    }
   })
 
 program
@@ -52,6 +75,18 @@ program
     )
     await ink.start()
     await ink.waitUntilExit()
+
+    // DEVELOPMENT MODE CLEANUP:
+    // When DEV=true, Ink automatically imports react-devtools-core and calls connectToDevTools()
+    // This creates a WebSocket server connection for DevTools communication.
+    // The WebSocket connection has active listeners that keep the Node.js event loop alive when
+    // we unmount the process. There's a realistic chance that our unmount logic has something to
+    // do with this issue, so we should look into it in the future. For now, we exit with
+    // process.exit(0) to terminate the WebSocket and close the process.
+    // @todo id:dev-mode-cleanup
+    if (process.env.DEV) {
+      process.exit(0)
+    }
   })
 
 program
