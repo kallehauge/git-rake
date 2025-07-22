@@ -16,15 +16,15 @@ interface BranchesListProps {
 export const BranchesList = React.memo(function BranchesList({
   branches,
 }: BranchesListProps) {
-  const { theme, state, inputLocked } = useAppUIContext()
-  const { currentBranch } = useBranchDataContext()
+  const { theme, inputLocked } = useAppUIContext()
+  const { currentBranch, isRefreshing } = useBranchDataContext()
   const { selectedIndex, selectedBranchNames } = useSelectionContext()
   const { searchQuery } = useSearchContext()
   const { toggleBranchSelection, handleListNavigation } = useBranchesSelection()
 
   useInput(
     (input, key) => {
-      if (state !== 'ready') return
+      if (isRefreshing) return
 
       if (handleListNavigation(key)) return
 

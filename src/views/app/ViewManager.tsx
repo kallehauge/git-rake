@@ -1,10 +1,9 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 import { useInput, useApp } from 'ink'
 import { GitRepository } from '@services/GitRepository.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { BranchesView } from '@views/branches/BranchesView.js'
 import { BranchView } from '@views/branch/BranchView.js'
-import { ErrorView } from '@views/error/ErrorView.js'
 
 interface ViewManagerProps {
   restoreMode?: boolean
@@ -17,11 +16,9 @@ export function ViewManager({
   gitRepo,
   currentPath,
 }: ViewManagerProps) {
-  const { state, currentView, showExitWarning, setShowExitWarning } =
-    useAppUIContext()
+  const { currentView, showExitWarning, setShowExitWarning } = useAppUIContext()
   const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const { exit } = useApp()
-  const [error] = useState<string>('')
 
   const handleCtrlC = useCallback(() => {
     if (showExitWarning) {
@@ -55,10 +52,6 @@ export function ViewManager({
   })
 
   const renderCurrentView = () => {
-    if (state === 'error') {
-      return <ErrorView error={error} currentPath={currentPath} />
-    }
-
     switch (currentView) {
       case 'branch':
         return <BranchView gitRepo={gitRepo} currentPath={currentPath} />

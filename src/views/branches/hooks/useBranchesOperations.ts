@@ -2,7 +2,6 @@ import { useCallback, useState, useMemo } from 'react'
 import { GitRepository } from '@services/GitRepository.js'
 import { GitBranch } from '@services/GitRepository.js'
 import { useBranchesSelection } from './useBranchesSelection.js'
-import { useAppUIContext } from '@contexts/AppUIContext.js'
 
 export const BRANCH_OPERATIONS = {
   DELETE: 'delete',
@@ -48,7 +47,6 @@ export function useBranchesOperations(
   gitRepo: GitRepository,
 ): UseBranchesOperationsReturn {
   const { clearSelection } = useBranchesSelection()
-  const { setState } = useAppUIContext()
 
   const [pendingOperation, setPendingOperation] =
     useState<UIOperationType | null>(null)
@@ -57,22 +55,16 @@ export function useBranchesOperations(
     async (operation: BranchOperationType, branches: GitBranch[]) => {
       if (branches.length === 0) return
 
-      try {
-        const operations = branches.map(branch => ({
-          type: operation,
-          branch,
-        }))
+      const operations = branches.map(branch => ({
+        type: operation,
+        branch,
+      }))
 
-        await gitRepo.performBatchOperations(operations)
+      await gitRepo.performBatchOperations(operations)
 
-        clearSelection()
-        setState('ready')
-      } catch (err) {
-        setState('error')
-        throw err
-      }
+      clearSelection()
     },
-    [gitRepo, clearSelection, setState],
+    [gitRepo, clearSelection],
   )
 
   const startConfirmation = useCallback((operation: UIOperationType) => {

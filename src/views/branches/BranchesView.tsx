@@ -30,13 +30,14 @@ export const BranchesView = React.memo(function BranchesView({
   currentPath,
   gitRepo,
 }: BranchesViewProps) {
-  const { state, inputLocked, setCurrentView, theme } = useAppUIContext()
+  const { inputLocked, setCurrentView, theme } = useAppUIContext()
   const {
     selectedBranches,
     branches,
     refreshBranches,
     filteredBranches: contextFilteredBranches,
     statusBarInfo,
+    isRefreshing,
   } = useBranchDataContext()
   const { handleSearchInput, activateSearch, cycleFilter } = useBranchesSearch()
   const { selectAllVisibleBranches } = useBranchesSelection()
@@ -57,52 +58,48 @@ export const BranchesView = React.memo(function BranchesView({
   })
 
   useInput((input, key) => {
-    if (state !== 'ready') return
+    if (isRefreshing || pendingOperation) return
 
     if (handleSearchInput(input, key)) return
+
+    // Prevent "normal" navigation from happening while we're in "search mode".
+    if (inputLocked) return
+
+    if (input === '/') {
+      activateSearch()
+      return
+    }
+
+    if (input === 'f') {
+      cycleFilter()
+      return
+    }
+
+    if (input === 'a') {
+      selectAllVisibleBranches()
+      return
+    }
+
+    if (key.return) {
+      setCurrentView('branch')
+      return
+    }
+
+    if (input === 't' && selectedBranches.length > 0 && !restoreMode) {
+      startConfirmation(UI_OPERATIONS.TRASH)
+      return
+    }
+
+    if (input === 'd' && selectedBranches.length > 0 && !restoreMode) {
+      startConfirmation(UI_OPERATIONS.DELETE)
+      return
+    }
+
+    if (input === 'r' && selectedBranches.length > 0 && restoreMode) {
+      startConfirmation(UI_OPERATIONS.RESTORE)
+      return
+    }
   })
-
-  useInput(
-    (input, key) => {
-      if (state !== 'ready') return
-
-      if (input === '/') {
-        activateSearch()
-        return
-      }
-
-      if (input === 'f') {
-        cycleFilter()
-        return
-      }
-
-      if (input === 'a') {
-        selectAllVisibleBranches()
-        return
-      }
-
-      if (key.return) {
-        setCurrentView('branch')
-        return
-      }
-
-      if (input === 't' && selectedBranches.length > 0 && !restoreMode) {
-        startConfirmation(UI_OPERATIONS.TRASH)
-        return
-      }
-
-      if (input === 'd' && selectedBranches.length > 0 && !restoreMode) {
-        startConfirmation(UI_OPERATIONS.DELETE)
-        return
-      }
-
-      if (input === 'r' && selectedBranches.length > 0 && restoreMode) {
-        startConfirmation(UI_OPERATIONS.RESTORE)
-        return
-      }
-    },
-    { isActive: !inputLocked },
-  )
 
   const handleConfirmWrapper = async () => {
     await handleConfirm(selectedBranches, refreshBranches)
@@ -120,7 +117,7 @@ export const BranchesView = React.memo(function BranchesView({
       currentPath={currentPath}
     >
       <Box flexGrow={1} flexDirection="column">
-        {branches.length === 0 ? (
+        {branches.length === 0 || isRefreshing ? (
           <Spinner text="Loading branches..." />
         ) : (
           <>
