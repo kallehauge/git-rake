@@ -2,18 +2,25 @@ import React from 'react'
 import { Box, Text, useInput } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { BranchItem } from './BranchItem.js'
-import { BranchListHeader } from './BranchListHeader.js'
+import { BranchesListHeader } from './BranchesListHeader.js'
 import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 import { useSelectionContext } from '@contexts/SelectionContext.js'
 import { useSearchContext } from '@contexts/SearchContext.js'
-import { useBranchSelection } from '@hooks/useBranchSelection.js'
+import { useBranchesSelection } from './hooks/useBranchesSelection.js'
+import { GitBranch } from '@services/GitRepository.js'
 
-export const BranchList = React.memo(function BranchList() {
+interface BranchesListProps {
+  branches: GitBranch[]
+}
+
+export const BranchesList = React.memo(function BranchesList({
+  branches,
+}: BranchesListProps) {
   const { theme, state, inputLocked } = useAppUIContext()
-  const { filteredBranches, currentBranch } = useBranchDataContext()
+  const { currentBranch } = useBranchDataContext()
   const { selectedIndex, selectedBranchNames } = useSelectionContext()
   const { searchQuery } = useSearchContext()
-  const { toggleBranchSelection, handleListNavigation } = useBranchSelection()
+  const { toggleBranchSelection, handleListNavigation } = useBranchesSelection()
 
   useInput(
     (input, key) => {
@@ -31,10 +38,10 @@ export const BranchList = React.memo(function BranchList() {
 
   return (
     <Box flexDirection="column">
-      <BranchListHeader />
+      <BranchesListHeader />
 
       <Box flexDirection="column" flexGrow={1} overflow="hidden">
-        {filteredBranches.length === 0 ? (
+        {branches.length === 0 ? (
           <Box justifyContent="center" alignItems="center" height={10}>
             <Text color={theme.colors.muted}>
               {searchQuery
@@ -43,7 +50,7 @@ export const BranchList = React.memo(function BranchList() {
             </Text>
           </Box>
         ) : (
-          filteredBranches.map((branch, index) => (
+          branches.map((branch, index) => (
             <BranchItem
               key={branch.ref}
               branch={branch}

@@ -73,13 +73,8 @@ export function BranchDataProvider({
   }, [onRefreshBranches])
 
   const filteredBranches = useMemo(() => {
-    return computeFilteredBranches(
-      branches,
-      searchQuery,
-      filterType,
-      selectedBranchNames,
-    )
-  }, [branches, searchQuery, filterType, selectedBranchNames])
+    return computeFilteredBranches(branches, searchQuery, filterType)
+  }, [branches, searchQuery, filterType])
 
   const selectedBranches = useMemo(() => {
     return computeSelectedBranches(branches, selectedBranchNames)

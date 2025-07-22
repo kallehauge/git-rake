@@ -3,7 +3,7 @@ import { GitRepository } from '@services/GitRepository.js'
 import { GitBranch } from '@services/GitRepository.js'
 import { GitRakeConfig } from '@utils/config.js'
 
-interface UseBranchesProps {
+interface UseRepositoryLoaderProps {
   gitRepo: GitRepository
   config: GitRakeConfig
   includeRemote?: boolean
@@ -11,20 +11,20 @@ interface UseBranchesProps {
   currentPath: string
 }
 
-interface UseBranchesReturn {
+interface UseRepositoryLoaderReturn {
   branches: GitBranch[]
   loading: boolean
   error: string
   loadBranches: () => Promise<void>
 }
 
-export function useBranches({
+export function useRepositoryLoader({
   gitRepo,
   config,
   includeRemote = false,
   restoreMode = false,
   currentPath,
-}: UseBranchesProps): UseBranchesReturn {
+}: UseRepositoryLoaderProps): UseRepositoryLoaderReturn {
   const [branches, setBranches] = useState<GitBranch[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>('')

@@ -1,24 +1,23 @@
-import React, { useState, useMemo } from 'react'
+import React from 'react'
 import { Box, Text, useInput } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { useBranchDataContext } from '@contexts/BranchDataContext.js'
-import { useSearch } from '@hooks/useSearch.js'
-import { useBranchSelection } from '@hooks/useBranchSelection.js'
+import { useBranchesSearch } from './hooks/useBranchesSearch.js'
+import { useBranchesSelection } from './hooks/useBranchesSelection.js'
 import {
-  useBranchOperations,
+  useBranchesOperations,
   UI_OPERATIONS,
-  UIOperationType,
-} from '@hooks/useBranchOperations.js'
+} from './hooks/useBranchesOperations.js'
+import { useBranchesDisplay } from './hooks/useBranchesDisplay.js'
 import { GitRepository } from '@services/GitRepository.js'
-import { BranchList } from './BranchList.js'
+import { BranchesList } from './BranchesList.js'
 import { ViewLayout } from '@views/app/ViewLayout.js'
-import { BranchStatusBarContent } from './BranchStatusBarContent.js'
+import { BranchesStatusBarContent } from './BranchesStatusBarContent.js'
 import { Spinner } from '@components/Spinner.js'
 import {
   ConfirmationBar,
   CONFIRMATION_SHORTCUTS,
 } from '@components/ConfirmationBar.js'
-import type { BranchFilter } from '@utils/filters.js'
 
 interface BranchesViewProps {
   restoreMode: boolean
@@ -31,23 +30,31 @@ export const BranchesView = React.memo(function BranchesView({
   currentPath,
   gitRepo,
 }: BranchesViewProps) {
-  const { state, inputLocked, setCurrentView } = useAppUIContext()
-  const { selectedBranches, branches, statusBarInfo, refreshBranches } =
-    useBranchDataContext()
+  const { state, inputLocked, setCurrentView, theme } = useAppUIContext()
   const {
-    handleSearchInput,
-    activateSearch,
-    cycleFilter,
-    setSelectedFilter,
-    restoreFilter,
-  } = useSearch()
-  const { selectAllVisibleBranches } = useBranchSelection()
-  const { performOperation } = useBranchOperations(gitRepo)
-  const [showConfirmation, setShowConfirmation] = useState(false)
-  const [pendingOperation, setPendingOperation] = useState<UIOperationType>(
-    UI_OPERATIONS.TRASH,
-  )
-  const [previousFilter, setPreviousFilter] = useState<BranchFilter>('all')
+    selectedBranches,
+    branches,
+    refreshBranches,
+    filteredBranches: contextFilteredBranches,
+    statusBarInfo,
+  } = useBranchDataContext()
+  const { handleSearchInput, activateSearch, cycleFilter } = useBranchesSearch()
+  const { selectAllVisibleBranches } = useBranchesSelection()
+  const {
+    pendingOperation,
+    startConfirmation,
+    handleConfirm,
+    handleCancel,
+    confirmationConfig,
+  } = useBranchesOperations(gitRepo)
+  const { branchesToDisplay, statusBarProps } = useBranchesDisplay({
+    pendingOperation,
+    selectedBranches,
+    contextFilteredBranches,
+    statusBarInfo,
+    branches,
+    theme,
+  })
 
   useInput((input, key) => {
     if (state !== 'ready') return
@@ -80,87 +87,34 @@ export const BranchesView = React.memo(function BranchesView({
       }
 
       if (input === 't' && selectedBranches.length > 0 && !restoreMode) {
-        setPendingOperation(UI_OPERATIONS.TRASH)
-        setPreviousFilter(statusBarInfo.filterType)
-        setSelectedFilter()
-        setShowConfirmation(true)
+        startConfirmation(UI_OPERATIONS.TRASH)
         return
       }
 
       if (input === 'd' && selectedBranches.length > 0 && !restoreMode) {
-        setPendingOperation(UI_OPERATIONS.DELETE)
-        setPreviousFilter(statusBarInfo.filterType)
-        setSelectedFilter()
-        setShowConfirmation(true)
+        startConfirmation(UI_OPERATIONS.DELETE)
         return
       }
 
       if (input === 'r' && selectedBranches.length > 0 && restoreMode) {
-        setPendingOperation(UI_OPERATIONS.RESTORE)
-        setPreviousFilter(statusBarInfo.filterType)
-        setSelectedFilter()
-        setShowConfirmation(true)
+        startConfirmation(UI_OPERATIONS.RESTORE)
         return
       }
     },
     { isActive: !inputLocked },
   )
 
-  const handleConfirm = async () => {
-    try {
-      await performOperation(pendingOperation, selectedBranches)
-      await refreshBranches()
-    } catch (error) {
-      // Error handling is managed by the hook and app-level state
-      console.error('Operation failed:', error)
-    } finally {
-      restoreFilter(previousFilter)
-      setShowConfirmation(false)
-    }
+  const handleConfirmWrapper = async () => {
+    await handleConfirm(selectedBranches, refreshBranches)
   }
-
-  const handleCancel = () => {
-    restoreFilter(previousFilter)
-    setShowConfirmation(false)
-  }
-
-  const createConfirmationConfig = (operation: UIOperationType) => {
-    const configs = {
-      [UI_OPERATIONS.DELETE]: {
-        type: 'alert' as const,
-        confirmText: 'Delete (Y)',
-        cancelText: 'Cancel (N)',
-        message:
-          '⚠️ WARNING: This will permanently delete branches. This action cannot be undone!',
-      },
-      [UI_OPERATIONS.TRASH]: {
-        type: 'warning' as const,
-        confirmText: 'Trash (Y)',
-        cancelText: 'Cancel (N)',
-        message:
-          'Note: Branches will be moved to trash and can be restored later.',
-      },
-      [UI_OPERATIONS.RESTORE]: {
-        type: 'info' as const,
-        confirmText: 'Restore (Y)',
-        cancelText: 'Cancel (N)',
-        message: undefined,
-      },
-    }
-    return configs[operation]
-  }
-
-  const confirmationConfig = useMemo(() => {
-    return showConfirmation ? createConfirmationConfig(pendingOperation) : null
-  }, [showConfirmation, pendingOperation])
 
   const branchesHelpText = `↑↓: navigate • space: select • a: select all • /: search • f: filter • enter: details • ${restoreMode ? 'r: restore' : 't: trash • d: delete permanently'}`
   const confirmationHelpText = `${CONFIRMATION_SHORTCUTS.navigate}: navigate • ${CONFIRMATION_SHORTCUTS.confirm}: confirm • ${CONFIRMATION_SHORTCUTS.cancel}: cancel`
-  const helpText = showConfirmation ? confirmationHelpText : branchesHelpText
+  const helpText = pendingOperation ? confirmationHelpText : branchesHelpText
 
   return (
     <ViewLayout
-      statusBarContent={<BranchStatusBarContent />}
+      statusBarContent={<BranchesStatusBarContent {...statusBarProps} />}
       restoreMode={restoreMode}
       helpText={helpText}
       currentPath={currentPath}
@@ -170,13 +124,13 @@ export const BranchesView = React.memo(function BranchesView({
           <Spinner text="Loading branches..." />
         ) : (
           <>
-            <BranchList />
+            <BranchesList branches={branchesToDisplay} />
             {confirmationConfig && (
               <ConfirmationBar
                 type={confirmationConfig.type}
                 confirmText={confirmationConfig.confirmText}
                 cancelText={confirmationConfig.cancelText}
-                onConfirm={handleConfirm}
+                onConfirm={handleConfirmWrapper}
                 onCancel={handleCancel}
               >
                 {confirmationConfig.message && (

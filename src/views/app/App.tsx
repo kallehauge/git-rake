@@ -1,6 +1,6 @@
 import { ViewManager } from './ViewManager.js'
 import { GitRepository } from '@services/GitRepository.js'
-import { useBranches } from '@hooks/useBranches.js'
+import { useRepositoryLoader } from './hooks/useRepositoryLoader.js'
 import { AppUIProvider, useAppUIContext } from '@contexts/AppUIContext.js'
 import { SearchProvider } from '@contexts/SearchContext.js'
 import { SelectionProvider } from '@contexts/SelectionContext.js'
@@ -24,7 +24,7 @@ export function App(props: AppProps) {
   const currentPath = props.workingDir || process.cwd()
   const restoreMode = props.restoreMode || false
 
-  const { branches, error, loadBranches } = useBranches({
+  const { branches, error, loadBranches } = useRepositoryLoader({
     gitRepo,
     config,
     includeRemote: props.includeRemote || false,
