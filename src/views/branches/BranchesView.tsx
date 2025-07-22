@@ -3,6 +3,7 @@ import { Box, useInput } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 import { useSearch } from '@hooks/useSearch.js'
+import { useBranchSelection } from '@hooks/useBranchSelection.js'
 import { BranchList } from './BranchList.js'
 import { ViewLayout } from '@views/app/ViewLayout.js'
 import { BranchStatusBarContent } from './BranchStatusBarContent.js'
@@ -20,6 +21,7 @@ export const BranchesView = React.memo(function BranchesView({
   const { state, setCurrentView, inputLocked } = useAppUIContext()
   const { selectedBranches, branches } = useBranchDataContext()
   const { handleSearchInput, activateSearch, cycleFilter } = useSearch()
+  const { selectAllVisibleBranches } = useBranchSelection()
 
   useInput((input, key) => {
     if (state !== 'ready') return
@@ -41,6 +43,11 @@ export const BranchesView = React.memo(function BranchesView({
         return
       }
 
+      if (input === 'a') {
+        selectAllVisibleBranches()
+        return
+      }
+
       if (key.return) {
         setCurrentView('branch')
         return
@@ -54,7 +61,7 @@ export const BranchesView = React.memo(function BranchesView({
     { isActive: !inputLocked },
   )
 
-  const helpText = `↑↓: navigate • space: select • /: search • f: filter • enter: details • ${restoreMode ? 'r: restore' : 'd: delete'}`
+  const helpText = `↑↓: navigate • space: select • a: select all • /: search • f: filter • enter: details • ${restoreMode ? 'r: restore' : 'd: delete'}`
 
   return (
     <ViewLayout

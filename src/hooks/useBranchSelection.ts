@@ -8,6 +8,7 @@ interface UseBranchSelectionReturn {
   toggleBranchSelection: (branch: GitBranch) => void
   clearSelection: () => void
   setSelectedBranches: (branches: GitBranch[]) => void
+  selectAllVisibleBranches: () => void
   navigateUp: () => void
   navigateDown: () => void
   handleListNavigation: (key: Key) => boolean
@@ -49,6 +50,13 @@ export function useBranchSelection(): UseBranchSelectionReturn {
     [setSelectedBranchNames],
   )
 
+  const selectAllVisibleBranches = useCallback(() => {
+    const selectableBranches = filteredBranches.filter(
+      branch => !branch.isCurrent,
+    )
+    setSelectedBranches(selectableBranches)
+  }, [filteredBranches, setSelectedBranches])
+
   const navigateUp = useCallback(() => {
     const newIndex = Math.max(0, selectedIndex - 1)
     setSelectedIndex(newIndex)
@@ -81,6 +89,7 @@ export function useBranchSelection(): UseBranchSelectionReturn {
     toggleBranchSelection,
     clearSelection,
     setSelectedBranches,
+    selectAllVisibleBranches,
     navigateUp,
     navigateDown,
     handleListNavigation,
