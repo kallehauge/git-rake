@@ -27,7 +27,7 @@ export interface GitConfig {
 }
 
 export interface GitBranchOperation {
-  type: 'delete' | 'restore' | 'prune'
+  type: 'delete' | 'restore' | 'prune' | 'trash'
   branch: GitBranch
 }
 
@@ -371,8 +371,11 @@ export class GitRepository {
     for (const operation of operations) {
       try {
         switch (operation.type) {
-          case 'delete':
+          case 'trash':
             await this.moveBranchToTrash(operation.branch.name)
+            break
+          case 'delete':
+            await this.deleteBranch(operation.branch.name, true)
             break
           case 'restore':
             await this.restoreBranchFromTrash(operation.branch.name)

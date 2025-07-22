@@ -9,7 +9,7 @@ export interface BranchFilterOptions {
   showRemote: boolean
 }
 
-export type BranchFilter = 'all' | 'merged' | 'stale' | 'unmerged'
+export type BranchFilter = 'all' | 'merged' | 'stale' | 'unmerged' | 'selected'
 
 export function filterBranches(
   branches: GitBranch[],
@@ -57,6 +57,16 @@ export function getFilterOptionsForType(
     case 'unmerged':
       return {
         showMerged: false,
+        showUnmerged: true,
+        showStale: true,
+        showLocal: true,
+        showRemote: false,
+      }
+    case 'selected':
+      // The selected filter works differently - it filters by branch names, not attributes
+      // This returns "show all" options since the actual filtering happens in derivedState
+      return {
+        showMerged: true,
         showUnmerged: true,
         showStale: true,
         showLocal: true,

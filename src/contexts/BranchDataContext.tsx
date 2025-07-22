@@ -1,4 +1,11 @@
-import { createContext, useContext, ReactNode, useMemo } from 'react'
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useMemo,
+  useState,
+  useCallback,
+} from 'react'
 import { GitBranch } from '@services/GitRepository.js'
 import {
   computeFilteredBranches,
@@ -16,6 +23,8 @@ export interface BranchData {
   selectedBranches: GitBranch[]
   currentBranch: GitBranch | null
   statusBarInfo: StatusBarInfo
+  refreshBranches: () => Promise<void>
+  isRefreshing: boolean
 }
 
 const defaultBranchData: BranchData = {
@@ -31,6 +40,8 @@ const defaultBranchData: BranchData = {
     searchMode: false,
     searchQuery: '',
   },
+  refreshBranches: async () => {},
+  isRefreshing: false,
 }
 
 const BranchDataContext = createContext<BranchData>(defaultBranchData)
@@ -38,18 +49,37 @@ const BranchDataContext = createContext<BranchData>(defaultBranchData)
 interface BranchDataProviderProps {
   children: ReactNode
   branches: GitBranch[]
+  onRefreshBranches?: () => Promise<void>
 }
 
 export function BranchDataProvider({
   children,
   branches,
+  onRefreshBranches,
 }: BranchDataProviderProps) {
   const { searchQuery, filterType, searchMode } = useContext(SearchContext)
   const { selectedBranchNames, selectedIndex } = useContext(SelectionContext)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  const refreshBranches = useCallback(async () => {
+    if (!onRefreshBranches) return
+
+    try {
+      setIsRefreshing(true)
+      await onRefreshBranches()
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [onRefreshBranches])
 
   const filteredBranches = useMemo(() => {
-    return computeFilteredBranches(branches, searchQuery, filterType)
-  }, [branches, searchQuery, filterType])
+    return computeFilteredBranches(
+      branches,
+      searchQuery,
+      filterType,
+      selectedBranchNames,
+    )
+  }, [branches, searchQuery, filterType, selectedBranchNames])
 
   const selectedBranches = useMemo(() => {
     return computeSelectedBranches(branches, selectedBranchNames)
@@ -88,6 +118,8 @@ export function BranchDataProvider({
       selectedBranches,
       currentBranch,
       statusBarInfo,
+      refreshBranches,
+      isRefreshing,
     }),
     [
       branches,
@@ -95,6 +127,8 @@ export function BranchDataProvider({
       selectedBranches,
       currentBranch,
       statusBarInfo,
+      refreshBranches,
+      isRefreshing,
     ],
   )
 

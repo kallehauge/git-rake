@@ -24,6 +24,8 @@ export function BranchStatusBarContent() {
         return 'Stale'
       case 'unmerged':
         return 'Unmerged'
+      case 'selected':
+        return 'Selected'
       default:
         return 'All'
     }

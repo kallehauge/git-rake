@@ -41,12 +41,14 @@ export function App(props: AppProps) {
       <AppUIProvider>
         <SearchProvider>
           <SelectionProvider>
-            <BranchDataProvider branches={branches}>
+            <BranchDataProvider
+              branches={branches}
+              onRefreshBranches={loadBranches}
+            >
               <ViewManager
                 restoreMode={restoreMode}
                 gitRepo={gitRepo}
                 currentPath={currentPath}
-                onRefreshBranches={loadBranches}
               />
             </BranchDataProvider>
           </SelectionProvider>

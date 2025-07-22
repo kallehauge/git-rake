@@ -9,6 +9,8 @@ interface UseSearchReturn {
   activateSearch: () => void
   clearSearch: () => void
   cycleFilter: () => void
+  setSelectedFilter: () => void
+  restoreFilter: (previousFilter: BranchFilter) => void
 }
 
 export function useSearch(): UseSearchReturn {
@@ -81,16 +83,35 @@ export function useSearch(): UseSearchReturn {
   }, [setSearchMode, setSearchQuery])
 
   const cycleFilter = useCallback(() => {
-    const filterTypes: BranchFilter[] = ['all', 'merged', 'stale', 'unmerged']
+    const filterTypes: BranchFilter[] = [
+      'all',
+      'merged',
+      'stale',
+      'unmerged',
+      'selected',
+    ]
     const currentIndex = filterTypes.indexOf(filterType)
     const nextIndex = (currentIndex + 1) % filterTypes.length
     setFilterType(filterTypes[nextIndex])
   }, [filterType, setFilterType])
+
+  const setSelectedFilter = useCallback(() => {
+    setFilterType('selected')
+  }, [setFilterType])
+
+  const restoreFilter = useCallback(
+    (previousFilter: BranchFilter) => {
+      setFilterType(previousFilter)
+    },
+    [setFilterType],
+  )
 
   return {
     handleSearchInput,
     activateSearch,
     clearSearch,
     cycleFilter,
+    setSelectedFilter,
+    restoreFilter,
   }
 }

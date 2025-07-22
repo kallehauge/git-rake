@@ -20,9 +20,19 @@ export function computeFilteredBranches(
   branches: GitBranch[],
   searchQuery: string,
   filterType: BranchFilter,
+  selectedBranchNames?: Set<string>,
 ): GitBranch[] {
-  const filterOptions = getFilterOptionsForType(filterType)
-  let filteredBranches = filterBranches(branches, filterOptions)
+  let filteredBranches: GitBranch[]
+
+  if (filterType === 'selected') {
+    // For selected filter, only show branches that are currently selected
+    filteredBranches = selectedBranchNames
+      ? branches.filter(branch => selectedBranchNames.has(branch.name))
+      : []
+  } else {
+    const filterOptions = getFilterOptionsForType(filterType)
+    filteredBranches = filterBranches(branches, filterOptions)
+  }
 
   if (searchQuery.trim()) {
     const searcher = new BranchSearcher(filteredBranches)
