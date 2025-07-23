@@ -44,11 +44,13 @@ export class GitRepository {
   private git: SimpleGit
   private config: GitConfig
   private trashNamespace: string
+  private trashNamespaceWithoutRefs: string
 
   constructor(config: GitConfig, workingDir?: string) {
     this.git = simpleGit(workingDir || process.cwd())
     this.config = config
     this.trashNamespace = `${config.trashNamespace.replace(/\/$/, '')}/`
+    this.trashNamespaceWithoutRefs = this.trashNamespace.replace('refs/', '')
   }
 
   async isGitRepository(): Promise<boolean> {
@@ -308,13 +310,13 @@ export class GitRepository {
       const refs = await this.git.raw([
         'for-each-ref',
         '--format=%(refname:short)',
-        `${this.trashNamespace}*`,
+        this.trashNamespace,
       ])
       return refs
         .trim()
         .split('\n')
         .filter(Boolean)
-        .map(ref => ref.replace(this.config.trashNamespace, ''))
+        .map(ref => ref.replace(this.trashNamespaceWithoutRefs, ''))
     } catch {
       return []
     }
