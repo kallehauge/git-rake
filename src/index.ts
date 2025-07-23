@@ -2,6 +2,7 @@ import React from 'react'
 import { Command } from 'commander'
 import { withFullScreen } from 'fullscreen-ink'
 import { App } from '@views/app/App.js'
+import { loadConfigAsync } from '@utils/config.js'
 
 const program = new Command()
 
@@ -13,8 +14,9 @@ program
   .version('1.0.0')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async options => {
+    const config = await loadConfigAsync(options.cwd)
     const ink = withFullScreen(
-      React.createElement(App, { workingDir: options.cwd }),
+      React.createElement(App, { workingDir: options.cwd, config }),
       { exitOnCtrlC: false },
     )
     await ink.start()
@@ -38,10 +40,12 @@ program
   .option('-r, --include-remote', 'Include remote tracking branches')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async options => {
+    const config = await loadConfigAsync(options.cwd)
     const ink = withFullScreen(
       React.createElement(App, {
         includeRemote: options.includeRemote,
         workingDir: options.cwd,
+        config,
       }),
       { exitOnCtrlC: true },
     )
@@ -66,10 +70,12 @@ program
   .description('Restore deleted branches from trash')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async options => {
+    const config = await loadConfigAsync(options.cwd)
     const ink = withFullScreen(
       React.createElement(App, {
         restoreMode: true,
         workingDir: options.cwd,
+        config,
       }),
       { exitOnCtrlC: false },
     )
@@ -96,8 +102,7 @@ program
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async (branchName, options) => {
     const { GitRepository } = await import('@services/GitRepository.js')
-    const { loadConfig } = await import('@utils/config.js')
-    const config = loadConfig()
+    const config = await loadConfigAsync(options.cwd)
     const gitRepo = new GitRepository(options.cwd, config)
 
     try {
@@ -118,8 +123,7 @@ program
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async options => {
     const { GitRepository } = await import('@services/GitRepository.js')
-    const { loadConfig } = await import('@utils/config.js')
-    const config = loadConfig()
+    const config = await loadConfigAsync(options.cwd)
     const gitRepo = new GitRepository(options.cwd, config)
 
     try {
@@ -149,8 +153,7 @@ program
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
   .action(async options => {
     const { GitRepository } = await import('@services/GitRepository.js')
-    const { loadConfig } = await import('@utils/config.js')
-    const config = loadConfig()
+    const config = await loadConfigAsync(options.cwd)
     const gitRepo = new GitRepository(options.cwd, config)
 
     try {

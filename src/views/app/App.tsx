@@ -1,34 +1,38 @@
 import { ViewManager } from './ViewManager.js'
 import { GitRepository } from '@services/GitRepository.js'
 import { useRepositoryLoader } from './hooks/useRepositoryLoader.js'
-import { AppUIProvider, useAppUIContext } from '@contexts/AppUIContext.js'
+import { AppUIProvider } from '@contexts/AppUIContext.js'
 import { SearchProvider } from '@contexts/SearchContext.js'
 import { SelectionProvider } from '@contexts/SelectionContext.js'
 import { BranchDataProvider } from '@contexts/BranchDataContext.js'
 import { ErrorView } from '@views/error/ErrorView.js'
 import { StrictMode, useMemo } from 'react'
+import { GitRakeConfig } from '@utils/config.js'
 
 interface AppProps {
+  config: GitRakeConfig
   includeRemote?: boolean
   restoreMode?: boolean
   workingDir?: string
 }
 
-export function App(props: AppProps) {
-  const { config } = useAppUIContext()
-
+export function App({
+  config,
+  restoreMode,
+  workingDir,
+  includeRemote,
+}: AppProps) {
   const gitRepo = useMemo(
-    () => new GitRepository(props.workingDir, config),
-    [props.workingDir, config],
+    () => new GitRepository(workingDir, config),
+    [workingDir, config],
   )
-  const currentPath = props.workingDir || process.cwd()
-  const restoreMode = props.restoreMode || false
+  const currentPath = workingDir || process.cwd()
 
   const { branches, error, loadBranches } = useRepositoryLoader({
     gitRepo,
-    config,
-    includeRemote: props.includeRemote || false,
-    restoreMode,
+    config: config,
+    includeRemote: includeRemote || false,
+    restoreMode: restoreMode || false,
     currentPath,
   })
 
@@ -38,7 +42,7 @@ export function App(props: AppProps) {
 
   return (
     <StrictMode>
-      <AppUIProvider>
+      <AppUIProvider config={config}>
         <SearchProvider>
           <SelectionProvider>
             <BranchDataProvider
@@ -46,7 +50,7 @@ export function App(props: AppProps) {
               onRefreshBranches={loadBranches}
             >
               <ViewManager
-                restoreMode={restoreMode}
+                restoreMode={restoreMode || false}
                 gitRepo={gitRepo}
                 currentPath={currentPath}
               />

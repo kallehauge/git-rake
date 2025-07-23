@@ -1,51 +1,32 @@
 import { createContext, useContext, ReactNode, useState, useMemo } from 'react'
-import { loadConfig, GitRakeConfig } from '@utils/config.js'
+import { GitRakeConfig } from '@utils/config.js'
 import { getTheme, AppTheme } from '@utils/themes/index.js'
 
 export type ViewState = 'branches' | 'branch' | 'confirmation'
 
-export interface AppUIState {
+type AppUIContextType = {
   currentView: ViewState
   inputLocked: boolean
   showExitWarning: boolean
   config: GitRakeConfig
   theme: AppTheme
-}
-
-export interface AppUIActions {
   setCurrentView: (view: ViewState) => void
   setInputLocked: (locked: boolean) => void
   setShowExitWarning: (show: boolean) => void
 }
 
-type AppUIContextType = AppUIState & AppUIActions
-
-const defaultConfig = loadConfig()
-const defaultTheme = getTheme(defaultConfig.theme)
-
-const defaultAppUIState: AppUIContextType = {
-  currentView: 'branches',
-  inputLocked: false,
-  showExitWarning: false,
-  config: defaultConfig,
-  theme: defaultTheme,
-  setCurrentView: () => {},
-  setInputLocked: () => {},
-  setShowExitWarning: () => {},
-}
-
-const AppUIContext = createContext<AppUIContextType>(defaultAppUIState)
+const AppUIContext = createContext<AppUIContextType | undefined>(undefined)
 
 interface AppUIProviderProps {
   children: ReactNode
+  config: GitRakeConfig
 }
 
-export function AppUIProvider({ children }: AppUIProviderProps) {
+export function AppUIProvider({ children, config }: AppUIProviderProps) {
   const [currentView, setCurrentView] = useState<ViewState>('branches')
   const [inputLocked, setInputLocked] = useState<boolean>(false)
   const [showExitWarning, setShowExitWarning] = useState<boolean>(false)
 
-  const config = useMemo(loadConfig, [])
   const theme = useMemo(() => getTheme(config.theme), [config.theme])
 
   const contextValue = useMemo(
@@ -70,5 +51,9 @@ export function AppUIProvider({ children }: AppUIProviderProps) {
 }
 
 export function useAppUIContext() {
-  return useContext(AppUIContext)
+  const context = useContext(AppUIContext)
+  if (context === undefined) {
+    throw new Error('useAppUIContext must be used within an AppUIProvider')
+  }
+  return context
 }
