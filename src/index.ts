@@ -60,7 +60,7 @@ program
     '[branch-name]',
     '(Optional) Name of individual branch to restore from trash.',
   )
-  .description('Restore deleted branches from trash.')
+  .description('Restore branches from trash.')
   .summary(
     'You can either restore a single branch or enter interactive mode to restore multiple branches.',
   )
@@ -80,31 +80,66 @@ program
     },
   )
 
+const trashCommandList = async (command: Command) => {
+  const { gitRepo } = await nonInteractiveAppInit(command)
+  try {
+    const trashBranches = await gitRepo.getTrashBranches()
+
+    if (trashBranches.length === 0) {
+      console.log('No branches in trash')
+      process.exit(0)
+    }
+
+    console.log('Branches in trash:')
+    trashBranches.forEach((branch: string) => {
+      console.log(`  • ${branch}`)
+    })
+    process.exit(0)
+  } catch (error) {
+    console.error(
+      'Failed to list trash:',
+      error instanceof Error ? error.message : error,
+    )
+    process.exit(1)
+  }
+}
+
+const trashCommandMoveToTrash = async (
+  branchName: string,
+  command: Command,
+) => {
+  const { gitRepo } = await nonInteractiveAppInit(command)
+  try {
+    await gitRepo.moveBranchToTrash(branchName)
+    console.log(`✅ Moved branch ${branchName} to trash`)
+    process.exit(0)
+  } catch (error) {
+    console.error(`❌ Failed to move branch ${branchName} to trash:`)
+    console.error(error)
+    process.exit(1)
+  }
+}
+
 program
   .command('trash')
-  .description('List branches in trash')
-  .action(async (_options: CommandOptions, command: Command) => {
-    const { gitRepo } = await nonInteractiveAppInit(command)
-    try {
-      const trashBranches = await gitRepo.getTrashBranches()
-
-      if (trashBranches.length === 0) {
-        console.log('No branches in trash')
-        return
+  .argument('[branch-name]', '(Optional) Name of individual branch to trash.')
+  .description('List trashed branches or move branches to trash')
+  .summary(
+    `If you don't provide a branch name, it will list all trashed branches. If you provide a branch name, it will move that branch to trash.`,
+  )
+  .action(
+    async (
+      branchName: string | undefined,
+      _options: CommandOptions,
+      command: Command,
+    ) => {
+      if (!branchName) {
+        trashCommandList(command)
+      } else {
+        trashCommandMoveToTrash(branchName, command)
       }
-
-      console.log('Branches in trash:')
-      trashBranches.forEach((branch: string) => {
-        console.log(`  • ${branch}`)
-      })
-    } catch (error) {
-      console.error(
-        'Failed to list trash:',
-        error instanceof Error ? error.message : error,
-      )
-      process.exit(1)
-    }
-  })
+    },
+  )
 
 program
   .command('cleanup')
