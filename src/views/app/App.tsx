@@ -23,8 +23,8 @@ export function App({
   includeRemote,
 }: AppProps) {
   const gitRepo = useMemo(
-    () => new GitRepository(workingDir, config),
-    [workingDir, config],
+    () => new GitRepository(config, workingDir),
+    [config, workingDir],
   )
   const currentPath = workingDir || process.cwd()
 

@@ -43,17 +43,12 @@ export interface BranchData {
 export class GitRepository {
   private git: SimpleGit
   private config: GitConfig
+  private trashNamespace: string
 
-  constructor(workingDir?: string, config?: Partial<GitConfig>) {
+  constructor(config: GitConfig, workingDir?: string) {
     this.git = simpleGit(workingDir || process.cwd())
-    this.config = {
-      staleDaysThreshold: 30,
-      trashNamespace: 'refs/rake-trash',
-      trashTtlDays: 90,
-      mainBranch: 'main',
-      excludedBranches: [],
-      ...config,
-    }
+    this.config = config
+    this.trashNamespace = `${config.trashNamespace.replace(/\/$/, '')}/`
   }
 
   async isGitRepository(): Promise<boolean> {
@@ -260,7 +255,7 @@ export class GitRepository {
   }
 
   async moveBranchToTrash(branchName: string): Promise<void> {
-    const trashRef = `${this.config.trashNamespace}/${branchName}`
+    const trashRef = `${this.trashNamespace}${branchName}`
 
     // Create trash ref before deleting branch
     await this.git.raw(['update-ref', trashRef, `refs/heads/${branchName}`])
@@ -269,19 +264,39 @@ export class GitRepository {
     await this.deleteBranch(branchName, true)
   }
 
-  async restoreBranchFromTrash(branchName: string): Promise<void> {
-    const trashRef = `${this.config.trashNamespace}/${branchName}`
+  private getTrashRefFromUserInput(branchName: string): string {
+    let trashNamespaceWithoutRefs = this.trashNamespace.replace('refs/', '')
+    branchName = branchName.replace('refs/', '')
+    branchName = branchName.replace(trashNamespaceWithoutRefs, '')
+    return `${this.trashNamespace}${branchName.trim()}`
+  }
+
+  async restoreBranchFromTrash(
+    branchName: string,
+  ): Promise<{ oldRef: string; newRef: string }> {
+    const trashRef = this.getTrashRefFromUserInput(branchName)
+    const branchNameWithoutTrashNamespace = trashRef.replace(
+      this.trashNamespace,
+      '',
+    )
+    const newRef = `refs/heads/${branchNameWithoutTrashNamespace}`
 
     try {
       // Check if trash ref exists
       await this.git.raw(['show-ref', '--verify', trashRef])
 
       // Restore branch from trash
-      await this.git.raw(['update-ref', `refs/heads/${branchName}`, trashRef])
+      await this.git.raw(['update-ref', newRef, trashRef])
 
       // Remove from trash
       await this.git.raw(['update-ref', '-d', trashRef])
+
+      return {
+        oldRef: trashRef,
+        newRef,
+      }
     } catch (error) {
+      console.error(`Error restoring branch ${branchName} from trash:`, error)
       throw new Error(
         `Branch ${branchName} not found in trash or could not be restored`,
       )
@@ -293,13 +308,13 @@ export class GitRepository {
       const refs = await this.git.raw([
         'for-each-ref',
         '--format=%(refname:short)',
-        `${this.config.trashNamespace}/*`,
+        `${this.trashNamespace}*`,
       ])
       return refs
         .trim()
         .split('\n')
         .filter(Boolean)
-        .map(ref => ref.replace(`${this.config.trashNamespace}/`, ''))
+        .map(ref => ref.replace(this.config.trashNamespace, ''))
     } catch {
       return []
     }

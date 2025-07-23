@@ -57,7 +57,9 @@ export async function loadConfigAsync(
   workingDir?: string,
 ): Promise<GitRakeConfig> {
   const gitRoot = await findGitRootAsync(workingDir).then(
-    root => root || process.cwd(),
+    (root: string | null) => {
+      return root || process.cwd()
+    },
   )
 
   let userConfig: Partial<GitRakeConfig> = {}

@@ -1,131 +1,90 @@
-import React from 'react'
 import { Command } from 'commander'
-import { withFullScreen } from 'fullscreen-ink'
 import { App } from '@views/app/App.js'
-import { loadConfigAsync } from '@utils/config.js'
+import { interactiveAppInit, nonInteractiveAppInit } from '@utils/bootstrap.js'
 
 const program = new Command()
+
+type CommandOptions = {
+  cwd?: string
+  includeRemote?: boolean
+}
 
 program
   .name('git-rake')
   .description(
-    'Interactive CLI tool to safely prune, delete, and restore Git branches',
+    'Interactive CLI tool to safely delete, trash, and restore Git branches',
   )
-  .version('1.0.0')
+  .version('0.1.0')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
-  .action(async options => {
-    const config = await loadConfigAsync(options.cwd)
-    const ink = withFullScreen(
-      React.createElement(App, { workingDir: options.cwd, config }),
-      { exitOnCtrlC: false },
-    )
-    await ink.start()
-    await ink.waitUntilExit()
-
-    // DEVELOPMENT MODE CLEANUP:
-    // When DEV=true, Ink automatically imports react-devtools-core and calls connectToDevTools()
-    // This creates a WebSocket server connection for DevTools communication.
-    // The WebSocket connection has active listeners that keep the Node.js event loop alive when
-    // we unmount the process. There's a realistic chance that our unmount logic has something to
-    // do with this issue, so we should look into it in the future. For now, we exit with
-    // process.exit(0) to terminate the WebSocket and close the process.
-    if (process.env.DEV) {
-      process.exit(0)
-    }
-  })
+  .option('-r, --include-remote', 'Include remote tracking branches')
+  .action(async (_options: CommandOptions, command: Command) =>
+    interactiveAppInit(command),
+  )
 
 program
   .command('clean')
   .description('Clean up local branches interactively')
-  .option('-r, --include-remote', 'Include remote tracking branches')
-  .option('--cwd <path>', 'Working directory (defaults to current directory)')
-  .action(async options => {
-    const config = await loadConfigAsync(options.cwd)
-    const ink = withFullScreen(
-      React.createElement(App, {
-        includeRemote: options.includeRemote,
-        workingDir: options.cwd,
-        config,
-      }),
-      { exitOnCtrlC: true },
-    )
-    await ink.start()
-    await ink.waitUntilExit()
-
-    // DEVELOPMENT MODE CLEANUP:
-    // When DEV=true, Ink automatically imports react-devtools-core and calls connectToDevTools()
-    // This creates a WebSocket server connection for DevTools communication.
-    // The WebSocket connection has active listeners that keep the Node.js event loop alive when
-    // we unmount the process. There's a realistic chance that our unmount logic has something to
-    // do with this issue, so we should look into it in the future. For now, we exit with
-    // process.exit(0) to terminate the WebSocket and close the process.
-    // @todo id:dev-mode-cleanup
-    if (process.env.DEV) {
-      process.exit(0)
-    }
+  .action(async (options: CommandOptions, command: Command) => {
+    interactiveAppInit(command, {
+      includeRemote: options.includeRemote || null,
+    })
   })
+
+const restoreCommandNonInteractive = async (
+  branchName: string,
+  command: Command,
+) => {
+  const { gitRepo } = await nonInteractiveAppInit(command)
+
+  if (!branchName) {
+    console.error('No branch name provided')
+    process.exit(1)
+  }
+
+  try {
+    const { oldRef, newRef } = await gitRepo.restoreBranchFromTrash(branchName)
+    console.log(`✅ Restored branch: ${oldRef} -> ${newRef}`)
+    process.exit(0)
+  } catch (error) {
+    console.error(
+      `❌ Failed to restore branch ${branchName}:`,
+      error instanceof Error ? error.message : error,
+    )
+    process.exit(1)
+  }
+}
 
 program
   .command('restore')
-  .description('Restore deleted branches from trash')
-  .option('--cwd <path>', 'Working directory (defaults to current directory)')
-  .action(async options => {
-    const config = await loadConfigAsync(options.cwd)
-    const ink = withFullScreen(
-      React.createElement(App, {
-        restoreMode: true,
-        workingDir: options.cwd,
-        config,
-      }),
-      { exitOnCtrlC: false },
-    )
-    await ink.start()
-    await ink.waitUntilExit()
-
-    // DEVELOPMENT MODE CLEANUP:
-    // When DEV=true, Ink automatically imports react-devtools-core and calls connectToDevTools()
-    // This creates a WebSocket server connection for DevTools communication.
-    // The WebSocket connection has active listeners that keep the Node.js event loop alive when
-    // we unmount the process. There's a realistic chance that our unmount logic has something to
-    // do with this issue, so we should look into it in the future. For now, we exit with
-    // process.exit(0) to terminate the WebSocket and close the process.
-    // @todo id:dev-mode-cleanup
-    if (process.env.DEV) {
-      process.exit(0)
-    }
-  })
-
-program
-  .command('restore')
-  .argument('<branch-name>', 'Name of the branch to restore')
-  .description('Restore a specific branch from trash')
-  .option('--cwd <path>', 'Working directory (defaults to current directory)')
-  .action(async (branchName, options) => {
-    const { GitRepository } = await import('@services/GitRepository.js')
-    const config = await loadConfigAsync(options.cwd)
-    const gitRepo = new GitRepository(options.cwd, config)
-
-    try {
-      await gitRepo.restoreBranchFromTrash(branchName)
-      console.log(`✅ Restored branch: ${branchName}`)
-    } catch (error) {
-      console.error(
-        `❌ Failed to restore branch ${branchName}:`,
-        error instanceof Error ? error.message : error,
-      )
-      process.exit(1)
-    }
-  })
+  .argument(
+    '[branch-name]',
+    '(Optional) Name of individual branch to restore from trash.',
+  )
+  .description('Restore deleted branches from trash.')
+  .summary(
+    'You can either restore a single branch or enter interactive mode to restore multiple branches.',
+  )
+  .action(
+    async (
+      branchName: string | undefined,
+      _options: CommandOptions,
+      command: Command,
+    ) => {
+      if (!branchName) {
+        interactiveAppInit(command, {
+          restoreMode: true,
+        })
+      } else {
+        restoreCommandNonInteractive(branchName, command)
+      }
+    },
+  )
 
 program
   .command('trash')
   .description('List branches in trash')
-  .option('--cwd <path>', 'Working directory (defaults to current directory)')
-  .action(async options => {
-    const { GitRepository } = await import('@services/GitRepository.js')
-    const config = await loadConfigAsync(options.cwd)
-    const gitRepo = new GitRepository(options.cwd, config)
-
+  .action(async (_options: CommandOptions, command: Command) => {
+    const { gitRepo } = await nonInteractiveAppInit(command)
     try {
       const trashBranches = await gitRepo.getTrashBranches()
 
@@ -150,11 +109,8 @@ program
 program
   .command('cleanup')
   .description('Clean up old entries from trash')
-  .option('--cwd <path>', 'Working directory (defaults to current directory)')
-  .action(async options => {
-    const { GitRepository } = await import('@services/GitRepository.js')
-    const config = await loadConfigAsync(options.cwd)
-    const gitRepo = new GitRepository(options.cwd, config)
+  .action(async (_options: CommandOptions, command: Command) => {
+    const { gitRepo } = await nonInteractiveAppInit(command)
 
     try {
       await gitRepo.cleanupTrash()
@@ -168,6 +124,6 @@ program
     }
   })
 
-program.parse()
+program.parseAsync()
 
 export { App }
