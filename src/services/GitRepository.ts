@@ -262,6 +262,9 @@ export class GitRepository {
     // Create trash ref before deleting branch
     await this.git.raw(['update-ref', trashRef, `refs/heads/${branchName}`])
 
+    // Store deletion date in git notes
+    await this.setTrashDeletionDate(trashRef)
+
     // Delete the original branch
     await this.deleteBranch(branchName, true)
   }
@@ -292,6 +295,9 @@ export class GitRepository {
 
       // Remove from trash
       await this.git.raw(['update-ref', '-d', trashRef])
+
+      // Clean up deletion date note
+      await this.removeTrashDeletionDate(trashRef)
 
       return {
         oldRef: trashRef,
@@ -330,15 +336,71 @@ export class GitRepository {
     for (const branchName of trashBranches) {
       try {
         const trashRef = `${this.config.trashNamespace}/${branchName}`
-        const log = await this.git.raw(['log', '-1', '--format=%ci', trashRef])
-        const commitDate = new Date(log.trim())
 
-        if (commitDate < cutoffDate) {
-          await this.git.raw(['update-ref', '-d', trashRef])
+        // Get deletion date from git notes
+        const deletionDateStr = await this.getTrashDeletionDate(trashRef)
+
+        // Skip branches without deletion date notes
+        if (!deletionDateStr) {
+          continue
         }
-      } catch {
-        // Ignore errors for individual branches
+
+        const deletionDate = new Date(deletionDateStr)
+
+        if (deletionDate < cutoffDate) {
+          await this.git.raw(['update-ref', '-d', trashRef])
+          await this.removeTrashDeletionDate(trashRef)
+        }
+      } catch (error) {
+        console.error(`Could not cleanup trash for ${branchName}:`, error)
       }
+    }
+  }
+
+  private async setTrashDeletionDate(trashRef: string): Promise<void> {
+    const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+    const branchName = trashRef.replace(this.trashNamespace, '')
+    try {
+      await this.git.raw([
+        'notes',
+        `--ref=rake-trash-dates/${branchName}`,
+        'add',
+        '-f', // Force overwrite if note exists
+        '-m',
+        today,
+        trashRef,
+      ])
+    } catch (error) {
+      console.error(`Could not set deletion date for ${trashRef}:`, error)
+    }
+  }
+
+  private async getTrashDeletionDate(trashRef: string): Promise<string | null> {
+    const branchName = trashRef.replace(this.trashNamespace, '')
+    try {
+      const result = await this.git.raw([
+        'notes',
+        `--ref=rake-trash-dates/${branchName}`,
+        'show',
+        trashRef,
+      ])
+      return result.trim()
+    } catch (error) {
+      console.error(`Could not get deletion date for ${trashRef}:`, error)
+      return null
+    }
+  }
+
+  private async removeTrashDeletionDate(trashRef: string): Promise<void> {
+    const branchName = trashRef.replace(this.trashNamespace, '')
+    try {
+      await this.git.raw([
+        'update-ref',
+        '-d',
+        `refs/notes/rake-trash-dates/${branchName}`,
+      ])
+    } catch (error) {
+      console.error(`Could not remove deletion date for ${trashRef}:`, error)
     }
   }
 
