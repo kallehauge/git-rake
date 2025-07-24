@@ -40,6 +40,9 @@ export function useRepositoryLoader({
       }
 
       if (config.autoCleanupTrash) {
+        // @todo: Move this so it's not blocking the UI.
+        // Best case then this will run async after everything else is loaded and
+        // we can show a progress bar to help give an indication of it happening.
         await gitRepo.cleanupTrash()
       }
 
