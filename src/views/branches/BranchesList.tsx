@@ -9,7 +9,7 @@ import { useSearchContext } from '@contexts/SearchContext.js'
 import { useBranchesSelection } from './hooks/useBranchesSelection.js'
 import { GitBranch } from '@services/GitRepository.js'
 
-interface BranchesListProps {
+type BranchesListProps = {
   branches: GitBranch[]
 }
 

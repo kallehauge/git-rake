@@ -2,7 +2,7 @@ import React from 'react'
 import { Text } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 
-interface TrackingStatusProps {
+type TrackingStatusProps = {
   loading: boolean
   data: { aheadBy: number; behindBy: number } | null | 'not-applicable'
 }

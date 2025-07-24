@@ -1,7 +1,7 @@
 import { Text } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 
-interface HelpBarProps {
+type HelpBarProps = {
   helpText: string
   showExitWarning?: boolean
 }

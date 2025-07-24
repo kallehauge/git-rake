@@ -4,7 +4,7 @@ import { getTheme, AppTheme } from '@utils/themes/index.js'
 
 export type ViewState = 'branches' | 'branch' | 'confirmation'
 
-type AppUIContextType = {
+type AppUIContextData = {
   currentView: ViewState
   inputLocked: boolean
   showExitWarning: boolean
@@ -15,9 +15,9 @@ type AppUIContextType = {
   setShowExitWarning: (show: boolean) => void
 }
 
-const AppUIContext = createContext<AppUIContextType | undefined>(undefined)
+const AppUIContext = createContext<AppUIContextData | undefined>(undefined)
 
-interface AppUIProviderProps {
+type AppUIProviderProps = {
   children: ReactNode
   config: GitRakeConfig
 }

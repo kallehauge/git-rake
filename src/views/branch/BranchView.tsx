@@ -7,7 +7,7 @@ import { ViewLayout } from '@views/app/ViewLayout.js'
 import { Spinner } from '@components/Spinner.js'
 import { TrackingStatus } from './TrackingStatus.js'
 
-interface BranchViewProps {
+type BranchViewProps = {
   gitRepo: GitRepository
   currentPath: string
 }

@@ -8,22 +8,22 @@ import {
 } from 'react'
 import { BranchFilter } from '@utils/filters.js'
 
-export interface SearchState {
+export type SearchState = {
   searchMode: boolean
   searchQuery: string
   filterType: BranchFilter
 }
 
-export interface SearchActions {
+export type SearchActions = {
   setSearchMode: (active: boolean) => void
   setSearchQuery: (query: string) => void
   appendSearchQuery: (char: string) => void
   setFilterType: (type: BranchFilter) => void
 }
 
-type SearchContextType = SearchState & SearchActions
+type SearchContextData = SearchState & SearchActions
 
-const defaultSearchState: SearchContextType = {
+const defaultSearchState: SearchContextData = {
   searchMode: false,
   searchQuery: '',
   filterType: 'all',
@@ -34,9 +34,9 @@ const defaultSearchState: SearchContextType = {
 }
 
 export const SearchContext =
-  createContext<SearchContextType>(defaultSearchState)
+  createContext<SearchContextData>(defaultSearchState)
 
-interface SearchProviderProps {
+type SearchProviderProps = {
   children: ReactNode
 }
 

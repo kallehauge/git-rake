@@ -51,7 +51,7 @@ export function truncateAuthorName(
   return `${name.substring(0, maxLength - 1)}…`
 }
 
-export interface BranchStatus {
+export type BranchStatus = {
   text: string
   color: string
 }

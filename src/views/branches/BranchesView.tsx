@@ -19,7 +19,7 @@ import {
   CONFIRMATION_SHORTCUTS,
 } from '@components/ConfirmationBar.js'
 
-interface BranchesViewProps {
+type BranchesViewProps = {
   restoreMode: boolean
   currentPath: string
   gitRepo: GitRepository

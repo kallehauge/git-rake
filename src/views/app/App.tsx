@@ -9,7 +9,7 @@ import { ErrorView } from '@views/error/ErrorView.js'
 import { StrictMode, useMemo } from 'react'
 import { GitRakeConfig } from '@utils/config.js'
 
-interface AppProps {
+type AppProps = {
   config: GitRakeConfig
   includeRemote?: boolean
   restoreMode?: boolean

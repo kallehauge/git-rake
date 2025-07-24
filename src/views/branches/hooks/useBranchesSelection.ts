@@ -4,7 +4,7 @@ import { GitBranch } from '@services/GitRepository.js'
 import { useSelectionContext } from '@contexts/SelectionContext.js'
 import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 
-interface UseBranchesSelectionReturn {
+type UseBranchesSelectionReturn = {
   toggleBranchSelection: (branch: GitBranch) => void
   clearSelection: () => void
   setSelectedBranches: (branches: GitBranch[]) => void

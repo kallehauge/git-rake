@@ -2,7 +2,7 @@ import { simpleGit, SimpleGit } from 'simple-git'
 import { differenceInDays } from 'date-fns'
 import { spawn } from 'child_process'
 
-export interface GitBranch {
+export type GitBranch = {
   name: string
   ref: string
   isCurrent: boolean
@@ -19,7 +19,7 @@ export interface GitBranch {
   behindBy?: number
 }
 
-export interface GitConfig {
+export type GitConfig = {
   staleDaysThreshold: number
   trashNamespace: string
   trashTtlDays: number
@@ -27,12 +27,12 @@ export interface GitConfig {
   excludedBranches: string[]
 }
 
-export interface GitBranchOperation {
+export type GitBranchOperation = {
   type: 'delete' | 'restore' | 'prune' | 'trash'
   branch: GitBranch
 }
 
-export interface BranchData {
+export type RawBranchData = {
   refname: string
   shortname: string
   date: Date
@@ -122,7 +122,9 @@ export class GitRepository {
     return branches
   }
 
-  private async getBatchBranchInfo(refsPattern: string): Promise<BranchData[]> {
+  private async getBatchBranchInfo(
+    refsPattern: string,
+  ): Promise<RawBranchData[]> {
     try {
       const format = [
         '%(refname)',
@@ -219,7 +221,7 @@ export class GitRepository {
   }
 
   private createBranchFromBatchData(
-    branchData: BranchData,
+    branchData: RawBranchData,
     isLocal: boolean,
     currentBranch: string,
     mergedBranches: Set<string>,

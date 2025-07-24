@@ -7,7 +7,7 @@ import {
   sortBranches,
 } from './filters.js'
 
-export interface StatusBarInfo {
+export type StatusBarInfo = {
   filterType: BranchFilter
   totalBranches: number
   filteredBranches: number

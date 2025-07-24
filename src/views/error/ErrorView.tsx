@@ -2,7 +2,7 @@ import { Box, Text } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { ViewLayout } from '@views/app/ViewLayout.js'
 
-interface ErrorViewProps {
+type ErrorViewProps = {
   error: string
   currentPath: string
 }

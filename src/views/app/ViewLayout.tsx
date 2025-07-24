@@ -4,7 +4,7 @@ import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { StatusBar } from '@components/StatusBar.js'
 import { HelpBar } from '@components/HelpBar.js'
 
-interface ViewLayoutProps {
+type ViewLayoutProps = {
   children: ReactNode
   statusBarContent?: ReactNode
   restoreMode?: boolean

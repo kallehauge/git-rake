@@ -3,7 +3,7 @@ import { GitConfig } from '@services/GitRepository.js'
 import { homedir } from 'os'
 import { simpleGit } from 'simple-git'
 
-export interface GitRakeConfig extends GitConfig {
+export type GitRakeConfig = GitConfig & {
   theme: string
   includeRemote: boolean
   autoCleanupTrash: boolean

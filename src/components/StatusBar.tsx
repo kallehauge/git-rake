@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 import { Text } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 
-interface StatusBarProps {
+type StatusBarProps = {
   children?: ReactNode
   restoreMode?: boolean
 }

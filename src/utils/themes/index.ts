@@ -1,5 +1,5 @@
 // AppTheme interface
-export interface AppTheme {
+export type AppTheme = {
   name: string
   colors: {
     primary: string

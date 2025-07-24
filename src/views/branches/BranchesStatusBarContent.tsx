@@ -1,7 +1,7 @@
 import { Text } from 'ink'
 import { AppTheme } from '@utils/themes/index.js'
 
-interface BranchesStatusBarContentProps {
+type BranchesStatusBarContentProps = {
   selectedCount: number
   filteredCount: number
   totalBranches: number

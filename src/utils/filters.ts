@@ -1,7 +1,7 @@
 import Fuse from 'fuse.js'
 import { GitBranch } from '@services/GitRepository.js'
 
-export interface BranchFilterOptions {
+export type BranchFilterOptions = {
   showMerged: boolean
   showUnmerged: boolean
   showStale: boolean

@@ -11,7 +11,7 @@ import {
   getSelectionIndicator,
 } from '@utils/branchUtils.js'
 
-interface BranchItemProps {
+type BranchItemProps = {
   branch: GitBranch
   isSelected: boolean
   isMarked: boolean

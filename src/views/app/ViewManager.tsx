@@ -5,7 +5,7 @@ import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { BranchesView } from '@views/branches/BranchesView.js'
 import { BranchView } from '@views/branch/BranchView.js'
 
-interface ViewManagerProps {
+type ViewManagerProps = {
   restoreMode?: boolean
   gitRepo: GitRepository
   currentPath: string

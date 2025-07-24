@@ -17,7 +17,7 @@ import {
 import { SearchContext } from './SearchContext.js'
 import { SelectionContext } from './SelectionContext.js'
 
-export interface BranchData {
+export type BranchContextData = {
   branches: GitBranch[]
   filteredBranches: GitBranch[]
   selectedBranches: GitBranch[]
@@ -27,7 +27,7 @@ export interface BranchData {
   isRefreshing: boolean
 }
 
-const defaultBranchData: BranchData = {
+const defaultBranchData: BranchContextData = {
   branches: [],
   filteredBranches: [],
   selectedBranches: [],
@@ -44,9 +44,9 @@ const defaultBranchData: BranchData = {
   isRefreshing: false,
 }
 
-const BranchDataContext = createContext<BranchData>(defaultBranchData)
+const BranchDataContext = createContext<BranchContextData>(defaultBranchData)
 
-interface BranchDataProviderProps {
+type BranchDataProviderProps = {
   children: ReactNode
   branches: GitBranch[]
   onRefreshBranches?: () => Promise<void>
@@ -106,7 +106,7 @@ export function BranchDataProvider({
     searchQuery,
   ])
 
-  const branchData: BranchData = useMemo(
+  const branchData: BranchContextData = useMemo(
     () => ({
       branches,
       filteredBranches,

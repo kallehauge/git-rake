@@ -3,7 +3,7 @@ import InkSpinner from 'ink-spinner'
 import type { SpinnerName } from 'cli-spinners'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 
-interface SpinnerProps {
+type SpinnerProps = {
   text?: string
   type?: SpinnerName
 }

@@ -10,7 +10,7 @@ export const CONFIRMATION_SHORTCUTS = {
   cancel: 'ESC/N',
 }
 
-interface ConfirmationBarProps {
+type ConfirmationBarProps = {
   type: ConfirmationType
   children?: React.ReactNode
   confirmText: string

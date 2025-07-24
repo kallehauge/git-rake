@@ -3,7 +3,7 @@ import { GitRepository } from '@services/GitRepository.js'
 import { GitBranch } from '@services/GitRepository.js'
 import { GitRakeConfig } from '@utils/config.js'
 
-interface UseRepositoryLoaderProps {
+type UseRepositoryLoaderProps = {
   gitRepo: GitRepository
   config: GitRakeConfig
   includeRemote?: boolean
@@ -11,7 +11,7 @@ interface UseRepositoryLoaderProps {
   currentPath: string
 }
 
-interface UseRepositoryLoaderReturn {
+type UseRepositoryLoaderReturn = {
   branches: GitBranch[]
   loading: boolean
   error: string

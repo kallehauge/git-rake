@@ -4,7 +4,7 @@ import { useSearchContext } from '@contexts/SearchContext.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { BranchFilter } from '@utils/filters.js'
 
-interface UseBranchesSearchReturn {
+type UseBranchesSearchReturn = {
   handleSearchInput: (input: string, key: Key) => boolean
   activateSearch: () => void
   clearSearch: () => void

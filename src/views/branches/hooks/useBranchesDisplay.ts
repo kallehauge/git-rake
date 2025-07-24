@@ -5,7 +5,7 @@ import { BranchFilter } from '@utils/filters.js'
 import { StatusBarInfo } from '@utils/derivedState.js'
 import { UIOperationType } from './useBranchesOperations.js'
 
-interface UseBranchesDisplayProps {
+type UseBranchesDisplayProps = {
   pendingOperation: UIOperationType | null
   selectedBranches: GitBranch[]
   contextFilteredBranches: GitBranch[]
@@ -14,7 +14,7 @@ interface UseBranchesDisplayProps {
   theme: AppTheme
 }
 
-interface BranchesStatusBarProps {
+type BranchesStatusBarProps = {
   selectedCount: number
   filteredCount: number
   totalBranches: number
@@ -25,7 +25,7 @@ interface BranchesStatusBarProps {
   theme: AppTheme
 }
 
-interface UseBranchesDisplayReturn {
+type UseBranchesDisplayReturn = {
   branchesToDisplay: GitBranch[]
   statusBarProps: BranchesStatusBarProps
 }
