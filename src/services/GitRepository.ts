@@ -449,7 +449,7 @@ export class GitRepository {
     const deletionChecks = await Promise.all(
       trashBranches.map(async branchName => {
         try {
-          const trashRef = `${this.trashNamespace}/${branchName}`
+          const trashRef = `${this.trashNamespace}${branchName}`
           const deletionDateStr = await this.getTrashDeletionDate(trashRef)
 
           if (!deletionDateStr) {
