@@ -1,6 +1,7 @@
 import { simpleGit, SimpleGit } from 'simple-git'
 import { differenceInDays } from 'date-fns'
 import { spawn } from 'child_process'
+import { logger } from '@utils/logger.js'
 import type {
   GitBranch,
   GitConfig,
@@ -125,10 +126,10 @@ export class GitRepository {
           }
         })
     } catch (error) {
-      console.error(
-        `Error getting batch branch info for ${refsPattern}:`,
-        error,
-      )
+      logger.error('Error getting batch branch info', {
+        refsPattern,
+        error: error instanceof Error ? error.message : String(error),
+      })
       return []
     }
   }
@@ -146,7 +147,9 @@ export class GitRepository {
 
       return mergedSet
     } catch (error) {
-      console.error('Error getting merged branches:', error)
+      logger.error('Error getting merged branches', {
+        error: error instanceof Error ? error.message : String(error),
+      })
       return new Set()
     }
   }
@@ -179,10 +182,10 @@ export class GitRepository {
 
       return null
     } catch (error) {
-      console.error(
-        `Error getting ahead/behind data for branch ${branchName}:`,
-        error,
-      )
+      logger.error('Error getting ahead/behind data for branch', {
+        branchName,
+        error: error instanceof Error ? error.message : String(error),
+      })
       return null
     }
   }
@@ -222,10 +225,10 @@ export class GitRepository {
         behindBy: undefined,
       }
     } catch (error) {
-      console.error(
-        `Error creating branch from batch data for ${branchData.shortname}:`,
-        error,
-      )
+      logger.error('Error creating branch from batch data', {
+        shortname: branchData.shortname,
+        error: error instanceof Error ? error.message : String(error),
+      })
       return null
     }
   }
@@ -335,7 +338,10 @@ export class GitRepository {
         newRef,
       }
     } catch (error) {
-      console.error(`Error restoring branch ${branchName} from trash:`, error)
+      logger.error('Error restoring branch from trash', {
+        branchName,
+        error: error instanceof Error ? error.message : String(error),
+      })
       throw new Error(
         `Branch ${branchName} not found in trash or could not be restored`,
       )
@@ -458,10 +464,10 @@ export class GitRepository {
             shouldDelete: deletionDate < cutoffDate,
           }
         } catch (error) {
-          console.error(
-            `Could not check deletion date for ${branchName}:`,
-            error,
-          )
+          logger.error('Could not check deletion date for branch', {
+            branchName,
+            error: error instanceof Error ? error.message : String(error),
+          })
           return null
         }
       }),
@@ -505,7 +511,10 @@ export class GitRepository {
         trashRef,
       ])
     } catch (error) {
-      console.error(`Could not set deletion date for ${trashRef}:`, error)
+      logger.error('Could not set deletion date for trash ref', {
+        trashRef,
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 
@@ -520,7 +529,10 @@ export class GitRepository {
       ])
       return result.trim()
     } catch (error) {
-      console.error(`Could not get deletion date for ${trashRef}:`, error)
+      logger.error('Could not get deletion date for trash ref', {
+        trashRef,
+        error: error instanceof Error ? error.message : String(error),
+      })
       return null
     }
   }
@@ -534,7 +546,10 @@ export class GitRepository {
         `refs/notes/rake-trash-dates/${branchName}`,
       ])
     } catch (error) {
-      console.error(`Could not remove deletion date for ${trashRef}:`, error)
+      logger.error('Could not remove deletion date for trash ref', {
+        trashRef,
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 

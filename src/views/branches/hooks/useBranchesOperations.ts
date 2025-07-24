@@ -1,6 +1,7 @@
 import { useCallback, useState, useMemo } from 'react'
 import { GitRepository } from '@services/GitRepository.js'
 import { useBranchesSelection } from './useBranchesSelection.js'
+import { logger } from '@utils/logger.js'
 import { UI_OPERATIONS } from './branches.types.js'
 import type {
   BranchOperationType,
@@ -45,7 +46,11 @@ export function useBranchesOperations(
         await performOperation(pendingOperation, selectedBranches)
         await onRefresh()
       } catch (error) {
-        console.error('Operation failed:', error)
+        logger.error('Operation failed', {
+          operation: pendingOperation,
+          branchCount: selectedBranches.length,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        })
       } finally {
         setPendingOperation(null)
       }

@@ -4,6 +4,7 @@ import { Command } from 'commander'
 import { GitRepository } from '@services/GitRepository.js'
 import { withFullScreen } from 'fullscreen-ink'
 import { App } from '@views/app/App.js'
+import { initializeLogger } from '@utils/logger.js'
 
 const loadConfig = async (cmd: Command) => {
   const cwd = cmd.optsWithGlobals().cwd
@@ -16,6 +17,9 @@ export const interactiveAppInit = async (
 ) => {
   const allOptions = cmd.optsWithGlobals()
   const config = await loadConfig(cmd)
+
+  initializeLogger(!!allOptions.debug || process.env.DEV === 'true')
+
   const ink = withFullScreen(
     React.createElement(App, {
       ...args,
@@ -42,6 +46,9 @@ export const interactiveAppInit = async (
 export const nonInteractiveAppInit = async (cmd: Command) => {
   const allOptions = cmd.optsWithGlobals()
   const config = await loadConfig(cmd)
+
+  initializeLogger(!!allOptions.debug || process.env.DEV === 'true')
+
   const gitRepo = new GitRepository(config, allOptions.cwd || null)
   return {
     gitRepo,
