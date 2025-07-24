@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Box, Text, useInput } from 'ink'
+import { Spinner } from './Spinner.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
+import { logger } from '@utils/logger.js'
 
 export type ConfirmationType = 'info' | 'warning' | 'alert'
 
@@ -15,7 +17,7 @@ type ConfirmationBarProps = {
   children?: React.ReactNode
   confirmText: string
   cancelText: string
-  onConfirm: () => void
+  onConfirm: () => Promise<void>
   onCancel: () => void
 }
 
@@ -31,6 +33,7 @@ export function ConfirmationBar({
   const [selectedButton, setSelectedButton] = useState<'confirm' | 'cancel'>(
     'cancel',
   )
+  const [isExecuting, setIsExecuting] = useState(false)
 
   useEffect(() => {
     setInputLocked(true)
@@ -45,19 +48,37 @@ export function ConfirmationBar({
 
   const themeColor = colorMap[type]
 
-  useInput((input, key) => {
-    if (key.leftArrow || key.rightArrow) {
-      setSelectedButton(selectedButton === 'confirm' ? 'cancel' : 'confirm')
-    }
+  const handleConfirm = async () => {
+    setIsExecuting(true)
 
-    if (key.return || input === 'y' || input === 'Y') {
-      onConfirm()
+    try {
+      await onConfirm()
+    } catch (error) {
+      logger.error('Confirmation operation failed', {
+        operation: type,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+    } finally {
+      setIsExecuting(false)
     }
+  }
 
-    if (key.escape || input === 'n' || input === 'N') {
-      onCancel()
-    }
-  })
+  useInput(
+    (input, key) => {
+      if (key.leftArrow || key.rightArrow) {
+        setSelectedButton(selectedButton === 'confirm' ? 'cancel' : 'confirm')
+      }
+
+      if (key.return || input === 'y' || input === 'Y') {
+        handleConfirm()
+      }
+
+      if (key.escape || input === 'n' || input === 'N') {
+        onCancel()
+      }
+    },
+    { isActive: !isExecuting },
+  )
 
   return (
     <Box
@@ -71,7 +92,7 @@ export function ConfirmationBar({
         <Box
           borderStyle="single"
           borderColor={
-            selectedButton === 'confirm'
+            !isExecuting && selectedButton === 'confirm'
               ? theme.colors.success
               : theme.colors.border
           }
@@ -80,9 +101,11 @@ export function ConfirmationBar({
         >
           <Text
             color={
-              selectedButton === 'confirm'
-                ? theme.colors.success
-                : theme.colors.text
+              isExecuting
+                ? theme.colors.muted
+                : selectedButton === 'confirm'
+                  ? theme.colors.success
+                  : theme.colors.text
             }
           >
             {confirmText}
@@ -92,7 +115,7 @@ export function ConfirmationBar({
         <Box
           borderStyle="single"
           borderColor={
-            selectedButton === 'cancel'
+            !isExecuting && selectedButton === 'cancel'
               ? colorMap['alert']
               : theme.colors.border
           }
@@ -100,14 +123,23 @@ export function ConfirmationBar({
         >
           <Text
             color={
-              selectedButton === 'cancel'
-                ? colorMap['alert']
-                : theme.colors.text
+              isExecuting
+                ? theme.colors.muted
+                : selectedButton === 'cancel'
+                  ? colorMap['alert']
+                  : theme.colors.text
             }
           >
             {cancelText}
           </Text>
         </Box>
+
+        {isExecuting && (
+          <Box flexDirection="row" alignItems="center" marginLeft={2}>
+            <Spinner type="dots" height={0} />
+            <Text color={themeColor}>Processing...</Text>
+          </Box>
+        )}
       </Box>
 
       {children && <Box>{children}</Box>}

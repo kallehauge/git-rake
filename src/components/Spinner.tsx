@@ -6,13 +6,14 @@ import { useAppUIContext } from '@contexts/AppUIContext.js'
 type SpinnerProps = {
   text?: string
   type?: SpinnerName
+  height?: number
 }
 
-export function Spinner({ text, type = 'dots' }: SpinnerProps) {
+export function Spinner({ text, type = 'dots', height = 6 }: SpinnerProps) {
   const { theme } = useAppUIContext()
 
   return (
-    <Box justifyContent="center" alignItems="center" height={6}>
+    <Box justifyContent="center" alignItems="center" height={height}>
       <Text color={theme.colors.primary}>
         <InkSpinner type={type} /> {text}
       </Text>

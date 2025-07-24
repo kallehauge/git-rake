@@ -32,10 +32,10 @@ export type UseBranchesOperationsReturn = {
   ) => Promise<void>
   pendingOperation: UIOperationType | null
   startConfirmation: (operation: UIOperationType) => void
-  handleConfirm: (
+  createOperationHandler: (
     selectedBranches: GitBranch[],
     onRefresh: () => Promise<void>,
-  ) => Promise<void>
+  ) => () => Promise<void>
   handleCancel: () => void
   confirmationConfig: ConfirmationConfig | null
 }

@@ -44,7 +44,7 @@ export const BranchesView = React.memo(function BranchesView({
   const {
     pendingOperation,
     startConfirmation,
-    handleConfirm,
+    createOperationHandler,
     handleCancel,
     confirmationConfig,
   } = useBranchesOperations(gitRepo)
@@ -101,10 +101,6 @@ export const BranchesView = React.memo(function BranchesView({
     }
   })
 
-  const handleConfirmWrapper = async () => {
-    await handleConfirm(selectedBranches, refreshBranches)
-  }
-
   const branchesHelpText = `↑↓: navigate • space: select • a: select all • /: search • f: filter • enter: details • ${restoreMode ? 'r: restore' : 't: trash • d: delete permanently'}`
   const confirmationHelpText = `${CONFIRMATION_SHORTCUTS.navigate}: navigate • ${CONFIRMATION_SHORTCUTS.confirm}: confirm • ${CONFIRMATION_SHORTCUTS.cancel}: cancel`
   const helpText = pendingOperation ? confirmationHelpText : branchesHelpText
@@ -131,7 +127,10 @@ export const BranchesView = React.memo(function BranchesView({
                 type={confirmationConfig.type}
                 confirmText={confirmationConfig.confirmText}
                 cancelText={confirmationConfig.cancelText}
-                onConfirm={handleConfirmWrapper}
+                onConfirm={createOperationHandler(
+                  selectedBranches,
+                  refreshBranches,
+                )}
                 onCancel={handleCancel}
               >
                 {confirmationConfig.message && (

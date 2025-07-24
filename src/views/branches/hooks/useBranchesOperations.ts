@@ -39,20 +39,23 @@ export function useBranchesOperations(
     setPendingOperation(operation)
   }, [])
 
-  const handleConfirm = useCallback(
-    async (selectedBranches: GitBranch[], onRefresh: () => Promise<void>) => {
-      if (!pendingOperation) return
-      try {
-        await performOperation(pendingOperation, selectedBranches)
-        await onRefresh()
-      } catch (error) {
-        logger.error('Operation failed', {
-          operation: pendingOperation,
-          branchCount: selectedBranches.length,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        })
-      } finally {
-        setPendingOperation(null)
+  const createOperationHandler = useCallback(
+    (selectedBranches: GitBranch[], onRefresh: () => Promise<void>) => {
+      return async () => {
+        if (!pendingOperation) return
+        try {
+          await performOperation(pendingOperation, selectedBranches)
+          await onRefresh()
+        } catch (error) {
+          logger.error('Operation failed', {
+            operation: pendingOperation,
+            branchCount: selectedBranches.length,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          })
+          throw error
+        } finally {
+          setPendingOperation(null)
+        }
       }
     },
     [pendingOperation, performOperation],
@@ -97,7 +100,7 @@ export function useBranchesOperations(
     performOperation,
     pendingOperation,
     startConfirmation,
-    handleConfirm,
+    createOperationHandler,
     handleCancel,
     confirmationConfig,
   }
