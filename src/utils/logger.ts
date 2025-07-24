@@ -10,11 +10,16 @@ export function initializeLogger(debug = false): void {
   debugMode = debug
 
   // Create logs directory if it doesn't exist
-  const logDir = join(homedir(), '.git-rake', 'logs')
+  // Use project directory for development, home directory for production
+  const logDir =
+    process.env.DEV === 'true'
+      ? join(process.cwd(), 'logs')
+      : join(homedir(), '.git-rake', 'logs')
+
   try {
     mkdirSync(logDir, { recursive: true })
   } catch (error) {
-    // Fallback to current directory if home directory is not writable
+    // Fallback to current directory if chosen directory is not writable
   }
 
   const logFile = join(logDir, 'git-rake.log')
