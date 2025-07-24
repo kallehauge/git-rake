@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  ReactNode,
-  useMemo,
-  useState,
-  useCallback,
-} from 'react'
+import { createContext, useContext, ReactNode, useMemo } from 'react'
 import type { BranchContextData } from './BranchDataContext.types.js'
 import type { GitBranch } from '@services/GitRepository.types.js'
 import {
@@ -30,8 +23,6 @@ const defaultBranchData: BranchContextData = {
     searchMode: false,
     searchQuery: '',
   },
-  refreshBranches: async () => {},
-  isRefreshing: false,
 }
 
 const BranchDataContext = createContext<BranchContextData>(defaultBranchData)
@@ -39,28 +30,14 @@ const BranchDataContext = createContext<BranchContextData>(defaultBranchData)
 type BranchDataProviderProps = {
   children: ReactNode
   branches: GitBranch[]
-  onRefreshBranches?: () => Promise<void>
 }
 
 export function BranchDataProvider({
   children,
   branches,
-  onRefreshBranches,
 }: BranchDataProviderProps) {
   const { searchQuery, filterType, searchMode } = useContext(SearchContext)
   const { selectedBranchNames, selectedIndex } = useContext(SelectionContext)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-
-  const refreshBranches = useCallback(async () => {
-    if (!onRefreshBranches) return
-
-    try {
-      setIsRefreshing(true)
-      await onRefreshBranches()
-    } finally {
-      setIsRefreshing(false)
-    }
-  }, [onRefreshBranches])
 
   const filteredBranches = useMemo(() => {
     return computeFilteredBranches(branches, searchQuery, filterType)
@@ -103,8 +80,6 @@ export function BranchDataProvider({
       selectedBranches,
       currentBranch,
       statusBarInfo,
-      refreshBranches,
-      isRefreshing,
     }),
     [
       branches,
@@ -112,8 +87,6 @@ export function BranchDataProvider({
       selectedBranches,
       currentBranch,
       statusBarInfo,
-      refreshBranches,
-      isRefreshing,
     ],
   )
 

@@ -17,15 +17,13 @@ export const BranchesList = React.memo(function BranchesList({
   branches,
 }: BranchesListProps) {
   const { theme, inputLocked } = useAppUIContext()
-  const { currentBranch, isRefreshing } = useBranchDataContext()
+  const { currentBranch } = useBranchDataContext()
   const { selectedIndex, selectedBranchNames } = useSelectionContext()
   const { searchQuery } = useSearchContext()
   const { toggleBranchSelection, handleListNavigation } = useBranchesSelection()
 
   useInput(
     (input, key) => {
-      if (isRefreshing) return
-
       if (handleListNavigation(key)) return
 
       if (input === ' ' && currentBranch) {

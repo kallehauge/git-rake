@@ -7,6 +7,4 @@ export type BranchContextData = {
   selectedBranches: GitBranch[]
   currentBranch: GitBranch | null
   statusBarInfo: StatusBarInfo
-  refreshBranches: () => Promise<void>
-  isRefreshing: boolean
 }

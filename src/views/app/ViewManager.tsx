@@ -9,12 +9,16 @@ type ViewManagerProps = {
   restoreMode?: boolean
   gitRepo: GitRepository
   currentPath: string
+  loading: boolean
+  refreshBranches: () => Promise<void>
 }
 
 export function ViewManager({
   restoreMode = false,
   gitRepo,
   currentPath,
+  loading,
+  refreshBranches,
 }: ViewManagerProps) {
   const { currentView, showExitWarning, setShowExitWarning } = useAppUIContext()
   const exitTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -63,6 +67,8 @@ export function ViewManager({
             restoreMode={restoreMode}
             currentPath={currentPath}
             gitRepo={gitRepo}
+            loading={loading}
+            refreshBranches={refreshBranches}
           />
         )
     }

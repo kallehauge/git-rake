@@ -21,21 +21,23 @@ type BranchesViewProps = {
   restoreMode: boolean
   currentPath: string
   gitRepo: GitRepository
+  loading: boolean
+  refreshBranches: () => Promise<void>
 }
 
 export const BranchesView = React.memo(function BranchesView({
   restoreMode,
   currentPath,
   gitRepo,
+  loading,
+  refreshBranches,
 }: BranchesViewProps) {
   const { inputLocked, setCurrentView, theme } = useAppUIContext()
   const {
     selectedBranches,
     branches,
-    refreshBranches,
     filteredBranches: contextFilteredBranches,
     statusBarInfo,
-    isRefreshing,
   } = useBranchDataContext()
   const { handleSearchInput, activateSearch, cycleFilter } = useBranchesSearch()
   const { selectAllVisibleBranches } = useBranchesSelection()
@@ -56,7 +58,7 @@ export const BranchesView = React.memo(function BranchesView({
   })
 
   useInput((input, key) => {
-    if (isRefreshing || pendingOperation) return
+    if (loading || pendingOperation) return
 
     if (handleSearchInput(input, key)) return
 
@@ -115,8 +117,12 @@ export const BranchesView = React.memo(function BranchesView({
       currentPath={currentPath}
     >
       <Box flexGrow={1} flexDirection="column">
-        {branches.length === 0 || isRefreshing ? (
+        {loading ? (
           <Spinner text="Loading branches..." />
+        ) : branchesToDisplay.length === 0 ? (
+          <Box justifyContent="center" alignItems="center" flexGrow={1}>
+            <Text color="gray">No branches found</Text>
+          </Box>
         ) : (
           <>
             <BranchesList branches={branchesToDisplay} />

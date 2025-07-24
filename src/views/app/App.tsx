@@ -29,7 +29,7 @@ export function App({
   )
   const currentPath = workingDir || process.cwd()
 
-  const { branches, error, loadBranches } = useRepositoryLoader({
+  const { branches, error, loadBranches, loading } = useRepositoryLoader({
     gitRepo,
     config: config,
     includeRemote: includeRemote || false,
@@ -56,14 +56,13 @@ export function App({
       <AppUIProvider config={config}>
         <SearchProvider>
           <SelectionProvider>
-            <BranchDataProvider
-              branches={branches}
-              onRefreshBranches={loadBranches}
-            >
+            <BranchDataProvider branches={branches}>
               <ViewManager
                 restoreMode={restoreMode || false}
                 gitRepo={gitRepo}
                 currentPath={currentPath}
+                loading={loading}
+                refreshBranches={loadBranches}
               />
             </BranchDataProvider>
           </SelectionProvider>
