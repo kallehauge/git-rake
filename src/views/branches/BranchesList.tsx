@@ -7,7 +7,7 @@ import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 import { useSelectionContext } from '@contexts/SelectionContext.js'
 import { useSearchContext } from '@contexts/SearchContext.js'
 import { useBranchesSelection } from './hooks/useBranchesSelection.js'
-import { GitBranch } from '@services/GitRepository.js'
+import type { GitBranch } from '@services/GitRepository.types.js'
 
 type BranchesListProps = {
   branches: GitBranch[]

@@ -1,45 +1,12 @@
 import { simpleGit, SimpleGit } from 'simple-git'
 import { differenceInDays } from 'date-fns'
 import { spawn } from 'child_process'
-
-export type GitBranch = {
-  name: string
-  ref: string
-  isCurrent: boolean
-  isLocal: boolean
-  isRemote: boolean
-  lastCommitDate: Date
-  lastCommitMessage: string
-  lastCommitHash: string
-  lastCommitAuthor?: string
-  isMerged: boolean
-  isStale: boolean
-  staleDays?: number
-  aheadBy?: number
-  behindBy?: number
-}
-
-export type GitConfig = {
-  staleDaysThreshold: number
-  trashNamespace: string
-  trashTtlDays: number
-  mainBranch: string
-  excludedBranches: string[]
-}
-
-export type GitBranchOperation = {
-  type: 'delete' | 'restore' | 'prune' | 'trash'
-  branch: GitBranch
-}
-
-export type RawBranchData = {
-  refname: string
-  shortname: string
-  date: Date
-  subject: string
-  hash: string
-  author: string
-}
+import type {
+  GitBranch,
+  GitConfig,
+  GitBranchOperation,
+  RawBranchData,
+} from './GitRepository.types.js'
 
 export class GitRepository {
   private git: SimpleGit

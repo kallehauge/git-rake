@@ -6,22 +6,8 @@ import {
   useCallback,
   useMemo,
 } from 'react'
-import { BranchFilter } from '@utils/filters.js'
-
-export type SearchState = {
-  searchMode: boolean
-  searchQuery: string
-  filterType: BranchFilter
-}
-
-export type SearchActions = {
-  setSearchMode: (active: boolean) => void
-  setSearchQuery: (query: string) => void
-  appendSearchQuery: (char: string) => void
-  setFilterType: (type: BranchFilter) => void
-}
-
-type SearchContextData = SearchState & SearchActions
+import type { SearchContextData } from './SearchContext.types.js'
+import type { BranchFilter } from '@utils/filters.js'
 
 const defaultSearchState: SearchContextData = {
   searchMode: false,

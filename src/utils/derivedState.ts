@@ -1,4 +1,4 @@
-import { GitBranch } from '@services/GitRepository.js'
+import type { GitBranch } from '@services/GitRepository.types.js'
 import { BranchFilter } from '@utils/filters.js'
 import {
   BranchSearcher,

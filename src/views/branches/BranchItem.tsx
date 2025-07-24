@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { Box, Text } from 'ink'
-import { GitBranch } from '@services/GitRepository.js'
+import type { GitBranch } from '@services/GitRepository.types.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import {
   getCompactTimeAgo,

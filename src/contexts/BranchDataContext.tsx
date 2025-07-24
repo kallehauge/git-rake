@@ -6,26 +6,16 @@ import {
   useState,
   useCallback,
 } from 'react'
-import { GitBranch } from '@services/GitRepository.js'
+import type { BranchContextData } from './BranchDataContext.types.js'
+import type { GitBranch } from '@services/GitRepository.types.js'
 import {
   computeFilteredBranches,
   computeSelectedBranches,
   computeStatusBarInfo,
   computeCurrentBranch,
-  StatusBarInfo,
 } from '@utils/derivedState.js'
 import { SearchContext } from './SearchContext.js'
 import { SelectionContext } from './SelectionContext.js'
-
-export type BranchContextData = {
-  branches: GitBranch[]
-  filteredBranches: GitBranch[]
-  selectedBranches: GitBranch[]
-  currentBranch: GitBranch | null
-  statusBarInfo: StatusBarInfo
-  refreshBranches: () => Promise<void>
-  isRefreshing: boolean
-}
 
 const defaultBranchData: BranchContextData = {
   branches: [],

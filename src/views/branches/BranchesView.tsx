@@ -4,10 +4,8 @@ import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 import { useBranchesSearch } from './hooks/useBranchesSearch.js'
 import { useBranchesSelection } from './hooks/useBranchesSelection.js'
-import {
-  useBranchesOperations,
-  UI_OPERATIONS,
-} from './hooks/useBranchesOperations.js'
+import { useBranchesOperations } from './hooks/useBranchesOperations.js'
+import { UI_OPERATIONS } from './hooks/branches.types.js'
 import { useBranchesDisplay } from './hooks/useBranchesDisplay.js'
 import { GitRepository } from '@services/GitRepository.js'
 import { BranchesList } from './BranchesList.js'

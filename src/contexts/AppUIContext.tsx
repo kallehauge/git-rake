@@ -1,19 +1,7 @@
 import { createContext, useContext, ReactNode, useState, useMemo } from 'react'
-import { GitRakeConfig } from '@utils/config.js'
-import { getTheme, AppTheme } from '@utils/themes/index.js'
-
-export type ViewState = 'branches' | 'branch' | 'confirmation'
-
-type AppUIContextData = {
-  currentView: ViewState
-  inputLocked: boolean
-  showExitWarning: boolean
-  config: GitRakeConfig
-  theme: AppTheme
-  setCurrentView: (view: ViewState) => void
-  setInputLocked: (locked: boolean) => void
-  setShowExitWarning: (show: boolean) => void
-}
+import { getTheme } from '@utils/themes/index.js'
+import type { ViewState, AppUIContextData } from './AppUIContext.types.js'
+import type { GitRakeConfig } from '@utils/config.js'
 
 const AppUIContext = createContext<AppUIContextData | undefined>(undefined)
 

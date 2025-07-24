@@ -1,5 +1,5 @@
 import Fuse from 'fuse.js'
-import { GitBranch } from '@services/GitRepository.js'
+import type { GitBranch } from '@services/GitRepository.types.js'
 
 export type BranchFilterOptions = {
   showMerged: boolean

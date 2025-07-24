@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { Key } from 'ink'
-import { GitBranch } from '@services/GitRepository.js'
+import type { GitBranch } from '@services/GitRepository.types.js'
 import { useSelectionContext } from '@contexts/SelectionContext.js'
 import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 

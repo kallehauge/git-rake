@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
-import { GitBranch } from '@services/GitRepository.js'
+import type { GitBranch } from '@services/GitRepository.types.js'
 import { AppTheme } from '@utils/themes/index.js'
 import { BranchFilter } from '@utils/filters.js'
 import { StatusBarInfo } from '@utils/derivedState.js'
-import { UIOperationType } from './useBranchesOperations.js'
+import type { UIOperationType } from './branches.types.js'
 
 type UseBranchesDisplayProps = {
   pendingOperation: UIOperationType | null

@@ -1,5 +1,5 @@
 import { cosmiconfigSync } from 'cosmiconfig'
-import { GitConfig } from '@services/GitRepository.js'
+import type { GitConfig } from '@services/GitRepository.types.js'
 import { homedir } from 'os'
 import { simpleGit } from 'simple-git'
 
