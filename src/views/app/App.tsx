@@ -6,8 +6,9 @@ import { SearchProvider } from '@contexts/SearchContext.js'
 import { SelectionProvider } from '@contexts/SelectionContext.js'
 import { BranchDataProvider } from '@contexts/BranchDataContext.js'
 import { ErrorView } from '@views/error/ErrorView.js'
-import { StrictMode, useMemo } from 'react'
+import { StrictMode, useMemo, useEffect, useRef } from 'react'
 import { GitRakeConfig } from '@utils/config.js'
+import { useTrashCleanup } from './hooks/useTrashCleanup.js'
 
 type AppProps = {
   config: GitRakeConfig
@@ -35,6 +36,16 @@ export function App({
     restoreMode: restoreMode || false,
     currentPath,
   })
+
+  const performTrashCleanup = useTrashCleanup({ gitRepo, config })
+  const hasCleanedRef = useRef(false)
+
+  useEffect(() => {
+    if (branches.length > 0 && !hasCleanedRef.current) {
+      hasCleanedRef.current = true
+      performTrashCleanup()
+    }
+  }, [branches.length, performTrashCleanup])
 
   if (error) {
     return <ErrorView error={error} currentPath={currentPath} />
