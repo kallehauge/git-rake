@@ -88,14 +88,3 @@ export class BranchSearcher {
     this.fuse.setCollection(branches)
   }
 }
-
-export function sortBranches(branches: GitBranch[]): GitBranch[] {
-  return [...branches].sort((a, b) => {
-    // Current branch first
-    if (a.isCurrent) return -1
-    if (b.isCurrent) return 1
-
-    // Then by last commit date (newest first)
-    return b.lastCommitDate.getTime() - a.lastCommitDate.getTime()
-  })
-}

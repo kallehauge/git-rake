@@ -6,7 +6,6 @@ import type {
   GitBranch,
   GitConfig,
   GitBranchOperation,
-  RawBranchData,
 } from './GitRepository.types.js'
 
 export class GitRepository {
@@ -44,113 +43,21 @@ export class GitRepository {
     return status.current || 'HEAD'
   }
 
-  async getAllBranches(includeRemote = false): Promise<GitBranch[]> {
-    const currentBranch = await this.getCurrentBranch()
-
-    // Get all branch information in batch operations
-    const [localBranchData, remoteBranchData, mergedBranches] =
-      await Promise.all([
-        this.getBatchBranchInfo('refs/heads'),
-        includeRemote
-          ? this.getBatchBranchInfo('refs/remotes')
-          : Promise.resolve([]),
-        this.getMergedBranches(),
-      ])
-
-    const branches: GitBranch[] = []
-
-    // Process local branches
-    for (const branchData of localBranchData) {
-      const branch = this.createBranchFromBatchData(
-        branchData,
-        true,
-        currentBranch,
-        mergedBranches,
-      )
-      if (branch) {
-        branches.push(branch)
-      }
-    }
-
-    // Process remote branches
-    for (const branchData of remoteBranchData) {
-      if (!branchData.refname.includes('HEAD')) {
-        const branch = this.createBranchFromBatchData(
-          branchData,
-          false,
-          currentBranch,
-          mergedBranches,
-        )
-        if (branch) {
-          branches.push(branch)
-        }
-      }
-    }
-
-    return branches
-  }
-
-  private async getBatchBranchInfo(
-    refsPattern: string,
-  ): Promise<RawBranchData[]> {
+  private async getMergedHashes(refsNamespace: string): Promise<string[]> {
     try {
-      const format = [
-        '%(refname)',
-        '%(refname:short)',
-        '%(committerdate:iso)',
-        '%(subject)',
-        '%(objectname:short)',
-        '%(authorname)',
-      ].join('%09') // Tab separator
-
       const result = await this.git.raw([
         'for-each-ref',
-        `--format=${format}`,
-        refsPattern,
+        '--merged=' + this.mainBranch,
+        '--format=%(objectname)',
+        refsNamespace,
       ])
-
-      return result
-        .trim()
-        .split('\n')
-        .filter(Boolean)
-        .map(line => {
-          const [refname, shortname, date, subject, hash, author] =
-            line.split('\t')
-          return {
-            refname,
-            shortname,
-            date: new Date(date),
-            subject: subject || '',
-            hash: hash || '',
-            author: author || '',
-          }
-        })
+      return result.trim().split('\n').filter(Boolean)
     } catch (error) {
-      logger.error('Error getting batch branch info', {
-        refsPattern,
+      logger.error('Error getting merged hashes', {
+        refsNamespace,
         error: error instanceof Error ? error.message : String(error),
       })
       return []
-    }
-  }
-
-  private async getMergedBranches(): Promise<Set<string>> {
-    try {
-      const result = await this.git.raw(['branch', '--merged'])
-      const mergedSet = new Set<string>()
-
-      result
-        .split('\n')
-        .map(line => line.trim().replace(/^\*?\s*/, ''))
-        .filter(Boolean)
-        .forEach(branch => mergedSet.add(branch))
-
-      return mergedSet
-    } catch (error) {
-      logger.error('Error getting merged branches', {
-        error: error instanceof Error ? error.message : String(error),
-      })
-      return new Set()
     }
   }
 
@@ -184,49 +91,6 @@ export class GitRepository {
     } catch (error) {
       logger.error('Error getting ahead/behind data for branch', {
         branchName,
-        error: error instanceof Error ? error.message : String(error),
-      })
-      return null
-    }
-  }
-
-  private createBranchFromBatchData(
-    branchData: RawBranchData,
-    isLocal: boolean,
-    currentBranch: string,
-    mergedBranches: Set<string>,
-  ): GitBranch | null {
-    try {
-      const cleanBranchName = branchData.shortname.replace('origin/', '')
-
-      // Filter out excluded branches
-      if (this.excludedBranches.includes(cleanBranchName)) {
-        return null
-      }
-
-      const staleDays = differenceInDays(new Date(), branchData.date)
-      const isStale = staleDays > this.staleDaysThreshold
-      const isMerged = mergedBranches.has(branchData.shortname)
-
-      return {
-        name: cleanBranchName,
-        ref: branchData.refname,
-        isCurrent: branchData.shortname === currentBranch,
-        isLocal,
-        isRemote: !isLocal,
-        lastCommitDate: branchData.date,
-        lastCommitMessage: branchData.subject,
-        lastCommitHash: branchData.hash,
-        lastCommitAuthor: branchData.author,
-        isMerged,
-        isStale,
-        staleDays,
-        aheadBy: undefined,
-        behindBy: undefined,
-      }
-    } catch (error) {
-      logger.error('Error creating branch from batch data', {
-        shortname: branchData.shortname,
         error: error instanceof Error ? error.message : String(error),
       })
       return null
@@ -427,6 +291,100 @@ export class GitRepository {
         .filter(Boolean)
         .map(ref => ref.replace(this.trashNamespaceWithoutRefs, ''))
     } catch {
+      return []
+    }
+  }
+
+  /**
+   * Get branches, with optional streaming callback
+   */
+  async getBranches(
+    namespace: 'heads' | 'rake-trash' | 'remotes',
+    onUpdate?: (branch: GitBranch, index: number) => void,
+  ): Promise<GitBranch[]> {
+    try {
+      const refsNamespace =
+        namespace === 'rake-trash' ? this.trashNamespace : `refs/${namespace}`
+      const currentBranch =
+        namespace === 'heads' ? await this.getCurrentBranch() : ''
+
+      const excludePatterns = this.excludedBranches.map(
+        branch => `--exclude=${refsNamespace}/${branch}`,
+      )
+
+      const format = [
+        '%(refname)',
+        '%(refname:short)',
+        '%(committerdate:iso)',
+        '%(subject)',
+        '%(objectname)', // Full hash for merge checking
+        '%(authorname)',
+      ].join('%09')
+
+      const rawResult = await this.git.raw([
+        'for-each-ref',
+        `--format=${format}`,
+        '--omit-empty',
+        '--sort=-committerdate',
+        ...excludePatterns,
+        refsNamespace,
+      ])
+
+      if (!rawResult.trim()) return []
+
+      const lines = rawResult.trim().split('\n')
+      const mergedHashes = new Set(await this.getMergedHashes(refsNamespace))
+
+      const branches: GitBranch[] = []
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        // Skip empty lines that can occur from trailing newlines in git output
+        // (--omit-empty handles format field expansions, but not trailing newlines from split)
+        if (!line) continue
+        const [refname, shortname, dateStr, subject, hash, author] =
+          line.split('\t')
+
+        // Strip away the namespace prefix for all "non-heads" namespaces to get a clean
+        // branch name to present to the user
+        let cleanName = shortname
+        if (namespace === 'remotes') {
+          cleanName = shortname.replace('origin/', '')
+        } else if (namespace === 'rake-trash') {
+          cleanName = shortname.replace(this.trashNamespaceWithoutRefs, '')
+        }
+
+        const date = new Date(dateStr)
+        const staleDays = differenceInDays(new Date(), date)
+
+        const branch: GitBranch = {
+          name: cleanName,
+          ref: refname,
+          isCurrent: shortname === currentBranch,
+          isLocal: namespace === 'heads' || namespace === 'rake-trash',
+          isRemote: namespace === 'remotes',
+          lastCommitDate: date,
+          lastCommitMessage: subject || '',
+          lastCommitHash: hash || '',
+          lastCommitAuthor: author || '',
+          isMerged: mergedHashes.has(hash),
+          isStale: staleDays > this.staleDaysThreshold,
+          staleDays,
+          aheadBy: undefined,
+          behindBy: undefined,
+        }
+
+        branches.push(branch)
+
+        // Optional callback to e.g. stream UI for immediate UI feedback
+        onUpdate?.(branch, branches.length - 1)
+      }
+
+      return branches
+    } catch (error) {
+      logger.error('Error getting branches', {
+        namespace,
+        error: error instanceof Error ? error.message : String(error),
+      })
       return []
     }
   }

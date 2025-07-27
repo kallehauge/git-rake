@@ -39,31 +39,50 @@ export function useRepositoryLoader({
         return
       }
 
-      let branchList: GitBranch[]
+      let branches: GitBranch[] = []
+
       if (restoreMode) {
-        const trashBranches = await gitRepo.getTrashBranches()
-        branchList = trashBranches.map((name: string) => ({
-          name,
-          ref: `refs/rake-trash/${name}`,
-          isCurrent: false,
-          isLocal: true,
-          isRemote: false,
-          lastCommitDate: new Date(),
-          lastCommitMessage: 'Deleted branch',
-          lastCommitHash: '',
-          isMerged: false,
-          isStale: true,
-        }))
+        branches = await gitRepo.getBranches('rake-trash', (branch, index) => {
+          setBranches(prev => [
+            ...prev.slice(0, index),
+            branch,
+            ...prev.slice(index + 1),
+          ])
+        })
       } else {
-        branchList = await gitRepo.getAllBranches(
-          includeRemote || config.includeRemote,
+        const localBranches = await gitRepo.getBranches(
+          'heads',
+          (branch, index) => {
+            setBranches(prev => [
+              ...prev.slice(0, index),
+              branch,
+              ...prev.slice(index + 1),
+            ])
+          },
         )
+
+        branches = [...localBranches]
+
+        if (includeRemote || config.includeRemote) {
+          const remoteBranches = await gitRepo.getBranches(
+            'remotes',
+            (branch, index) => {
+              const newIndex = localBranches.length + index
+              setBranches(prev => [
+                ...prev.slice(0, newIndex),
+                branch,
+                ...prev.slice(newIndex + 1),
+              ])
+            },
+          )
+          branches = [...localBranches, ...remoteBranches]
+        }
       }
 
-      setBranches(branchList)
+      setBranches(branches)
+      setLoading(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
-    } finally {
       setLoading(false)
     }
   }, [gitRepo, config, includeRemote, restoreMode, currentPath])

@@ -7,10 +7,10 @@ export type GitBranch = {
   lastCommitDate: Date
   lastCommitMessage: string
   lastCommitHash: string
-  lastCommitAuthor?: string
+  lastCommitAuthor: string
   isMerged: boolean
   isStale: boolean
-  staleDays?: number
+  staleDays: number
   aheadBy?: number
   behindBy?: number
 }
@@ -26,13 +26,4 @@ export type GitConfig = {
 export type GitBranchOperation = {
   type: 'delete' | 'restore' | 'prune' | 'trash'
   branch: GitBranch
-}
-
-export type RawBranchData = {
-  refname: string
-  shortname: string
-  date: Date
-  subject: string
-  hash: string
-  author: string
 }

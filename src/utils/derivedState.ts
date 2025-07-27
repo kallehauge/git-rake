@@ -4,7 +4,6 @@ import {
   BranchSearcher,
   getFilterOptionsForType,
   filterBranches,
-  sortBranches,
 } from './filters.js'
 
 export type StatusBarInfo = {
@@ -29,7 +28,7 @@ export function computeFilteredBranches(
     filteredBranches = searcher.search(searchQuery)
   }
 
-  return sortBranches(filteredBranches)
+  return filteredBranches
 }
 
 export function computeSelectedBranches(

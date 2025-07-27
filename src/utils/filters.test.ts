@@ -1,8 +1,4 @@
-import {
-  filterBranches,
-  getFilterOptionsForType,
-  sortBranches,
-} from './filters'
+import { filterBranches, getFilterOptionsForType } from './filters'
 import { GitBranch } from '@types'
 
 const mockBranch = (overrides: Partial<GitBranch> = {}): GitBranch => ({
@@ -81,40 +77,6 @@ describe('filters', () => {
 
       expect(result).toHaveLength(1)
       expect(result[0].name).toBe('local')
-    })
-  })
-
-  describe('sortBranches', () => {
-    it('should sort current branch first', () => {
-      const branches = [
-        mockBranch({
-          name: 'feature',
-          isCurrent: false,
-          lastCommitDate: new Date('2023-01-02'),
-        }),
-        mockBranch({
-          name: 'main',
-          isCurrent: true,
-          lastCommitDate: new Date('2023-01-01'),
-        }),
-      ]
-
-      const result = sortBranches(branches)
-
-      expect(result[0].name).toBe('main')
-      expect(result[1].name).toBe('feature')
-    })
-
-    it('should sort by last commit date after current branch', () => {
-      const branches = [
-        mockBranch({ name: 'old', lastCommitDate: new Date('2023-01-01') }),
-        mockBranch({ name: 'new', lastCommitDate: new Date('2023-01-02') }),
-      ]
-
-      const result = sortBranches(branches)
-
-      expect(result[0].name).toBe('new')
-      expect(result[1].name).toBe('old')
     })
   })
 })

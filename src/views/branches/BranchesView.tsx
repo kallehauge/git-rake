@@ -113,12 +113,16 @@ export const BranchesView = React.memo(function BranchesView({
       currentPath={currentPath}
     >
       <Box flexGrow={1} flexDirection="column">
-        {loading ? (
-          <Spinner text="Loading branches..." />
-        ) : branchesToDisplay.length === 0 ? (
-          <Box justifyContent="center" alignItems="center" flexGrow={1}>
-            <Text color="gray">No branches found</Text>
-          </Box>
+        {branchesToDisplay.length === 0 ? (
+          loading ? (
+            <Box justifyContent="center" alignItems="center" flexGrow={1}>
+              <Spinner text="Loading branches..." />
+            </Box>
+          ) : (
+            <Box justifyContent="center" alignItems="center" flexGrow={1}>
+              <Text>No branches found</Text>
+            </Box>
+          )
         ) : (
           <>
             <BranchesList branches={branchesToDisplay} />
