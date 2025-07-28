@@ -17,7 +17,6 @@ export type GitBranch = {
 
 export type GitConfig = {
   staleDaysThreshold: number
-  trashNamespace: string
   trashTtlDays: number
   mainBranch: string
   excludedBranches: string[]
@@ -26,4 +25,9 @@ export type GitConfig = {
 export type GitBranchOperation = {
   type: 'delete' | 'restore' | 'prune' | 'trash'
   branch: GitBranch
+}
+
+export type RefOperation = {
+  name: string
+  sha: string
 }

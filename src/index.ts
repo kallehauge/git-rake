@@ -44,8 +44,9 @@ const restoreCommandNonInteractive = async (
   }
 
   try {
-    const { oldRef, newRef } = await gitRepo.restoreBranchFromTrash(branchName)
-    console.log(`✅ Restored branch: ${oldRef} -> ${newRef}`)
+    const cleanBranchName = gitRepo.parseUserInput(branchName, 'trash')
+    await gitRepo.restoreBranchFromTrash(cleanBranchName)
+    console.log(`✅ Restored branch: ${cleanBranchName}`)
     process.exit(0)
   } catch (error) {
     console.error(
@@ -112,8 +113,9 @@ const trashCommandMoveToTrash = async (
 ) => {
   const { gitRepo } = await nonInteractiveAppInit(command)
   try {
-    await gitRepo.moveBranchToTrash(branchName)
-    console.log(`✅ Moved branch ${branchName} to trash`)
+    const cleanBranchName = gitRepo.parseUserInput(branchName, 'heads')
+    await gitRepo.moveBranchToTrash(cleanBranchName)
+    console.log(`✅ Moved branch ${cleanBranchName} to trash`)
     process.exit(0)
   } catch (error) {
     console.error(`❌ Failed to move branch ${branchName} to trash:`)

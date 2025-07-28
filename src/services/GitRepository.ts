@@ -6,12 +6,37 @@ import type {
   GitBranch,
   GitConfig,
   GitBranchOperation,
+  RefOperation,
 } from './GitRepository.types.js'
 
 export class GitRepository {
   private git: SimpleGit
-  private trashNamespace: string
-  private trashNamespaceWithoutRefs: string
+  private readonly NAMESPACES = {
+    heads: {
+      full: 'refs/heads/',
+      short: 'heads/',
+      // Slicing is more efficient than using replace(), and instead of running .length on every
+      // branch name that we want to process, we can just use a constant.
+      fullLength: 11,
+      shortLength: 6,
+    },
+    trash: {
+      full: 'refs/rake-trash/',
+      short: 'rake-trash/',
+      // Slicing is more efficient than using replace(), and instead of running .length on every
+      // branch name that we want to process, we can just use a constant.
+      fullLength: 16,
+      shortLength: 11,
+    },
+    remotes: {
+      full: 'refs/remotes/',
+      short: 'remotes/',
+      // Slicing is more efficient than using replace(), and instead of running .length on every
+      // branch name that we want to process, we can just use a constant.
+      fullLength: 13,
+      shortLength: 8,
+    },
+  } as const
   private mainBranch: string
   private workingDir: string
   private trashTtlDays: number
@@ -22,8 +47,6 @@ export class GitRepository {
     this.workingDir = workingDir || process.cwd()
     this.git = simpleGit(this.workingDir)
     this.mainBranch = config.mainBranch
-    this.trashNamespace = `${config.trashNamespace.replace(/\/$/, '')}/`
-    this.trashNamespaceWithoutRefs = this.trashNamespace.replace('refs/', '')
     this.trashTtlDays = config.trashTtlDays
     this.staleDaysThreshold = config.staleDaysThreshold
     this.excludedBranches = config.excludedBranches
@@ -36,6 +59,44 @@ export class GitRepository {
     } catch {
       return false
     }
+  }
+
+  /**
+   * Builds complete git ref from branch name and namespace
+   *
+   * E.g. "feature/auth", "heads" -> "refs/heads/feature/auth"
+   */
+  private buildFullRef(
+    branchName: string,
+    namespaceKey: keyof typeof this.NAMESPACES,
+  ): string {
+    return this.NAMESPACES[namespaceKey].full + branchName
+  }
+
+  /**
+   * Parses user input to extract clean branch name
+   *
+   * Handles: "refs/rake-trash/branch", "rake-trash/branch", "branch"
+   *
+   * @todo This is a bit of a hack. We should probably use a more robust parser.
+   */
+  parseUserInput(
+    input: string,
+    targetNamespaceKey: keyof typeof this.NAMESPACES,
+  ): string {
+    const target = this.NAMESPACES[targetNamespaceKey]
+
+    // Try full ref
+    if (input.startsWith(target.full)) {
+      return input.slice(target.fullLength)
+    }
+
+    // Try short ref
+    if (input.startsWith(target.short)) {
+      return input.slice(target.shortLength)
+    }
+
+    return input
   }
 
   async getCurrentBranch(): Promise<string> {
@@ -102,194 +163,47 @@ export class GitRepository {
   }
 
   async moveBranchToTrash(branchName: string): Promise<void> {
-    const trashRef = `${this.trashNamespace}${branchName}`
-    const headRef = `refs/heads/${branchName}`
-
-    // Get SHA first, then batch the ref operations for atomicity
-    const sha = await this.git.raw(['rev-parse', headRef])
-    await this.executeBatchRefUpdates([
-      { action: 'create', ref: trashRef, value: sha.trim() },
-      { action: 'delete', ref: headRef },
-    ])
-
-    // Git notes operations can't be batched with `git update-ref --stdin`
-    // This is a git limitation, not a design choice
-    await this.setTrashDeletionDate(trashRef)
+    await this.moveBranchesToTrash([branchName])
   }
 
   /**
-   * Moves multiple branches to trash in a single batch operation
-   *
-   * Architecture: For N branches, executes (N+2) git operations:
-   * - N rev-parse calls to get SHAs (parallel, git doesn't support batch rev-parse)
-   * - 1 batch ref update for all creates/deletes (atomic via `git update-ref --stdin`)
-   * - N git notes calls for deletion dates (parallel, `git notes` lacks batch interface)
+   * Move multiple branches to trash
    */
   async moveBranchesToTrash(branchNames: string[]): Promise<void> {
     if (branchNames.length === 0) return
 
-    // Fetch all branch SHAs in parallel since `git rev-parse` doesn't support batch input
-    // Concurrent execution scales much better than sequential for large branch sets
-    const branchData = await Promise.all(
-      branchNames.map(async name => {
-        try {
-          const sha = await this.git.raw(['rev-parse', `refs/heads/${name}`])
-          return { name, sha: sha.trim() }
-        } catch {
-          // Branch doesn't exist - filter out later
-          return null
-        }
-      }),
-    )
-
-    const validBranches = branchData.filter(Boolean) as Array<{
-      name: string
-      sha: string
-    }>
-
-    // Create atomic batch: for each branch, create trash ref then delete original.
-    // Git ensures this happens atomically. If any command fails, none are applied.
-    const commands = validBranches.flatMap(({ name, sha }) => [
-      {
-        action: 'create' as const,
-        ref: `${this.trashNamespace}${name}`,
-        value: sha,
-      },
-      { action: 'delete' as const, ref: `refs/heads/${name}` },
-    ])
-
-    await this.executeBatchRefUpdates(commands)
-
-    // Git notes lack batch interface, but parallel execution still provides some scalability
-    await Promise.all(
-      validBranches.map(({ name }) =>
-        this.setTrashDeletionDate(`${this.trashNamespace}${name}`),
-      ),
-    )
+    const bulkOperations = await this.getBranchOperations(branchNames, 'heads')
+    await this.trashBranchesWithRetry(bulkOperations)
   }
 
-  private getTrashRefFromUserInput(branchName: string): string {
-    let trashNamespaceWithoutRefs = this.trashNamespace.replace('refs/', '')
-    branchName = branchName.replace('refs/', '')
-    branchName = branchName.replace(trashNamespaceWithoutRefs, '')
-    return `${this.trashNamespace}${branchName.trim()}`
-  }
-
-  async restoreBranchFromTrash(
-    branchName: string,
-  ): Promise<{ oldRef: string; newRef: string }> {
-    const trashRef = this.getTrashRefFromUserInput(branchName)
-    const branchNameWithoutTrashNamespace = trashRef.replace(
-      this.trashNamespace,
-      '',
-    )
-    const newRef = `refs/heads/${branchNameWithoutTrashNamespace}`
-
-    try {
-      // Get SHA from trash ref. This also serves as existence verification.
-      // Atomic batch restore: create branch ref then delete trash ref.
-      const sha = await this.git.raw(['rev-parse', trashRef])
-      await this.executeBatchRefUpdates([
-        { action: 'create', ref: newRef, value: sha.trim() },
-        { action: 'delete', ref: trashRef },
-      ])
-
-      // Clean up deletion date note
-      await this.removeTrashDeletionDate(trashRef)
-
-      return {
-        oldRef: trashRef,
-        newRef,
-      }
-    } catch (error) {
-      logger.error('Error restoring branch from trash', {
-        branchName,
-        error: error instanceof Error ? error.message : String(error),
-      })
-      throw new Error(
-        `Branch ${branchName} not found in trash or could not be restored`,
-      )
-    }
+  async restoreBranchFromTrash(branchName: string): Promise<void> {
+    await this.restoreBranchesFromTrash([branchName])
   }
 
   /**
-   * Restores multiple branches from trash in a single batch operation.
-   *
-   * Architecture: For N branches, executes (N+2) git operations:
-   * - N rev-parse calls to get trash SHAs (parallel, also serves as existence verification)
-   * - 1 batch ref update for all creates/deletes (atomic via git update-ref --stdin)
-   * - N note deletion calls (parallel, git notes lacks batch interface)
-   *
-   * Critical: Order matters in batch commands. We have to create new ref before deleting
-   * trash ref to prevent race conditions if the same SHA is referenced elsewhere.
+   * Restores multiple branches from trash
    */
-  async restoreBranchesFromTrash(
-    branchNames: string[],
-  ): Promise<Array<{ oldRef: string; newRef: string }>> {
-    if (branchNames.length === 0) return []
+  async restoreBranchesFromTrash(branchNames: string[]): Promise<void> {
+    if (branchNames.length === 0) return
 
-    // Validate all trash refs exist and get their SHAs in parallel
-    // This also serves as existence verification - failed rev-parse means no trash entry
-    const restoreData = await Promise.all(
-      branchNames.map(async name => {
-        try {
-          const trashRef = this.getTrashRefFromUserInput(name)
-          const sha = await this.git.raw(['rev-parse', trashRef])
-          const branchNameClean = trashRef.replace(this.trashNamespace, '')
-          return {
-            branchName: name,
-            trashRef,
-            newRef: `refs/heads/${branchNameClean}`,
-            sha: sha.trim(),
-          }
-        } catch {
-          // Skip restore if trash ref doesn't exist
-          return null
-        }
-      }),
-    )
-
-    const validRestores = restoreData.filter(Boolean) as Array<{
-      branchName: string
-      trashRef: string
-      newRef: string
-      sha: string
-    }>
-
-    // Atomic batch restore: create branch ref then delete trash ref
-    // Order is critical: create first to ensure SHA remains referenced
-    const commands = validRestores.flatMap(({ trashRef, newRef, sha }) => [
-      { action: 'create' as const, ref: newRef, value: sha },
-      { action: 'delete' as const, ref: trashRef },
-    ])
-
-    await this.executeBatchRefUpdates(commands)
-
-    // Parallel cleanup of deletion date notes
-    await Promise.all(
-      validRestores.map(({ trashRef }) =>
-        this.removeTrashDeletionDate(trashRef),
-      ),
-    )
-
-    return validRestores.map(({ trashRef, newRef }) => ({
-      oldRef: trashRef,
-      newRef,
-    }))
+    const bulkOperations = await this.getBranchOperations(branchNames, 'trash')
+    await this.restoreBranchesWithRetry(bulkOperations)
   }
 
+  /**
+   * Get all branches in trash
+   *
+   * @todo Look for a way to use getBranches() or something similar to avoid duplicating code
+   */
   async getTrashBranches(): Promise<string[]> {
     try {
       const refs = await this.git.raw([
         'for-each-ref',
-        '--format=%(refname:short)',
-        this.trashNamespace,
+        this.NAMESPACES.trash.full,
+        '--format=%(refname:lstrip=2)',
+        '--sort=-committerdate',
       ])
-      return refs
-        .trim()
-        .split('\n')
-        .filter(Boolean)
-        .map(ref => ref.replace(this.trashNamespaceWithoutRefs, ''))
+      return refs.trim().split('\n').filter(Boolean)
     } catch {
       return []
     }
@@ -299,22 +213,21 @@ export class GitRepository {
    * Get branches, with optional streaming callback
    */
   async getBranches(
-    namespace: 'heads' | 'rake-trash' | 'remotes',
+    branchType: 'heads' | 'trash' | 'remotes',
     onUpdate?: (branch: GitBranch, index: number) => void,
   ): Promise<GitBranch[]> {
     try {
-      const refsNamespace =
-        namespace === 'rake-trash' ? this.trashNamespace : `refs/${namespace}`
+      // Only 'heads' branches can be the current branch. Checking out a trashed or remote branch will detach HEAD.
       const currentBranch =
-        namespace === 'heads' ? await this.getCurrentBranch() : ''
-
+        branchType === 'heads' ? await this.getCurrentBranch() : ''
+      const namespace = this.NAMESPACES[branchType].full
       const excludePatterns = this.excludedBranches.map(
-        branch => `--exclude=${refsNamespace}/${branch}`,
+        branch => `--exclude=${namespace}/${branch}`,
       )
 
       const format = [
         '%(refname)',
-        '%(refname:short)',
+        '%(refname:lstrip=2)', // Clean branch name without refs/namespace/
         '%(committerdate:iso)',
         '%(subject)',
         '%(objectname)', // Full hash for merge checking
@@ -327,41 +240,35 @@ export class GitRepository {
         '--omit-empty',
         '--sort=-committerdate',
         ...excludePatterns,
-        refsNamespace,
+        namespace,
       ])
 
       if (!rawResult.trim()) return []
 
       const lines = rawResult.trim().split('\n')
-      const mergedHashes = new Set(await this.getMergedHashes(refsNamespace))
+      const mergedHashes = new Set(await this.getMergedHashes(namespace))
 
       const branches: GitBranch[] = []
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i]
-        // Skip empty lines that can occur from trailing newlines in git output
-        // (--omit-empty handles format field expansions, but not trailing newlines from split)
+        // Skip empty lines that can occur from trailing newlines in git output.
+        // The --omit-empty flag handles empty format fields, but not empty lines from string splitting.
         if (!line) continue
         const [refname, shortname, dateStr, subject, hash, author] =
           line.split('\t')
-
-        // Strip away the namespace prefix for all "non-heads" namespaces to get a clean
-        // branch name to present to the user
-        let cleanName = shortname
-        if (namespace === 'remotes') {
-          cleanName = shortname.replace('origin/', '')
-        } else if (namespace === 'rake-trash') {
-          cleanName = shortname.replace(this.trashNamespaceWithoutRefs, '')
-        }
 
         const date = new Date(dateStr)
         const staleDays = differenceInDays(new Date(), date)
 
         const branch: GitBranch = {
-          name: cleanName,
+          name:
+            branchType === 'remotes'
+              ? shortname.replace('origin/', '')
+              : shortname,
           ref: refname,
           isCurrent: shortname === currentBranch,
-          isLocal: namespace === 'heads' || namespace === 'rake-trash',
-          isRemote: namespace === 'remotes',
+          isLocal: branchType === 'heads' || branchType === 'trash',
+          isRemote: branchType === 'remotes',
           lastCommitDate: date,
           lastCommitMessage: subject || '',
           lastCommitHash: hash || '',
@@ -382,7 +289,7 @@ export class GitRepository {
       return branches
     } catch (error) {
       logger.error('Error getting branches', {
-        namespace,
+        branchType,
         error: error instanceof Error ? error.message : String(error),
       })
       return []
@@ -390,94 +297,75 @@ export class GitRepository {
   }
 
   /**
-   * Removes expired branches from trash using parallel processing and batch operations.
-   *
-   * Architecture: For N trash branches with M expired, executes (N+2) git operations:
-   * - N git notes reads to check deletion dates (parallel, git notes lacks batch read)
-   * - 1 batch delete command for all M expired trash refs (atomic)
-   * - M note cleanup operations (parallel)
+   * Removes expired branches from trash
    */
   async cleanupTrash(): Promise<void> {
-    const trashBranches = await this.getTrashBranches()
+    const branches = await this.getTrashBranches()
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - this.trashTtlDays)
 
-    // Parallel deletion date checks enable scalability for large trash collections
-    // Sequential reads would block on each git notes operation individually
-    const deletionChecks = await Promise.all(
-      trashBranches.map(async branchName => {
+    const { expiredRefs, expiredBranchNames } = await branches.reduce(
+      async (accumPromise, branchName) => {
+        const collections = await accumPromise
+
         try {
-          const trashRef = `${this.trashNamespace}${branchName}`
+          const trashRef = this.buildFullRef(branchName, 'trash')
           const deletionDateStr = await this.getTrashDeletionDate(trashRef)
 
           if (!deletionDateStr) {
-            // Skip cleanup if branch was trashed before we implemented date tracking
-            return null
+            logger.warn('We could not find a deletion date for this branch', {
+              branchName,
+            })
+            return collections
           }
 
           const deletionDate = new Date(deletionDateStr)
-          return {
-            branchName,
-            trashRef,
-            shouldDelete: deletionDate < cutoffDate,
-          }
+
+          // Bail early if branch is not expired
+          if (deletionDate >= cutoffDate) return collections
+
+          collections.expiredRefs.push(trashRef)
+          collections.expiredBranchNames.push(branchName)
         } catch (error) {
           logger.error('Could not check deletion date for branch', {
             branchName,
             error: error instanceof Error ? error.message : String(error),
           })
-          return null
         }
+
+        return collections
+      },
+      Promise.resolve({
+        expiredRefs: [] as string[],
+        expiredBranchNames: [] as string[],
       }),
     )
 
-    const validChecks = deletionChecks.filter(Boolean) as Array<{
-      branchName: string
-      trashRef: string
-      shouldDelete: boolean
-    }>
+    if (expiredRefs.length === 0) return
 
-    const toDelete = validChecks.filter(check => check.shouldDelete)
+    // Build single batch operation for both branch refs and notes
+    const deleteCommands = expiredRefs
+      .map(ref => ({ action: 'delete' as const, ref }))
+      .concat(
+        expiredBranchNames.map(branchName => ({
+          action: 'delete' as const,
+          ref: `refs/notes/rake-trash-dates/${branchName}`,
+        })),
+      )
 
-    if (toDelete.length === 0) return
+    const result = await this.executeBatchRefUpdates(deleteCommands)
 
-    // Atomic batch deletion of all expired trash refs for consistency and efficiency
-    const deleteCommands = toDelete.map(({ trashRef }) => ({
-      action: 'delete' as const,
-      ref: trashRef,
-    }))
-
-    await this.executeBatchRefUpdates(deleteCommands)
-
-    // Parallel cleanup of associated deletion date notes
-    await Promise.all(
-      toDelete.map(({ trashRef }) => this.removeTrashDeletionDate(trashRef)),
-    )
-  }
-
-  private async setTrashDeletionDate(trashRef: string): Promise<void> {
-    const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
-    const branchName = trashRef.replace(this.trashNamespace, '')
-    try {
-      await this.git.raw([
-        'notes',
-        `--ref=rake-trash-dates/${branchName}`,
-        'add',
-        '-f', // Force overwrite if note exists
-        '-m',
-        today,
-        trashRef,
-      ])
-    } catch (error) {
-      logger.error('Could not set deletion date for trash ref', {
-        trashRef,
-        error: error instanceof Error ? error.message : String(error),
+    if (!result.success) {
+      logger.error('Failed to delete expired trash refs and notes', {
+        expiredCount: expiredRefs.length,
+        error: result.error,
       })
+      throw new Error(`Trash cleanup failed: ${result.error}`)
     }
   }
 
   private async getTrashDeletionDate(trashRef: string): Promise<string | null> {
-    const branchName = trashRef.replace(this.trashNamespace, '')
+    const branchName = trashRef.slice(this.NAMESPACES.trash.fullLength)
     try {
       const result = await this.git.raw([
         'notes',
@@ -495,27 +383,10 @@ export class GitRepository {
     }
   }
 
-  private async removeTrashDeletionDate(trashRef: string): Promise<void> {
-    const branchName = trashRef.replace(this.trashNamespace, '')
-    try {
-      await this.git.raw([
-        'update-ref',
-        '-d',
-        `refs/notes/rake-trash-dates/${branchName}`,
-      ])
-    } catch (error) {
-      logger.error('Could not remove deletion date for trash ref', {
-        trashRef,
-        error: error instanceof Error ? error.message : String(error),
-      })
-    }
-  }
-
   /**
    * Executes multiple git ref updates atomically using `git update-ref --stdin`.
    *
-   * Atomicity: All ref updates succeed together or all fail together.
-   * Efficiency: Single git process handles multiple operations vs N separate spawns.
+   * Atomicity: All transactions succeed together or all fail together.
    *
    * Uses child_process.spawn instead of simple-git because:
    * - simple-git doesn't support stdin piping for batch operations
@@ -528,8 +399,8 @@ export class GitRepository {
       ref: string
       value?: string
     }>,
-  ): Promise<void> {
-    if (commands.length === 0) return
+  ): Promise<{ success: boolean; conflictingRefs: string[]; error?: string }> {
+    if (commands.length === 0) return { success: true, conflictingRefs: [] }
 
     // Format commands according to `git update-ref --stdin` protocol
     // Each line: `action ref [value]` terminated with `\n`
@@ -551,9 +422,9 @@ export class GitRepository {
         })
         .join('\n') + '\n'
 
-    // Must use spawn because `git --stdin` requires proper stream handling
-    // that simple-git doesn't provide for this specific use case
-    return new Promise((resolve, reject) => {
+    // We have to use spawn because simple-git doesn't support stdin piping for batch operations.
+    // We need precise control over stdin formatting and stream closure for `git update-ref --stdin`.
+    return new Promise(resolve => {
       const gitProcess = spawn('git', ['update-ref', '--stdin'], {
         cwd: this.workingDir,
       })
@@ -566,19 +437,306 @@ export class GitRepository {
 
       gitProcess.on('close', code => {
         if (code === 0) {
-          resolve()
-        } else {
-          reject(new Error(`git update-ref --stdin failed: ${stderr}`))
+          resolve({ success: true, conflictingRefs: [] })
+          return
         }
+
+        const conflictingRefs = this.parseConflictingRefs(stderr)
+        resolve({
+          success: false,
+          conflictingRefs,
+          error: stderr,
+        })
       })
 
       gitProcess.on('error', error => {
-        reject(error)
+        resolve({ success: false, conflictingRefs: [], error: error.message })
       })
 
       gitProcess.stdin.write(stdin)
       gitProcess.stdin.end()
     })
+  }
+
+  private parseConflictingRefs(stderr: string): string[] {
+    const conflictingRefs: string[] = []
+    // Git error format: "fatal: cannot lock ref 'refs/rake-trash/branch': reference already exists"
+    const regex = /fatal: cannot lock ref '([^']+)': .*already exists/g
+    let match
+    while ((match = regex.exec(stderr)) !== null) {
+      conflictingRefs.push(match[1])
+    }
+    return conflictingRefs
+  }
+
+  /**
+   * Strips the {N} increment suffix from a branch name
+   *
+   * E.g., "feature/foo{2}" -> "feature/foo"
+   */
+  private stripIncrement(branchName: string): string {
+    return branchName.replace(/\{\d+\}$/, '')
+  }
+
+  /**
+   * Builds a ref name with an increment suffix
+   *
+   * E.g., buildIncrementedRef("feature/foo", 2) -> "feature/foo{2}"
+   */
+  private buildIncrementedRef(baseRef: string, increment: number): string {
+    return increment === 0 ? baseRef : `${baseRef}{${increment}}`
+  }
+
+  /**
+   * Creates git commands for moving branches to trash
+   */
+  private createTrashCommands(operations: RefOperation[]) {
+    const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+
+    return operations.flatMap(({ name: branchName, sha }) => [
+      {
+        action: 'create' as const,
+        ref: this.buildFullRef(branchName, 'trash'),
+        value: sha,
+      },
+      {
+        action: 'delete' as const,
+        ref: this.buildFullRef(branchName, 'heads'),
+      },
+      {
+        action: 'create' as const,
+        ref: `refs/notes/rake-trash-dates/${branchName}`,
+        value: today,
+      },
+    ])
+  }
+
+  /**
+   * Creates git commands for restoring branches from trash
+   */
+  private createRestoreCommands(operations: RefOperation[]) {
+    return operations.flatMap(({ name: branchName, sha }) => {
+      const trashRef = this.buildFullRef(branchName, 'trash')
+      const commands = [
+        {
+          action: 'create' as const,
+          ref: this.buildFullRef(branchName, 'heads'),
+          value: sha,
+        },
+        { action: 'delete' as const, ref: trashRef },
+        {
+          action: 'delete' as const,
+          ref: `refs/notes/rake-trash-dates/${branchName}`,
+        },
+      ]
+
+      return commands
+    })
+  }
+
+  private async trashBranchesWithRetry(
+    operations: RefOperation[],
+  ): Promise<void> {
+    if (operations.length === 0) return
+
+    // Try with "normal branch names" first
+    let result = await this.executeBatchRefUpdates(
+      this.createTrashCommands(operations),
+    )
+
+    if (result.success) return
+
+    // Throw immediately if we had errors, but none of them are branch name conflicts
+    if (result.conflictingRefs.length === 0) {
+      throw new Error(`Trash operation failed: ${result.error}`)
+    }
+
+    // Resolve conflicts and retry
+    const updatedOperations = await this.resolveNameConflicts(
+      result.conflictingRefs,
+      operations,
+      this.NAMESPACES.trash.full,
+    )
+
+    result = await this.executeBatchRefUpdates(
+      this.createTrashCommands(updatedOperations),
+    )
+
+    if (!result.success) {
+      throw new Error(`Conflict resolution failed: ${result.error}`)
+    }
+  }
+
+  private async restoreBranchesWithRetry(
+    operations: RefOperation[],
+  ): Promise<void> {
+    if (operations.length === 0) return
+
+    // Try with "normal branch names" first
+    let result = await this.executeBatchRefUpdates(
+      this.createRestoreCommands(operations),
+    )
+
+    if (result.success) return
+
+    // Throw immediately if we had errors, but none of them are branch name conflicts
+    if (result.conflictingRefs.length === 0) {
+      throw new Error(`Restore operation failed: ${result.error}`)
+    }
+
+    // Resolve conflicts and retry
+    const updatedOperations = await this.resolveNameConflicts(
+      result.conflictingRefs,
+      operations,
+      this.NAMESPACES.heads.full,
+    )
+
+    result = await this.executeBatchRefUpdates(
+      this.createRestoreCommands(updatedOperations),
+    )
+
+    if (!result.success) {
+      throw new Error(`Conflict resolution failed: ${result.error}`)
+    }
+  }
+
+  /**
+   * Resolves naming conflicts by finding available incremented names
+   */
+  private async resolveNameConflicts(
+    conflictingRefs: string[],
+    operations: RefOperation[],
+    targetNamespace: string,
+  ): Promise<RefOperation[]> {
+    if (conflictingRefs.length === 0) {
+      return operations
+    }
+
+    // Build conflict resolutions map
+    const conflictResolutions = new Map<string, string>()
+    const existingRefs = await this.getAllRefsInNamespace(targetNamespace)
+
+    for (const conflictingRef of conflictingRefs) {
+      const branchName = conflictingRef.slice(targetNamespace.length)
+      const baseBranchName = this.stripIncrement(branchName)
+      const increment = this.findNextAvailableIncrementFromRefs(
+        baseBranchName,
+        existingRefs,
+      )
+      const incrementedBranchName = this.buildIncrementedRef(
+        baseBranchName,
+        increment,
+      )
+
+      logger.info(
+        `Resolving naming conflict. Original: '${branchName}', Final: '${incrementedBranchName}'`,
+      )
+      conflictResolutions.set(branchName, incrementedBranchName)
+    }
+
+    // Return operations with resolved names so the operations can be retried
+    return operations.map(op => ({
+      ...op,
+      name: conflictResolutions.get(op.name) || op.name,
+    }))
+  }
+
+  /**
+   * Gets all refs in a namespace with a single git call for better performance
+   */
+  private async getAllRefsInNamespace(namespace: string): Promise<string[]> {
+    try {
+      const refs = await this.git.raw([
+        'for-each-ref',
+        '--format=%(refname:lstrip=2)', // Clean branch names without refs/namespace/
+        namespace,
+      ])
+
+      if (!refs.trim()) return []
+
+      return refs.trim().split('\n').filter(Boolean)
+    } catch (error) {
+      logger.error('Error getting refs in namespace', {
+        namespace,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return []
+    }
+  }
+
+  /**
+   * Create branch operations for multiple branches
+   */
+  private async getBranchOperations(
+    branchNames: string[],
+    namespace: keyof typeof this.NAMESPACES,
+  ): Promise<RefOperation[]> {
+    if (branchNames.length === 0) return []
+
+    try {
+      const result = await this.git.raw([
+        'for-each-ref',
+        '--format=%(refname:lstrip=2) %(objectname)',
+        this.NAMESPACES[namespace].full,
+      ])
+
+      if (!result.trim()) return []
+
+      const requestedBranches = new Set(branchNames)
+      const operations: RefOperation[] = []
+
+      for (const line of result.trim().split('\n')) {
+        const [branchName, sha] = line.split(' ')
+        if (branchName && sha && requestedBranches.has(branchName)) {
+          operations.push({ name: branchName, sha })
+        }
+      }
+
+      return operations
+    } catch (error) {
+      logger.error('Error fetching branch operations', {
+        branchCount: branchNames.length,
+        namespace: this.NAMESPACES[namespace].full,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return []
+    }
+  }
+
+  /**
+   * Finds the next available increment from a pre-fetched list of refs
+   */
+  private findNextAvailableIncrementFromRefs(
+    baseBranchName: string,
+    allRefs: string[],
+  ): number {
+    // Find refs that match our base name with {N} pattern
+    const escapedBaseBranchName = baseBranchName.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      '\\$&',
+    )
+    const incrementPattern = new RegExp(
+      `^${escapedBaseBranchName}(\\{(\\d+)\\})?$`,
+    )
+
+    let maxIncrement = 0
+    let baseExists = false
+
+    for (const branchName of allRefs) {
+      const match = branchName.match(incrementPattern)
+      if (match) {
+        if (match[2]) {
+          const increment = parseInt(match[2], 10)
+          maxIncrement = Math.max(maxIncrement, increment)
+        } else {
+          baseExists = true
+        }
+      }
+    }
+
+    // If base doesn't exist, we can use it (increment 0)
+    // Otherwise, use next available increment
+    return baseExists ? maxIncrement + 1 : 0
   }
 
   async pruneRemoteBranches(): Promise<string[]> {

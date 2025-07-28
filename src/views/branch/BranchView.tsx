@@ -39,7 +39,7 @@ export const BranchView = React.memo(function BranchView({
 
     setLoadingGitLog(true)
     gitRepo
-      .getBranchLog(currentBranch.name, 15)
+      .getBranchLog(currentBranch.ref, 15)
       .then(setGitLog)
       .catch(() => setGitLog('Failed to load branch log'))
       .finally(() => setLoadingGitLog(false))

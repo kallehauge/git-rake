@@ -100,9 +100,6 @@ Create a `.gitrakerc`, `.gitrakerc.yml`, or `.gitrakerc.yaml` file:
 # Number of days before a branch is considered stale
 staleDaysThreshold: 30
 
-# Namespace for storing deleted branches
-trashNamespace: "refs/rake-trash"
-
 # Number of days to keep deleted branches in trash
 trashTtlDays: 90
 

@@ -12,7 +12,6 @@ export type GitRakeConfig = GitConfig & {
 
 const defaultConfig: GitRakeConfig = {
   staleDaysThreshold: 30,
-  trashNamespace: 'refs/rake-trash',
   trashTtlDays: 90,
   mainBranch: 'main',
   theme: 'auto',

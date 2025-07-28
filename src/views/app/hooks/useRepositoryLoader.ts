@@ -42,7 +42,7 @@ export function useRepositoryLoader({
       let branches: GitBranch[] = []
 
       if (restoreMode) {
-        branches = await gitRepo.getBranches('rake-trash', (branch, index) => {
+        branches = await gitRepo.getBranches('trash', (branch, index) => {
           setBranches(prev => [
             ...prev.slice(0, index),
             branch,
