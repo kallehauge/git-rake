@@ -18,11 +18,16 @@ program
   )
   .version('0.1.0')
   .option('--cwd <path>', 'Working directory (defaults to current directory)')
-  .option('-r, --include-remote', 'Include remote tracking branches')
   .option('--debug', 'Enable debug logging to ~/.git-rake/logs/git-rake.log')
-  .action(async (_options: CommandOptions, command: Command) =>
-    interactiveAppInit(command),
-  )
+
+// Remote branch functionality is not fully implemented yet, so we only enable it in dev mode
+if (process.env.DEV === 'true') {
+  program.option('-r, --include-remote', 'Include remote tracking branches')
+}
+
+program.action(async (_options: CommandOptions, command: Command) =>
+  interactiveAppInit(command),
+)
 
 program
   .command('clean')
