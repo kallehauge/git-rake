@@ -5,7 +5,6 @@ const mockBranch = (overrides: Partial<GitBranch> = {}): GitBranch => ({
   name: 'test-branch',
   ref: 'refs/heads/test-branch',
   isCurrent: false,
-  isLocal: true,
   isRemote: false,
   lastCommitDate: new Date(),
   lastCommitMessage: 'Test commit',
@@ -62,8 +61,8 @@ describe('filters', () => {
 
     it('should filter local vs remote branches', () => {
       const branches = [
-        mockBranch({ name: 'local', isLocal: true, isRemote: false }),
-        mockBranch({ name: 'remote', isLocal: false, isRemote: true }),
+        mockBranch({ name: 'local', isRemote: false }),
+        mockBranch({ name: 'remote', isRemote: true }),
       ]
 
       const options = {

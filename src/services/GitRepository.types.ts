@@ -2,7 +2,6 @@ export type GitBranch = {
   name: string
   ref: string
   isCurrent: boolean
-  isLocal: boolean
   isRemote: boolean
   lastCommitDate: Date
   lastCommitMessage: string

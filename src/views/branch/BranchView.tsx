@@ -46,7 +46,7 @@ export const BranchView = React.memo(function BranchView({
   }, [currentBranch, gitRepo])
 
   useEffect(() => {
-    if (!currentBranch || !currentBranch.isLocal) {
+    if (!currentBranch || currentBranch.isRemote) {
       setAheadBehindData('not-applicable')
       return
     }
@@ -126,7 +126,7 @@ export const BranchView = React.memo(function BranchView({
 
           <Text color={theme.colors.text}>
             <Text color={theme.colors.secondary}>Type: </Text>
-            {currentBranch.isLocal ? 'Local' : 'Remote'}
+            {!currentBranch.isRemote ? 'Local' : 'Remote'}
           </Text>
 
           <Text color={theme.colors.text}>
@@ -141,7 +141,7 @@ export const BranchView = React.memo(function BranchView({
             </Text>
           )}
 
-          {currentBranch.isLocal && (
+          {!currentBranch.isRemote && (
             <Text color={theme.colors.text}>
               <Text color={theme.colors.secondary}>Tracking: </Text>
               <TrackingStatus

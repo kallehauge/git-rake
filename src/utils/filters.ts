@@ -16,7 +16,7 @@ export function filterBranches(
   options: BranchFilterOptions,
 ): GitBranch[] {
   return branches.filter(branch => {
-    if (branch.isLocal && !options.showLocal) return false
+    if (!branch.isRemote && !options.showLocal) return false
     if (branch.isRemote && !options.showRemote) return false
     if (branch.isMerged && !options.showMerged) return false
     if (!branch.isMerged && !options.showUnmerged) return false

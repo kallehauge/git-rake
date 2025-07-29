@@ -238,7 +238,6 @@ export class GitRepository {
           isStale: staleDays > this.staleDaysThreshold,
           staleDays,
           isCurrent: shortname === currentBranch,
-          isLocal: branchType === 'heads',
           isRemote: branchType === 'remotes',
           aheadBy: undefined,
           behindBy: undefined,
