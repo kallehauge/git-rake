@@ -207,7 +207,7 @@ export class GitRepository {
         branchType === 'heads' ? await this.getCurrentBranch() : ''
       const namespace = this.NAMESPACES[branchType].full
       const excludePatterns = this.excludedBranches.map(
-        branch => `--exclude=${namespace}/${branch}`,
+        branch => `--exclude=${namespace}${branch}`,
       )
 
       const format = [
