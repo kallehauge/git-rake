@@ -738,36 +738,25 @@ export class GitRepository {
    * Finds the next available increment from a pre-fetched list of refs
    */
   private findNextAvailableIncrementFromRefs(
-    baseBranchName: string,
+    conflictingBranchName: string,
     allRefs: string[],
   ): number {
-    // Find refs that match our base name with {N} pattern
-    const escapedBaseBranchName = baseBranchName.replace(
-      /[.*+?^${}()|[\]\\]/g,
-      '\\$&',
-    )
-    const incrementPattern = new RegExp(
-      `^${escapedBaseBranchName}(\\{(\\d+)\\})?$`,
-    )
+    const baseBranchName = this.stripIncrement(conflictingBranchName)
 
-    let maxIncrement = 0
-    let baseExists = false
+    let highestIncrement = 0
+    for (const refName of allRefs) {
+      // Check for increment pattern: "base-name{123}"
+      if (refName.startsWith(baseBranchName + '{') && refName.endsWith('}')) {
+        const incrementPart = refName.slice(baseBranchName.length + 1, -1)
+        const increment = parseInt(incrementPart, 10)
 
-    for (const branchName of allRefs) {
-      const match = branchName.match(incrementPattern)
-      if (match) {
-        if (match[2]) {
-          const increment = parseInt(match[2], 10)
-          maxIncrement = Math.max(maxIncrement, increment)
-        } else {
-          baseExists = true
+        if (!isNaN(increment)) {
+          highestIncrement = Math.max(highestIncrement, increment)
         }
       }
     }
 
-    // If base doesn't exist, we can use it (increment 0)
-    // Otherwise, use next available increment
-    return baseExists ? maxIncrement + 1 : 0
+    return highestIncrement + 1
   }
 
   async pruneRemoteBranches(): Promise<string[]> {
