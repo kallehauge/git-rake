@@ -154,6 +154,7 @@ program
     try {
       await gitRepo.cleanupTrash()
       console.log('✅ Cleaned up old trash entries')
+      process.exit(0)
     } catch (error) {
       console.error(
         'Failed to cleanup trash:',
