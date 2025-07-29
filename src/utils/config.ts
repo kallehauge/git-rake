@@ -13,7 +13,7 @@ export type GitRakeConfig = GitConfig & {
 const defaultConfig: GitRakeConfig = {
   staleDaysThreshold: 30,
   trashTtlDays: 90,
-  mainBranch: 'main',
+  mergeCompareBranch: 'main',
   theme: 'auto',
   includeRemote: false,
   autoCleanupTrash: true,

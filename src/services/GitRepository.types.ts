@@ -22,7 +22,7 @@ export type GitTrashBranch = GitBranch & {
 export type GitConfig = {
   staleDaysThreshold: number
   trashTtlDays: number
-  mainBranch: string
+  mergeCompareBranch: string
   excludedBranches: string[]
 }
 

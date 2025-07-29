@@ -38,7 +38,7 @@ export class GitRepository {
       shortLength: 8,
     },
   } as const
-  private mainBranch: string
+  private mergeCompareBranch: string
   private workingDir: string
   private trashTtlDays: number
   private staleDaysThreshold: number
@@ -47,10 +47,13 @@ export class GitRepository {
   constructor(config: GitConfig, workingDir?: string) {
     this.workingDir = workingDir || process.cwd()
     this.git = simpleGit(this.workingDir)
-    this.mainBranch = config.mainBranch
+    this.mergeCompareBranch = config.mergeCompareBranch
     this.trashTtlDays = config.trashTtlDays
     this.staleDaysThreshold = config.staleDaysThreshold
     this.excludedBranches = config.excludedBranches
+    // This app assumes that the "mergeCompareBranch" exists locally, so we do not want to
+    // include it in any accedental bulk operations aka we exclude it by default.
+    this.excludedBranches.push(this.mergeCompareBranch)
   }
 
   async isGitRepository(): Promise<boolean> {
@@ -109,7 +112,7 @@ export class GitRepository {
     try {
       const result = await this.git.raw([
         'for-each-ref',
-        '--merged=' + this.mainBranch,
+        '--merged=' + this.mergeCompareBranch,
         '--format=%(objectname)',
         '--omit-empty',
         refsNamespace,
@@ -130,9 +133,9 @@ export class GitRepository {
   ): Promise<{ aheadBy: number; behindBy: number } | null> {
     try {
       const baseBranch = currentBranch || (await this.getCurrentBranch())
-      const mainBranch = this.mainBranch
+      const mergeCompareBranch = this.mergeCompareBranch
 
-      if (branchName === baseBranch || branchName === mainBranch) {
+      if (branchName === baseBranch || branchName === mergeCompareBranch) {
         return null
       }
 
@@ -140,7 +143,7 @@ export class GitRepository {
         'rev-list',
         '--left-right',
         '--count',
-        `${mainBranch}...${branchName}`,
+        `${mergeCompareBranch}...${branchName}`,
       ])
 
       const counts = result.trim().split('\t')

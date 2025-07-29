@@ -21,3 +21,8 @@ autoCleanupTrash: true
 # Branches to exclude from git rake operations (never shown or selectable)
 # These branches will be completely filtered out and cannot be deleted
 excludedBranches: ["main", "master", "develop", "staging"]
+
+# The branch the tool will use to compare if other branches are already merged
+# Based on my own experience, this is typically a "develop" branch since, when
+# we work, we do so against that branch - but it's up to you and your flow!
+mergeCompareBranch: develop
