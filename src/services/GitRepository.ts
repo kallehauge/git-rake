@@ -13,30 +13,9 @@ import type {
 export class GitRepository {
   private git: SimpleGit
   private readonly NAMESPACES = {
-    heads: {
-      full: 'refs/heads/',
-      short: 'heads/',
-      // Slicing is more efficient than using replace(), and instead of running .length on every
-      // branch name that we want to process, we can just use a constant.
-      fullLength: 11,
-      shortLength: 6,
-    },
-    trash: {
-      full: 'refs/rake-trash/',
-      short: 'rake-trash/',
-      // Slicing is more efficient than using replace(), and instead of running .length on every
-      // branch name that we want to process, we can just use a constant.
-      fullLength: 16,
-      shortLength: 11,
-    },
-    remotes: {
-      full: 'refs/remotes/',
-      short: 'remotes/',
-      // Slicing is more efficient than using replace(), and instead of running .length on every
-      // branch name that we want to process, we can just use a constant.
-      fullLength: 13,
-      shortLength: 8,
-    },
+    heads: 'refs/heads/',
+    trash: 'refs/rake-trash/',
+    remotes: 'refs/remotes/',
   } as const
   private mergeCompareBranch: string
   private workingDir: string
@@ -74,7 +53,7 @@ export class GitRepository {
     branchName: string,
     namespaceKey: keyof typeof this.NAMESPACES,
   ): string {
-    return this.NAMESPACES[namespaceKey].full + branchName
+    return this.NAMESPACES[namespaceKey] + branchName
   }
 
   /**
@@ -88,16 +67,17 @@ export class GitRepository {
     input: string,
     targetNamespaceKey: keyof typeof this.NAMESPACES,
   ): string {
-    const target = this.NAMESPACES[targetNamespaceKey]
+    const targetFull = this.NAMESPACES[targetNamespaceKey]
+    const targetShort = targetFull.slice(5) // Remove 'refs/' prefix to get short form
 
     // Try full ref
-    if (input.startsWith(target.full)) {
-      return input.slice(target.fullLength)
+    if (input.startsWith(targetFull)) {
+      return input.slice(targetFull.length)
     }
 
     // Try short ref
-    if (input.startsWith(target.short)) {
-      return input.slice(target.shortLength)
+    if (input.startsWith(targetShort)) {
+      return input.slice(targetShort.length)
     }
 
     return input
@@ -208,7 +188,7 @@ export class GitRepository {
       // Only 'heads' branches can be the current branch. Checking out a trashed or remote branch will detach HEAD.
       const currentBranch =
         branchType === 'heads' ? await this.getCurrentBranch() : ''
-      const namespace = this.NAMESPACES[branchType].full
+      const namespace = this.NAMESPACES[branchType]
       const excludePatterns = this.excludedBranches.map(
         branch => `--exclude=${namespace}${branch}`,
       )
@@ -568,7 +548,7 @@ export class GitRepository {
     const updatedOperations = await this.resolveNameConflicts(
       result.conflictingRefs,
       operations,
-      this.NAMESPACES.trash.full,
+      this.NAMESPACES.trash,
     )
 
     result = await this.executeBatchRefUpdates(
@@ -601,7 +581,7 @@ export class GitRepository {
     const updatedOperations = await this.resolveNameConflicts(
       result.conflictingRefs,
       operations,
-      this.NAMESPACES.heads.full,
+      this.NAMESPACES.heads,
     )
 
     result = await this.executeBatchRefUpdates(
@@ -692,7 +672,7 @@ export class GitRepository {
         'for-each-ref',
         '--format=%(refname:lstrip=2) %(objectname)',
         '--omit-empty',
-        this.NAMESPACES[namespace].full,
+        this.NAMESPACES[namespace],
       ])
 
       if (!result.trim()) return []
@@ -730,7 +710,7 @@ export class GitRepository {
     } catch (error) {
       logger.error('Error fetching branch operations', {
         branchCount: branchNames.length,
-        namespace: this.NAMESPACES[namespace].full,
+        namespace: this.NAMESPACES[namespace],
         error: error instanceof Error ? error.message : String(error),
       })
       throw error
