@@ -4,6 +4,7 @@ import { spawn } from 'child_process'
 import { logger } from '@utils/logger.js'
 import type {
   GitBranch,
+  GitTrashBranch,
   GitConfig,
   GitBranchOperation,
   RefOperation,
@@ -110,6 +111,7 @@ export class GitRepository {
         'for-each-ref',
         '--merged=' + this.mainBranch,
         '--format=%(objectname)',
+        '--omit-empty',
         refsNamespace,
       ])
       return result.trim().split('\n').filter(Boolean)
@@ -191,31 +193,14 @@ export class GitRepository {
   }
 
   /**
-   * Get all branches in trash
-   *
-   * @todo Look for a way to use getBranches() or something similar to avoid duplicating code
-   */
-  async getTrashBranches(): Promise<string[]> {
-    try {
-      const refs = await this.git.raw([
-        'for-each-ref',
-        this.NAMESPACES.trash.full,
-        '--format=%(refname:lstrip=2)',
-        '--sort=-committerdate',
-      ])
-      return refs.trim().split('\n').filter(Boolean)
-    } catch {
-      return []
-    }
-  }
-
-  /**
    * Get branches, with optional streaming callback
    */
-  async getBranches(
-    branchType: 'heads' | 'trash' | 'remotes',
-    onUpdate?: (branch: GitBranch, index: number) => void,
-  ): Promise<GitBranch[]> {
+  async getBranches<T extends 'heads' | 'trash' | 'remotes'>(
+    branchType: T,
+    onUpdate?: T extends 'trash'
+      ? (branch: GitTrashBranch, index: number) => void
+      : (branch: GitBranch, index: number) => void,
+  ): Promise<T extends 'trash' ? GitTrashBranch[] : GitBranch[]> {
     try {
       // Only 'heads' branches can be the current branch. Checking out a trashed or remote branch will detach HEAD.
       const currentBranch =
@@ -248,7 +233,7 @@ export class GitRepository {
       const lines = rawResult.trim().split('\n')
       const mergedHashes = new Set(await this.getMergedHashes(namespace))
 
-      const branches: GitBranch[] = []
+      const branches = []
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i]
         // Skip empty lines that can occur from trailing newlines in git output.
@@ -260,33 +245,57 @@ export class GitRepository {
         const date = new Date(dateStr)
         const staleDays = differenceInDays(new Date(), date)
 
-        const branch: GitBranch = {
-          name:
-            branchType === 'remotes'
-              ? shortname.replace('origin/', '')
-              : shortname,
+        const baseBranch = {
           ref: refname,
-          isCurrent: shortname === currentBranch,
-          isLocal: branchType === 'heads' || branchType === 'trash',
-          isRemote: branchType === 'remotes',
           lastCommitDate: date,
-          lastCommitMessage: subject || '',
-          lastCommitHash: hash || '',
-          lastCommitAuthor: author || '',
+          lastCommitMessage: subject,
+          lastCommitHash: hash,
+          lastCommitAuthor: author,
           isMerged: mergedHashes.has(hash),
           isStale: staleDays > this.staleDaysThreshold,
           staleDays,
+          isCurrent: shortname === currentBranch,
+          isLocal: branchType === 'heads',
+          isRemote: branchType === 'remotes',
           aheadBy: undefined,
           behindBy: undefined,
         }
 
-        branches.push(branch)
+        if (branchType === 'trash') {
+          const parsed = this.parseTrashRefName(shortname)
+          const branch = {
+            ...baseBranch,
+            name: parsed.branchName,
+            deletionDate: new Date(parsed.date),
+          } satisfies GitTrashBranch
 
-        // Optional callback to e.g. stream UI for immediate UI feedback
-        onUpdate?.(branch, branches.length - 1)
+          branches.push(branch)
+
+          // Optional callback to e.g. stream UI for immediate UI feedback
+          ;(onUpdate as (branch: GitTrashBranch, index: number) => void)?.(
+            branch,
+            branches.length - 1,
+          )
+        } else {
+          const branch = {
+            ...baseBranch,
+            name:
+              branchType === 'remotes'
+                ? shortname.replace('origin/', '')
+                : shortname,
+          } satisfies GitBranch
+
+          branches.push(branch)
+
+          // Optional callback to e.g. stream UI for immediate UI feedback
+          ;(onUpdate as (branch: GitBranch, index: number) => void)?.(
+            branch,
+            branches.length - 1,
+          )
+        }
       }
 
-      return branches
+      return branches as T extends 'trash' ? GitTrashBranch[] : GitBranch[]
     } catch (error) {
       logger.error('Error getting branches', {
         branchType,
@@ -300,86 +309,37 @@ export class GitRepository {
    * Removes expired branches from trash
    */
   async cleanupTrash(): Promise<void> {
-    const branches = await this.getTrashBranches()
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - this.trashTtlDays)
 
-    const { expiredRefs, expiredBranchNames } = await branches.reduce(
-      async (accumPromise, branchName) => {
-        const collections = await accumPromise
-
-        try {
-          const trashRef = this.buildFullRef(branchName, 'trash')
-          const deletionDateStr = await this.getTrashDeletionDate(trashRef)
-
-          if (!deletionDateStr) {
-            logger.warn('We could not find a deletion date for this branch', {
-              branchName,
-            })
-            return collections
-          }
-
-          const deletionDate = new Date(deletionDateStr)
-
-          // Bail early if branch is not expired
-          if (deletionDate >= cutoffDate) return collections
-
-          collections.expiredRefs.push(trashRef)
-          collections.expiredBranchNames.push(branchName)
-        } catch (error) {
-          logger.error('Could not check deletion date for branch', {
-            branchName,
-            error: error instanceof Error ? error.message : String(error),
-          })
-        }
-
-        return collections
-      },
-      Promise.resolve({
-        expiredRefs: [] as string[],
-        expiredBranchNames: [] as string[],
-      }),
-    )
-
-    if (expiredRefs.length === 0) return
-
-    // Build single batch operation for both branch refs and notes
-    const deleteCommands = expiredRefs
-      .map(ref => ({ action: 'delete' as const, ref }))
-      .concat(
-        expiredBranchNames.map(branchName => ({
-          action: 'delete' as const,
-          ref: `refs/notes/rake-trash-dates/${branchName}`,
-        })),
-      )
-
-    const result = await this.executeBatchRefUpdates(deleteCommands)
-
-    if (!result.success) {
-      logger.error('Failed to delete expired trash refs and notes', {
-        expiredCount: expiredRefs.length,
-        error: result.error,
-      })
-      throw new Error(`Trash cleanup failed: ${result.error}`)
-    }
-  }
-
-  private async getTrashDeletionDate(trashRef: string): Promise<string | null> {
-    const branchName = trashRef.slice(this.NAMESPACES.trash.fullLength)
     try {
-      const result = await this.git.raw([
-        'notes',
-        `--ref=rake-trash-dates/${branchName}`,
-        'show',
-        trashRef,
-      ])
-      return result.trim()
+      const trashBranches = await this.getBranches('trash')
+
+      const expiredOperations = trashBranches.reduce<
+        Array<{ action: 'delete'; ref: string }>
+      >((operations, branch) => {
+        if (branch.deletionDate < cutoffDate) {
+          operations.push({ action: 'delete' as const, ref: branch.ref })
+        }
+        return operations
+      }, [])
+
+      if (expiredOperations.length === 0) return
+
+      const result = await this.executeBatchRefUpdates(expiredOperations)
+
+      if (!result.success) {
+        logger.error('Failed to delete expired trash refs', {
+          expiredCount: expiredOperations.length,
+          error: result.error,
+        })
+        throw new Error(`Trash cleanup failed: ${result.error}`)
+      }
     } catch (error) {
-      logger.error('Could not get deletion date for trash ref', {
-        trashRef,
+      logger.error('Failed to cleanup trash', {
         error: error instanceof Error ? error.message : String(error),
       })
-      return null
+      throw error
     }
   }
 
@@ -488,25 +448,77 @@ export class GitRepository {
   }
 
   /**
+   * Parses a date-embedded trash ref name into branch name and date.
+   *
+   * Format: "branch-name@YYYY-MM-DD"
+   * Uses @ separator to avoid conflicts with branch names that may contain colons.
+   */
+  private parseTrashRefName(refName: string): {
+    branchName: string
+    date: string
+  } {
+    const lastAt = refName.lastIndexOf('@')
+    if (lastAt === -1) {
+      throw new Error(`Invalid trash ref format - missing date: ${refName}`)
+    }
+
+    const branchName = refName.substring(0, lastAt)
+    const date = refName.substring(lastAt + 1)
+
+    if (!branchName) {
+      throw new Error(
+        `Invalid trash ref format - empty branch name: ${refName}`,
+      )
+    }
+
+    // Validate date format with regex first for performance and exact format matching.
+    // The Date constructor is too permissive - it accepts "2023/12/25", "Dec 25, 2023", etc.
+    // Regex ensures we only accept YYYY-MM-DD format and fails fast on invalid strings.
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      throw new Error(
+        `Invalid trash ref format - bad date format: ${refName} (expected YYYY-MM-DD)`,
+      )
+    }
+
+    // Validate it's actually a valid date after passing format check.
+    // This catches edge cases like "2023-13-01" (month overflow) or "2023-02-30" (invalid day).
+    // Date constructor silently "corrects" these instead of failing, so we verify the round-trip.
+    const dateObj = new Date(date)
+    if (
+      isNaN(dateObj.getTime()) ||
+      dateObj.toISOString().split('T')[0] !== date
+    ) {
+      throw new Error(
+        `Invalid trash ref format - invalid date: ${refName} (${date} is not a valid date)`,
+      )
+    }
+
+    return { branchName, date }
+  }
+
+  /**
+   * Builds a trash ref name with embedded date.
+   *
+   * Performance: Date is embedded directly in ref name, eliminating need for separate notes refs.
+   */
+  private buildTrashRefName(branchName: string): string {
+    const today = new Date().toISOString().split('T')[0]
+    return `${branchName}@${today}`
+  }
+
+  /**
    * Creates git commands for moving branches to trash
    */
   private createTrashCommands(operations: RefOperation[]) {
-    const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
-
     return operations.flatMap(({ name: branchName, sha }) => [
       {
         action: 'create' as const,
-        ref: this.buildFullRef(branchName, 'trash'),
+        ref: this.buildFullRef(this.buildTrashRefName(branchName), 'trash'),
         value: sha,
       },
       {
         action: 'delete' as const,
         ref: this.buildFullRef(branchName, 'heads'),
-      },
-      {
-        action: 'create' as const,
-        ref: `refs/notes/rake-trash-dates/${branchName}`,
-        value: today,
       },
     ])
   }
@@ -515,22 +527,20 @@ export class GitRepository {
    * Creates git commands for restoring branches from trash
    */
   private createRestoreCommands(operations: RefOperation[]) {
-    return operations.flatMap(({ name: branchName, sha }) => {
-      const trashRef = this.buildFullRef(branchName, 'trash')
-      const commands = [
+    return operations.flatMap(({ name: decoratedName, sha }) => {
+      const branchName = this.parseTrashRefName(decoratedName).branchName
+
+      return [
         {
           action: 'create' as const,
           ref: this.buildFullRef(branchName, 'heads'),
           value: sha,
         },
-        { action: 'delete' as const, ref: trashRef },
         {
           action: 'delete' as const,
-          ref: `refs/notes/rake-trash-dates/${branchName}`,
+          ref: this.buildFullRef(decoratedName, 'trash'),
         },
       ]
-
-      return commands
     })
   }
 
@@ -649,6 +659,7 @@ export class GitRepository {
       const refs = await this.git.raw([
         'for-each-ref',
         '--format=%(refname:lstrip=2)', // Clean branch names without refs/namespace/
+        '--omit-empty',
         namespace,
       ])
 
@@ -677,6 +688,7 @@ export class GitRepository {
       const result = await this.git.raw([
         'for-each-ref',
         '--format=%(refname:lstrip=2) %(objectname)',
+        '--omit-empty',
         this.NAMESPACES[namespace].full,
       ])
 
@@ -684,12 +696,31 @@ export class GitRepository {
 
       const requestedBranches = new Set(branchNames)
       const operations: RefOperation[] = []
+      const foundBranches = new Set<string>()
 
       for (const line of result.trim().split('\n')) {
-        const [branchName, sha] = line.split(' ')
-        if (branchName && sha && requestedBranches.has(branchName)) {
-          operations.push({ name: branchName, sha })
+        const [refName, sha] = line.split(' ')
+        if (!refName || !sha) continue
+
+        let branchName: string
+
+        if (namespace === 'trash') {
+          branchName = this.parseTrashRefName(refName).branchName
+        } else {
+          branchName = refName
         }
+
+        if (requestedBranches.has(branchName)) {
+          operations.push({ name: refName, sha })
+          foundBranches.add(branchName)
+        }
+      }
+
+      if (foundBranches.size !== branchNames.length) {
+        const missing = branchNames.filter(name => !foundBranches.has(name))
+        throw new Error(
+          `Branches not found in ${namespace}: ${missing.join(', ')}`,
+        )
       }
 
       return operations
@@ -699,7 +730,7 @@ export class GitRepository {
         namespace: this.NAMESPACES[namespace].full,
         error: error instanceof Error ? error.message : String(error),
       })
-      return []
+      throw error
     }
   }
 

@@ -15,6 +15,10 @@ export type GitBranch = {
   behindBy?: number
 }
 
+export type GitTrashBranch = GitBranch & {
+  deletionDate: Date
+}
+
 export type GitConfig = {
   staleDaysThreshold: number
   trashTtlDays: number

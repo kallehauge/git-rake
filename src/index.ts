@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import { App } from '@views/app/App.js'
 import { interactiveAppInit, nonInteractiveAppInit } from '@utils/bootstrap.js'
+import { GitTrashBranch } from '@services/GitRepository.types.js'
 
 const program = new Command()
 
@@ -86,7 +87,7 @@ program
 const trashCommandList = async (command: Command) => {
   const { gitRepo } = await nonInteractiveAppInit(command)
   try {
-    const trashBranches = await gitRepo.getTrashBranches()
+    const trashBranches = await gitRepo.getBranches('trash')
 
     if (trashBranches.length === 0) {
       console.log('No branches in trash')
@@ -94,8 +95,10 @@ const trashCommandList = async (command: Command) => {
     }
 
     console.log('Branches in trash:')
-    trashBranches.forEach((branch: string) => {
-      console.log(`  • ${branch}`)
+    trashBranches.forEach((branch: GitTrashBranch) => {
+      console.log(
+        `  • ${branch.name} (${branch.deletionDate.toLocaleDateString()})`,
+      )
     })
     process.exit(0)
   } catch (error) {
