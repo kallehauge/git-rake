@@ -9,7 +9,7 @@ import {
   getSelectionIndicator,
 } from '@utils/branchUtils.js'
 
-type BranchItemProps = {
+type BranchesListItemProps = {
   branch: GitBranch
   isSelected: boolean
   isMarked: boolean
@@ -17,13 +17,13 @@ type BranchItemProps = {
   columnLayout: BranchesListLayout
 }
 
-export const BranchItem = React.memo(function BranchItem({
+export const BranchesListItem = React.memo(function BranchesListItem({
   branch,
   isSelected,
   isMarked,
   showSelection,
   columnLayout,
-}: BranchItemProps) {
+}: BranchesListItemProps) {
   const { theme } = useAppUIContext()
 
   const selectionIndicator = useMemo(

@@ -1,7 +1,7 @@
 import { memo, useCallback } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
-import { BranchItem } from './BranchItem.js'
+import { BranchesListItem } from './BranchesListItem.js'
 import { BranchesListHeader } from './BranchesListHeader.js'
 import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 import { useSelectionContext } from '@contexts/SelectionContext.js'
@@ -27,7 +27,7 @@ export const BranchesList = memo(function BranchesList({
 
   const renderBranchItem = useCallback(
     (branch: GitBranch, index: number, isSelected: boolean) => (
-      <BranchItem
+      <BranchesListItem
         key={branch.ref}
         branch={branch}
         isSelected={isSelected}
