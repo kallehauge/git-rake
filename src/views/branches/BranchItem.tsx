@@ -4,9 +4,6 @@ import type { GitBranch } from '@services/GitRepository.types.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import {
   getCompactTimeAgo,
-  truncateCommitMessage,
-  truncateBranchName,
-  truncateAuthorName,
   getBranchStatus,
   getSelectionIndicator,
 } from '@utils/branchUtils.js'
@@ -43,73 +40,99 @@ export const BranchItem = React.memo(function BranchItem({
     [branch.lastCommitDate],
   )
 
-  const commitMessage = useMemo(
-    () => truncateCommitMessage(branch.lastCommitMessage),
-    [branch.lastCommitMessage],
-  )
-
-  const branchName = useMemo(
-    () => truncateBranchName(branch.name),
-    [branch.name],
-  )
-
-  const authorName = useMemo(
-    () => truncateAuthorName(branch.lastCommitAuthor || ''),
-    [branch.lastCommitAuthor],
-  )
-
   const statusInfo = useMemo(
     () => getBranchStatus(branch, theme.colors),
     [branch, theme.colors],
   )
 
   return (
-    <Box paddingX={1} paddingY={0}>
-      <Box width={3}>
+    <Box paddingX={1} paddingY={0} overflow="hidden" width="100%">
+      <Box width={3} flexShrink={0} minWidth={0}>
         <Text color={textColor}>{selectionIndicator}</Text>
       </Box>
 
-      <Box width={25} marginRight={2}>
-        <Text color={branchNameColor} bold={branch.isCurrent}>
-          {branchName}
+      <Box
+        flexBasis="25%"
+        flexShrink={0}
+        marginRight={2}
+        overflow="hidden"
+        minWidth={0}
+      >
+        <Text
+          color={branchNameColor}
+          bold={branch.isCurrent}
+          wrap="truncate-end"
+        >
+          {branch.name}
         </Text>
       </Box>
 
-      <Box width={10} marginRight={1}>
-        <Text color={isSelected ? theme.colors.selection : statusInfo.color}>
+      <Box
+        flexBasis="10%"
+        flexShrink={2}
+        marginRight={1}
+        overflow="hidden"
+        minWidth={0}
+      >
+        <Text
+          color={isSelected ? theme.colors.selection : statusInfo.color}
+          wrap="truncate-end"
+        >
           {statusInfo.text}
         </Text>
       </Box>
 
-      <Box width={8} marginRight={1}>
+      <Box
+        flexBasis="8%"
+        flexShrink={2}
+        marginRight={1}
+        overflow="hidden"
+        minWidth={0}
+      >
         <Text
           color={isSelected ? theme.colors.selection : theme.colors.secondary}
+          wrap="truncate-end"
         >
           {timeAgo}
         </Text>
       </Box>
 
-      <Box width={8} marginRight={1}>
+      <Box
+        flexBasis="8%"
+        flexShrink={2}
+        marginRight={1}
+        overflow="hidden"
+        minWidth={0}
+      >
         <Text
           color={isSelected ? theme.colors.selection : theme.colors.secondary}
+          wrap="truncate-end"
         >
           {branch.lastCommitHash.substring(0, 7)}
         </Text>
       </Box>
 
-      <Box width={12} marginRight={1}>
+      <Box
+        flexBasis="12%"
+        flexShrink={2}
+        marginRight={1}
+        overflow="hidden"
+        minWidth={0}
+      >
         <Text
           color={isSelected ? theme.colors.selection : theme.colors.secondary}
+          wrap="truncate-end"
         >
-          {authorName}
+          {branch.lastCommitAuthor || '—'}
         </Text>
       </Box>
 
-      <Box flexGrow={1}>
+      <Box width="40%" flexShrink={1} overflow="hidden" minWidth={0}>
         <Text
           color={isSelected ? theme.colors.selection : theme.colors.secondary}
+          wrap="truncate-end"
         >
-          {commitMessage}
+          {branch.lastCommitMessage}
         </Text>
       </Box>
     </Box>

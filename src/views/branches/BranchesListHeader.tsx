@@ -11,44 +11,76 @@ export function BranchesListHeader() {
       borderBottom={true}
       borderColor={theme.colors.border}
       flexShrink={0}
+      overflow="hidden"
+      width="100%"
     >
       {/* Selection indicator space */}
-      <Box width={3}>
+      <Box width={3} flexShrink={0} minWidth={0}>
         <Text color={theme.colors.secondary}> </Text>
       </Box>
 
-      <Box width={25} marginRight={2}>
-        <Text color={theme.colors.secondary} bold>
+      <Box
+        flexBasis="25%"
+        flexShrink={0}
+        marginRight={2}
+        overflow="hidden"
+        minWidth={0}
+      >
+        <Text color={theme.colors.secondary} bold wrap="truncate-end">
           BRANCH NAME
         </Text>
       </Box>
 
-      <Box width={10} marginRight={1}>
-        <Text color={theme.colors.secondary} bold>
+      <Box
+        flexBasis="10%"
+        flexShrink={2}
+        marginRight={1}
+        overflow="hidden"
+        minWidth={0}
+      >
+        <Text color={theme.colors.secondary} bold wrap="truncate-end">
           STATUS
         </Text>
       </Box>
 
-      <Box width={8} marginRight={1}>
-        <Text color={theme.colors.secondary} bold>
+      <Box
+        flexBasis="8%"
+        flexShrink={2}
+        marginRight={1}
+        overflow="hidden"
+        minWidth={0}
+      >
+        <Text color={theme.colors.secondary} bold wrap="truncate-end">
           AGE
         </Text>
       </Box>
 
-      <Box width={8} marginRight={1}>
-        <Text color={theme.colors.secondary} bold>
+      <Box
+        flexBasis="8%"
+        flexShrink={2}
+        marginRight={1}
+        overflow="hidden"
+        minWidth={0}
+      >
+        <Text color={theme.colors.secondary} bold wrap="truncate-end">
           COMMIT
         </Text>
       </Box>
 
-      <Box width={12} marginRight={1}>
-        <Text color={theme.colors.secondary} bold>
+      <Box
+        flexBasis="12%"
+        flexShrink={2}
+        marginRight={1}
+        overflow="hidden"
+        minWidth={0}
+      >
+        <Text color={theme.colors.secondary} bold wrap="truncate-end">
           AUTHOR
         </Text>
       </Box>
 
-      <Box flexGrow={1}>
-        <Text color={theme.colors.secondary} bold>
+      <Box width="40%" flexShrink={1} overflow="hidden" minWidth={0}>
+        <Text color={theme.colors.secondary} bold wrap="truncate-end">
           MESSAGE
         </Text>
       </Box>

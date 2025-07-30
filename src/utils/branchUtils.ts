@@ -20,37 +20,6 @@ export function getCompactTimeAgo(date: Date): string {
   return `${diffInYears}y ago`
 }
 
-export function truncateCommitMessage(
-  message: string,
-  maxLength: number = 40,
-): string {
-  if (message.length <= maxLength) {
-    return message
-  }
-  return `${message.substring(0, maxLength - 3)}...`
-}
-
-export function truncateBranchName(
-  name: string,
-  maxLength: number = 23,
-): string {
-  if (name.length <= maxLength) {
-    return name
-  }
-  return `${name.substring(0, maxLength - 3)}...`
-}
-
-export function truncateAuthorName(
-  name: string,
-  maxLength: number = 10,
-): string {
-  if (!name) return '—'
-  if (name.length <= maxLength) {
-    return name
-  }
-  return `${name.substring(0, maxLength - 1)}…`
-}
-
 export type BranchStatus = {
   text: string
   color: string
