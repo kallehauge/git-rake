@@ -10,6 +10,7 @@ type ViewLayoutProps = {
   restoreMode?: boolean
   helpText: string
   currentPath: string
+  confirmationBarContent?: ReactNode
 }
 
 export function ViewLayout({
@@ -18,6 +19,7 @@ export function ViewLayout({
   restoreMode = false,
   helpText,
   currentPath,
+  confirmationBarContent,
 }: ViewLayoutProps) {
   const { theme, showExitWarning } = useAppUIContext()
 
@@ -36,9 +38,7 @@ export function ViewLayout({
         <StatusBar restoreMode={restoreMode}>{statusBarContent}</StatusBar>
       </Box>
 
-      <Box flexGrow={1} flexShrink={1} overflow="hidden">
-        {children}
-      </Box>
+      {children}
 
       <Box
         flexShrink={0}
@@ -48,6 +48,9 @@ export function ViewLayout({
       >
         <HelpBar helpText={helpText} showExitWarning={showExitWarning} />
       </Box>
+
+      {/* Optional Confirmation Bar */}
+      {confirmationBarContent}
     </Box>
   )
 }

@@ -10,6 +10,7 @@ export function BranchesListHeader() {
       paddingY={0}
       borderBottom={true}
       borderColor={theme.colors.border}
+      flexShrink={0}
     >
       {/* Selection indicator space */}
       <Box width={3}>

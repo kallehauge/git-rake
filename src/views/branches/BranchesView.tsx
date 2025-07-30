@@ -111,6 +111,24 @@ export const BranchesView = React.memo(function BranchesView({
       restoreMode={restoreMode}
       helpText={helpText}
       currentPath={currentPath}
+      confirmationBarContent={
+        confirmationConfig ? (
+          <ConfirmationBar
+            type={confirmationConfig.type}
+            confirmText={confirmationConfig.confirmText}
+            cancelText={confirmationConfig.cancelText}
+            onConfirm={createOperationHandler(
+              selectedBranches,
+              refreshBranches,
+            )}
+            onCancel={handleCancel}
+          >
+            {confirmationConfig.message && (
+              <Text>{confirmationConfig.message}</Text>
+            )}
+          </ConfirmationBar>
+        ) : undefined
+      }
     >
       <Box flexGrow={1} flexDirection="column">
         {branchesToDisplay.length === 0 ? (
@@ -126,22 +144,6 @@ export const BranchesView = React.memo(function BranchesView({
         ) : (
           <>
             <BranchesList branches={branchesToDisplay} />
-            {confirmationConfig && (
-              <ConfirmationBar
-                type={confirmationConfig.type}
-                confirmText={confirmationConfig.confirmText}
-                cancelText={confirmationConfig.cancelText}
-                onConfirm={createOperationHandler(
-                  selectedBranches,
-                  refreshBranches,
-                )}
-                onCancel={handleCancel}
-              >
-                {confirmationConfig.message && (
-                  <Text>{confirmationConfig.message}</Text>
-                )}
-              </ConfirmationBar>
-            )}
           </>
         )}
       </Box>
