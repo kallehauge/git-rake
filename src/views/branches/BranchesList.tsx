@@ -7,6 +7,7 @@ import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 import { useSelectionContext } from '@contexts/SelectionContext.js'
 import { useSearchContext } from '@contexts/SearchContext.js'
 import { useBranchesSelection } from './hooks/useBranchesSelection.js'
+import { useBranchesListLayout } from './hooks/useBranchesListLayout.js'
 import { ScrollableList } from '@components/scrollable-list/index.js'
 import type { GitBranch } from '@services/GitRepository.types.js'
 
@@ -22,6 +23,7 @@ export const BranchesList = memo(function BranchesList({
   const { selectedIndex, selectedBranchNames } = useSelectionContext()
   const { searchQuery } = useSearchContext()
   const { toggleBranchSelection, handleListNavigation } = useBranchesSelection()
+  const columnLayout = useBranchesListLayout()
 
   const renderBranchItem = useCallback(
     (branch: GitBranch, index: number, isSelected: boolean) => (
@@ -31,9 +33,10 @@ export const BranchesList = memo(function BranchesList({
         isSelected={isSelected}
         isMarked={selectedBranchNames.has(branch.name)}
         showSelection={!branch.isCurrent}
+        columnLayout={columnLayout}
       />
     ),
-    [selectedBranchNames],
+    [selectedBranchNames, columnLayout],
   )
 
   useInput(
@@ -50,7 +53,7 @@ export const BranchesList = memo(function BranchesList({
 
   return (
     <Box flexDirection="column">
-      <BranchesListHeader />
+      <BranchesListHeader columnLayout={columnLayout} />
 
       {branches.length === 0 ? (
         <Box justifyContent="center" alignItems="center" flexGrow={1}>

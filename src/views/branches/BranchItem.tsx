@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { Box, Text } from 'ink'
 import type { GitBranch } from '@services/GitRepository.types.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
+import type { BranchesListLayout } from './hooks/useBranchesListLayout.js'
 import {
   getCompactTimeAgo,
   getBranchStatus,
@@ -13,6 +14,7 @@ type BranchItemProps = {
   isSelected: boolean
   isMarked: boolean
   showSelection: boolean
+  columnLayout: BranchesListLayout
 }
 
 export const BranchItem = React.memo(function BranchItem({
@@ -20,6 +22,7 @@ export const BranchItem = React.memo(function BranchItem({
   isSelected,
   isMarked,
   showSelection,
+  columnLayout,
 }: BranchItemProps) {
   const { theme } = useAppUIContext()
 
@@ -63,73 +66,57 @@ export const BranchItem = React.memo(function BranchItem({
 
   return (
     <Box paddingX={1} paddingY={0} overflow="hidden" width="100%">
-      <Box width={3} flexShrink={0} minWidth={0}>
+      <Box {...columnLayout.selection.styles}>
         <Text color={textColor}>{selectionIndicator}</Text>
       </Box>
 
-      <Box
-        flexBasis="25%"
-        flexShrink={0}
-        marginRight={2}
-        overflow="hidden"
-        minWidth={0}
-      >
+      <Box {...columnLayout.branchName.styles}>
         <Text color={textColor} wrap="truncate-end">
           {branch.name}
         </Text>
       </Box>
 
-      <Box
-        flexBasis="10%"
-        flexShrink={2}
-        marginRight={1}
-        overflow="hidden"
-        minWidth={0}
-      >
-        <Text
-          color={isSelected ? theme.colors.selection : statusInfo.color}
-          wrap="truncate-end"
-        >
-          {statusInfo.text}
-        </Text>
-      </Box>
+      {columnLayout.status.visible && (
+        <Box {...columnLayout.status.styles}>
+          <Text
+            color={isSelected ? theme.colors.selection : statusInfo.color}
+            wrap="truncate-end"
+          >
+            {statusInfo.text}
+          </Text>
+        </Box>
+      )}
 
-      <Box
-        flexBasis="8%"
-        flexShrink={2}
-        marginRight={1}
-        overflow="hidden"
-        minWidth={0}
-      >
-        <Text color={textColor} wrap="truncate-end">
-          {timeAgo}
-        </Text>
-      </Box>
+      {columnLayout.updated.visible && (
+        <Box {...columnLayout.updated.styles}>
+          <Text color={textColor} wrap="truncate-end">
+            {timeAgo}
+          </Text>
+        </Box>
+      )}
 
-      <Box
-        flexBasis="10%"
-        flexShrink={2}
-        marginRight={1}
-        overflow="hidden"
-        minWidth={0}
-      >
-        <Text
-          color={
-            isSelected
-              ? theme.colors.selection
-              : getUpstreamStatusText(branch.upstreamTrackShort).color
-          }
-          wrap="truncate-end"
-        >
-          {getUpstreamStatusText(branch.upstreamTrackShort).text}
-        </Text>
-      </Box>
+      {columnLayout.upstream.visible && (
+        <Box {...columnLayout.upstream.styles}>
+          <Text
+            color={
+              isSelected
+                ? theme.colors.selection
+                : getUpstreamStatusText(branch.upstreamTrackShort).color
+            }
+            wrap="truncate-end"
+          >
+            {getUpstreamStatusText(branch.upstreamTrackShort).text}
+          </Text>
+        </Box>
+      )}
 
-      <Box width="48%" flexShrink={1} overflow="hidden" minWidth={0}>
-        <Text color={textColor} wrap="truncate-end">
-          {branch.lastCommitMessage}
-        </Text>
-      </Box>
+      {columnLayout.lastCommit.visible && (
+        <Box {...columnLayout.lastCommit.styles}>
+          <Text color={textColor} wrap="truncate-end">
+            {branch.lastCommitMessage}
+          </Text>
+        </Box>
+      )}
     </Box>
   )
 })
