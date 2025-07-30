@@ -51,37 +51,25 @@ export function BranchesListHeader() {
         minWidth={0}
       >
         <Text color={theme.colors.secondary} bold wrap="truncate-end">
-          AGE
+          UPDATED
         </Text>
       </Box>
 
       <Box
-        flexBasis="8%"
+        flexBasis="10%"
         flexShrink={2}
         marginRight={1}
         overflow="hidden"
         minWidth={0}
       >
         <Text color={theme.colors.secondary} bold wrap="truncate-end">
-          COMMIT
+          UPSTREAM
         </Text>
       </Box>
 
-      <Box
-        flexBasis="12%"
-        flexShrink={2}
-        marginRight={1}
-        overflow="hidden"
-        minWidth={0}
-      >
+      <Box width="48%" flexShrink={1} overflow="hidden" minWidth={0}>
         <Text color={theme.colors.secondary} bold wrap="truncate-end">
-          AUTHOR
-        </Text>
-      </Box>
-
-      <Box width="40%" flexShrink={1} overflow="hidden" minWidth={0}>
-        <Text color={theme.colors.secondary} bold wrap="truncate-end">
-          MESSAGE
+          LAST COMMIT
         </Text>
       </Box>
     </Box>

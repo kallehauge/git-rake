@@ -10,8 +10,9 @@ export type GitBranch = {
   isMerged: boolean
   isStale: boolean
   staleDays: number
-  aheadBy?: number
-  behindBy?: number
+  upstreamBranch: string | null
+  upstreamTrack: string | null
+  upstreamTrackShort: string | null
 }
 
 export type GitTrashBranch = GitBranch & {

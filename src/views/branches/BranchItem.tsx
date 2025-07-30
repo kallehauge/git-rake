@@ -29,11 +29,6 @@ export const BranchItem = React.memo(function BranchItem({
   )
 
   const textColor = isSelected ? theme.colors.selection : theme.colors.text
-  const branchNameColor = isSelected
-    ? theme.colors.selection
-    : branch.isCurrent
-      ? theme.colors.primary
-      : theme.colors.text
 
   const timeAgo = useMemo(
     () => getCompactTimeAgo(branch.lastCommitDate),
@@ -41,9 +36,30 @@ export const BranchItem = React.memo(function BranchItem({
   )
 
   const statusInfo = useMemo(
-    () => getBranchStatus(branch, theme.colors),
-    [branch, theme.colors],
+    () => getBranchStatus(branch, theme),
+    [branch, theme],
   )
+
+  const getUpstreamStatusText = (
+    status: string | null,
+  ): { text: string; color: string } => {
+    if (status === null) return { text: '—', color: theme.colors.secondary }
+
+    switch (status) {
+      case '>':
+        return { text: 'ahead', color: theme.colors.success }
+      case '<':
+        return { text: 'behind', color: theme.colors.warning }
+      case '<>':
+        return { text: 'diverged', color: theme.colors.error }
+      case '=':
+        return { text: 'in sync', color: theme.colors.success }
+      case '[gone]':
+        return { text: 'gone', color: theme.colors.error }
+      default:
+        return { text: '—', color: theme.colors.secondary }
+    }
+  }
 
   return (
     <Box paddingX={1} paddingY={0} overflow="hidden" width="100%">
@@ -58,11 +74,7 @@ export const BranchItem = React.memo(function BranchItem({
         overflow="hidden"
         minWidth={0}
       >
-        <Text
-          color={branchNameColor}
-          bold={branch.isCurrent}
-          wrap="truncate-end"
-        >
+        <Text color={textColor} wrap="truncate-end">
           {branch.name}
         </Text>
       </Box>
@@ -89,49 +101,32 @@ export const BranchItem = React.memo(function BranchItem({
         overflow="hidden"
         minWidth={0}
       >
-        <Text
-          color={isSelected ? theme.colors.selection : theme.colors.secondary}
-          wrap="truncate-end"
-        >
+        <Text color={textColor} wrap="truncate-end">
           {timeAgo}
         </Text>
       </Box>
 
       <Box
-        flexBasis="8%"
+        flexBasis="10%"
         flexShrink={2}
         marginRight={1}
         overflow="hidden"
         minWidth={0}
       >
         <Text
-          color={isSelected ? theme.colors.selection : theme.colors.secondary}
+          color={
+            isSelected
+              ? theme.colors.selection
+              : getUpstreamStatusText(branch.upstreamTrackShort).color
+          }
           wrap="truncate-end"
         >
-          {branch.lastCommitHash.substring(0, 7)}
+          {getUpstreamStatusText(branch.upstreamTrackShort).text}
         </Text>
       </Box>
 
-      <Box
-        flexBasis="12%"
-        flexShrink={2}
-        marginRight={1}
-        overflow="hidden"
-        minWidth={0}
-      >
-        <Text
-          color={isSelected ? theme.colors.selection : theme.colors.secondary}
-          wrap="truncate-end"
-        >
-          {branch.lastCommitAuthor || '—'}
-        </Text>
-      </Box>
-
-      <Box width="40%" flexShrink={1} overflow="hidden" minWidth={0}>
-        <Text
-          color={isSelected ? theme.colors.selection : theme.colors.secondary}
-          wrap="truncate-end"
-        >
+      <Box width="48%" flexShrink={1} overflow="hidden" minWidth={0}>
+        <Text color={textColor} wrap="truncate-end">
           {branch.lastCommitMessage}
         </Text>
       </Box>

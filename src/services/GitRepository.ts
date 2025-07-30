@@ -200,6 +200,9 @@ export class GitRepository {
         '%(subject)',
         '%(objectname)', // Full hash for merge checking
         '%(authorname)',
+        '%(upstream:short)',
+        '%(upstream:track)',
+        '%(upstream:trackshort)',
       ].join('%09')
 
       const rawResult = await this.git.raw([
@@ -222,8 +225,17 @@ export class GitRepository {
         // Skip empty lines that can occur from trailing newlines in git output.
         // The --omit-empty flag handles empty format fields, but not empty lines from string splitting.
         if (!line) continue
-        const [refname, shortname, dateStr, subject, hash, author] =
-          line.split('\t')
+        const [
+          refname,
+          shortname,
+          dateStr,
+          subject,
+          hash,
+          author,
+          upstreamShort,
+          upstreamTrack,
+          upstreamTrackShort,
+        ] = line.split('\t')
 
         const date = new Date(dateStr)
         const staleDays = differenceInDays(new Date(), date)
@@ -239,8 +251,9 @@ export class GitRepository {
           staleDays,
           isCurrent: shortname === currentBranch,
           isRemote: branchType === 'remotes',
-          aheadBy: undefined,
-          behindBy: undefined,
+          upstreamBranch: upstreamShort || null,
+          upstreamTrack: upstreamTrack || null,
+          upstreamTrackShort: upstreamTrackShort || null,
         }
 
         if (branchType === 'trash') {

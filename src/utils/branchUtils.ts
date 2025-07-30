@@ -27,39 +27,17 @@ export type BranchStatus = {
 
 export function getBranchStatus(
   branch: GitBranch,
-  colors: AppTheme['colors'],
+  theme: AppTheme,
 ): BranchStatus {
-  if (branch.isCurrent) {
-    return { text: 'current', color: colors.primary }
-  }
-
   if (branch.isMerged) {
-    return { text: 'merged', color: colors.success }
-  }
-
-  if (branch.aheadBy !== undefined && branch.behindBy !== undefined) {
-    if (branch.aheadBy === 0 && branch.behindBy === 0) {
-      return { text: 'up-to-date', color: colors.success }
-    }
-    if (branch.aheadBy > 0 && branch.behindBy > 0) {
-      return {
-        text: `+${branch.aheadBy}/-${branch.behindBy}`,
-        color: colors.warning,
-      }
-    }
-    if (branch.aheadBy > 0) {
-      return { text: `+${branch.aheadBy}`, color: colors.success }
-    }
-    if (branch.behindBy > 0) {
-      return { text: `-${branch.behindBy}`, color: colors.warning }
-    }
+    return { text: 'merged', color: theme.colors.error }
   }
 
   if (branch.isStale) {
-    return { text: 'stale', color: colors.warning }
+    return { text: 'stale', color: theme.colors.warning }
   }
 
-  return { text: 'unmerged', color: colors.error }
+  return { text: 'unmerged', color: theme.colors.text }
 }
 
 export function getSelectionIndicator(

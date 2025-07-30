@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { GitRepository } from '@services/GitRepository.js'
 import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { ViewLayout } from '@views/app/ViewLayout.js'
 import { Spinner } from '@components/Spinner.js'
-import { TrackingStatus } from './TrackingStatus.js'
+import { getBranchStatus } from '@utils/branchUtils.js'
 
 type BranchViewProps = {
   gitRepo: GitRepository
@@ -20,20 +20,10 @@ export const BranchView = React.memo(function BranchView({
   const { currentBranch } = useBranchDataContext()
   const [gitLog, setGitLog] = useState<string>('')
   const [loadingGitLog, setLoadingGitLog] = useState(false)
-  const [aheadBehindData, setAheadBehindData] = useState<
-    | {
-        aheadBy: number
-        behindBy: number
-      }
-    | null
-    | 'not-applicable'
-  >(null)
-  const [loadingAheadBehind, setLoadingAheadBehind] = useState(false)
 
   useEffect(() => {
     if (!currentBranch) {
       setGitLog('')
-      setAheadBehindData(null)
       return
     }
 
@@ -43,20 +33,6 @@ export const BranchView = React.memo(function BranchView({
       .then(setGitLog)
       .catch(() => setGitLog('Failed to load branch log'))
       .finally(() => setLoadingGitLog(false))
-  }, [currentBranch, gitRepo])
-
-  useEffect(() => {
-    if (!currentBranch || currentBranch.isRemote) {
-      setAheadBehindData('not-applicable')
-      return
-    }
-
-    setLoadingAheadBehind(true)
-    gitRepo
-      .getBranchAheadBehind(currentBranch.name)
-      .then(data => setAheadBehindData(data || 'not-applicable'))
-      .catch(() => setAheadBehindData(null))
-      .finally(() => setLoadingAheadBehind(false))
   }, [currentBranch, gitRepo])
 
   useInput(
@@ -73,6 +49,14 @@ export const BranchView = React.memo(function BranchView({
   const statusBarContent = (
     <Text color={theme.colors.text}>{currentBranch?.name}</Text>
   )
+
+  const statusInfo = useMemo(() => {
+    if (!currentBranch) {
+      return { text: 'Loading...', color: 'white' }
+    }
+
+    return getBranchStatus(currentBranch, theme)
+  }, [currentBranch, theme])
 
   if (!currentBranch) {
     return (
@@ -105,50 +89,48 @@ export const BranchView = React.memo(function BranchView({
     >
       <Box flexDirection="column">
         <Box flexDirection="column" paddingX={1} paddingY={1}>
-          <Text color={theme.colors.text}>
-            <Text color={theme.colors.secondary}>Status: </Text>
-            {currentBranch.isCurrent && (
-              <Text color={theme.colors.primary}>Current</Text>
-            )}
-            {currentBranch.isMerged && !currentBranch.isCurrent && (
-              <Text color={theme.colors.success}>Merged</Text>
-            )}
-            {!currentBranch.isMerged && !currentBranch.isCurrent && (
-              <Text color={theme.colors.warning}>Unmerged</Text>
-            )}
-            {currentBranch.isStale && (
-              <Text color={theme.colors.warning}>
-                {' '}
-                • Stale ({currentBranch.staleDays} days)
-              </Text>
-            )}
-          </Text>
+          <Box flexDirection="row">
+            <Text color={theme.colors.primary}>Status: </Text>
+            <Text color={statusInfo.color} wrap="truncate-end">
+              {statusInfo.text}
+            </Text>
+          </Box>
 
-          <Text color={theme.colors.text}>
-            <Text color={theme.colors.secondary}>Type: </Text>
-            {!currentBranch.isRemote ? 'Local' : 'Remote'}
-          </Text>
-
-          <Text color={theme.colors.text}>
-            <Text color={theme.colors.secondary}>Last Commit: </Text>
-            {currentBranch.lastCommitHash.substring(0, 8)}
-          </Text>
+          <Box flexDirection="row">
+            <Text color={theme.colors.primary}>Remote: </Text>
+            <Text color={theme.colors.text}>
+              {!currentBranch.isRemote ? 'Local' : 'Remote'}
+            </Text>
+          </Box>
 
           {currentBranch.lastCommitAuthor && (
-            <Text color={theme.colors.text}>
-              <Text color={theme.colors.secondary}>Author: </Text>
-              {currentBranch.lastCommitAuthor}
-            </Text>
+            <Box flexDirection="row">
+              <Text color={theme.colors.primary}>Author: </Text>
+              <Text color={theme.colors.text}>
+                {currentBranch.lastCommitAuthor}
+              </Text>
+            </Box>
           )}
 
           {!currentBranch.isRemote && (
-            <Text color={theme.colors.text}>
-              <Text color={theme.colors.secondary}>Tracking: </Text>
-              <TrackingStatus
-                loading={loadingAheadBehind}
-                data={aheadBehindData}
-              />
-            </Text>
+            <Box flexDirection="row">
+              <Text color={theme.colors.primary}>Tracking: </Text>
+              {currentBranch.upstreamBranch !== null ? (
+                <>
+                  <Text color={theme.colors.text}>
+                    {currentBranch.upstreamBranch}
+                  </Text>
+                  {currentBranch.upstreamTrack !== null && (
+                    <Text color={theme.colors.warning}>
+                      {' '}
+                      {currentBranch.upstreamTrack}
+                    </Text>
+                  )}
+                </>
+              ) : (
+                <Text color={theme.colors.muted}>No upstream</Text>
+              )}
+            </Box>
           )}
         </Box>
 
