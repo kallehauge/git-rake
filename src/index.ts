@@ -1,15 +1,8 @@
 import { Command } from 'commander'
 import { App } from '@views/app/App.js'
-import { interactiveAppInit, nonInteractiveAppInit } from '@utils/bootstrap.js'
-import { GitTrashBranch } from '@services/GitRepository.types.js'
+import { restoreCommand, trashCommand } from '@commands/index.js'
 
 const program = new Command()
-
-type CommandOptions = {
-  cwd?: string
-  includeRemote?: boolean
-  debug?: boolean
-}
 
 program
   .name('git-rake')
@@ -25,43 +18,26 @@ if (process.env.DEV === 'true') {
   program.option('-r, --include-remote', 'Include remote tracking branches')
 }
 
-program.action(async (_options: CommandOptions, command: Command) =>
-  interactiveAppInit(command),
-)
-
-program
-  .command('clean')
-  .description('Clean up local branches interactively')
-  .action(async (options: CommandOptions, command: Command) => {
-    interactiveAppInit(command, {
-      includeRemote: options.includeRemote || null,
-    })
-  })
-
-const restoreCommandNonInteractive = async (
-  branchName: string,
-  command: Command,
-) => {
-  const { gitRepo } = await nonInteractiveAppInit(command)
-
-  if (!branchName) {
-    console.error('No branch name provided')
-    process.exit(1)
-  }
-
-  try {
-    const cleanBranchName = gitRepo.parseUserInput(branchName, 'trash')
-    await gitRepo.restoreBranchFromTrash(cleanBranchName)
-    console.log(`✅ Restored branch: ${cleanBranchName}`)
-    process.exit(0)
-  } catch (error) {
-    console.error(
-      `❌ Failed to restore branch ${branchName}:`,
-      error instanceof Error ? error.message : error,
-    )
-    process.exit(1)
-  }
-}
+// Base command reserved for future functionality
+program.action(async () => {
+  console.log('Available commands:')
+  console.log(
+    '  trash, branch      Interactive branch management (trash/delete)',
+  )
+  console.log('  trash --list       List trashed branches')
+  console.log('  trash --prune      Prune old trash entries')
+  console.log('  trash <branch>     Move branch to trash')
+  console.log('  restore            Interactive restore mode')
+  console.log('  restore <branch>   Restore specific branch')
+  console.log('')
+  console.log('Aliases:')
+  console.log('  branch             Alias for trash command')
+  console.log('')
+  console.log(
+    'Run "git-rake <command> --help" for more information on a command.',
+  )
+  process.exit(0)
+})
 
 program
   .command('restore')
@@ -73,104 +49,21 @@ program
   .summary(
     'You can either restore a single branch or enter interactive mode to restore multiple branches.',
   )
-  .action(
-    async (
-      branchName: string | undefined,
-      _options: CommandOptions,
-      command: Command,
-    ) => {
-      if (!branchName) {
-        interactiveAppInit(command, {
-          restoreMode: true,
-        })
-      } else {
-        restoreCommandNonInteractive(branchName, command)
-      }
-    },
-  )
-
-const trashCommandList = async (command: Command) => {
-  const { gitRepo } = await nonInteractiveAppInit(command)
-  try {
-    const trashBranches = await gitRepo.getBranches('trash')
-
-    if (trashBranches.length === 0) {
-      console.log('No branches in trash')
-      process.exit(0)
-    }
-
-    console.log('Branches in trash:')
-    trashBranches.forEach((branch: GitTrashBranch) => {
-      console.log(
-        `  • ${branch.name} (${branch.deletionDate.toLocaleDateString()})`,
-      )
-    })
-    process.exit(0)
-  } catch (error) {
-    console.error(
-      'Failed to list trash:',
-      error instanceof Error ? error.message : error,
-    )
-    process.exit(1)
-  }
-}
-
-const trashCommandMoveToTrash = async (
-  branchName: string,
-  command: Command,
-) => {
-  const { gitRepo } = await nonInteractiveAppInit(command)
-  try {
-    const cleanBranchName = gitRepo.parseUserInput(branchName, 'heads')
-    await gitRepo.moveBranchToTrash(cleanBranchName)
-    console.log(`✅ Moved branch ${cleanBranchName} to trash`)
-    process.exit(0)
-  } catch (error) {
-    console.error(`❌ Failed to move branch ${branchName} to trash:`)
-    console.error(error)
-    process.exit(1)
-  }
-}
+  .action(restoreCommand)
 
 program
   .command('trash')
+  .alias('branch')
   .argument('[branch-name]', '(Optional) Name of individual branch to trash.')
-  .description('List trashed branches or move branches to trash')
+  .option('-l, --list', 'List trashed branches')
+  .option('-p, --prune', 'Prune old entries from trash')
+  .description(
+    'Interactive branch management (trash/delete), list trashed branches, move branches to trash, or prune old trash',
+  )
   .summary(
-    `If you don't provide a branch name, it will list all trashed branches. If you provide a branch name, it will move that branch to trash.`,
+    'Enter interactive mode for branch management (default), list trashed branches (--list), move a specific branch to trash (<branch-name>), or prune old trash (--prune). Alias: branch',
   )
-  .action(
-    async (
-      branchName: string | undefined,
-      _options: CommandOptions,
-      command: Command,
-    ) => {
-      if (!branchName) {
-        trashCommandList(command)
-      } else {
-        trashCommandMoveToTrash(branchName, command)
-      }
-    },
-  )
-
-program
-  .command('cleanup')
-  .description('Clean up old entries from trash')
-  .action(async (_options: CommandOptions, command: Command) => {
-    const { gitRepo } = await nonInteractiveAppInit(command)
-
-    try {
-      await gitRepo.cleanupTrash()
-      console.log('✅ Cleaned up old trash entries')
-      process.exit(0)
-    } catch (error) {
-      console.error(
-        'Failed to cleanup trash:',
-        error instanceof Error ? error.message : error,
-      )
-      process.exit(1)
-    }
-  })
+  .action(trashCommand)
 
 program.parseAsync()
 

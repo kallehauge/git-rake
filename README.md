@@ -27,11 +27,24 @@ npx git-rake
 
 ## Usage
 
-### Interactive Mode (Default)
+### Available Commands
 ```bash
-git-rake
-# or
-git-rake clean
+git-rake                    # Show command help
+git-rake trash              # Interactive branch management (trash/delete)
+git-rake branch             # Alias for trash command
+git-rake trash --list       # List trashed branches
+git-rake trash --prune      # Prune trashed branches that are past TTL
+git-rake trash <branch>     # Move specific branch to trash
+git-rake restore            # Interactive restore mode
+git-rake restore <branch>   # Restore specific branch
+```
+
+### Interactive Mode
+```bash
+# Enter interactive branch management
+git-rake trash
+# or using the alias
+git-rake branch
 ```
 
 ### Keyboard Controls
@@ -39,30 +52,33 @@ git-rake clean
 - `Space` - Select/deselect branch for batch operations
 - `/` - Enter search mode
 - `f` - Cycle filters (all/merged/stale/unmerged)
-- `d` - Delete selected branches
+- `t` - Trash selected branches (soft delete)
+- `d` - Delete selected branches (permanent)
+- `r` - Restore selected branches (in restore mode)
 - `Esc`- Cancel current operation
 - `Ctrl+C` - Exit
 
-### Command Line Options
+### Command Examples
 
 ```bash
-# Include remote tracking branches
-git-rake clean --include-remote
+# Interactive branch management
+git-rake trash
+git-rake branch  # An alias that does the same as `trash`
+
+# List trashed branches
+git-rake trash --list
+
+# Prune trashed branches that are past TTL
+git-rake trash --prune
+
+# Move specific branch to trash
+git-rake trash feature-branch
 
 # Restore deleted branches interactively
 git-rake restore
 
 # Restore specific branch
 git-rake restore my-feature-branch
-
-# List branches in trash
-git-rake trash
-
-# Clean up old trash entries
-git-rake cleanup
-
-# Generate example config
-git-rake config
 ```
 
 ## Themes
@@ -139,9 +155,25 @@ git config --global alias.rake '!git-rake'
 
 Then use:
 ```bash
-git rake
-git rake clean
-git rake restore
+git rake trash              # Interactive branch management
+git rake restore            # Interactive restore mode
+git rake trash --prune      # Prune trashed branches that are past TTL
+```
+
+### Suggested Git Aliases
+
+```bash
+# Common aliases for branch management
+git config --global alias.trash '!git-rake trash'
+git config --global alias.restore '!git-rake restore'
+git config --global alias.prune-trash '!git-rake trash --prune'
+```
+
+Then use:
+```bash
+git trash                   # Interactive branch management
+git restore                 # Interactive restore mode
+git prune-trash             # Prune trashed branches that are past TTL
 ```
 
 ## Development
