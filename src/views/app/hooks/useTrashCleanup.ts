@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import type { GitRepository } from '@services/GitRepository.js'
-import type { GitRakeConfig } from '@utils/config.js'
+import type { GitRakeConfig } from '@utils/config.types.js'
 import { logger } from '@utils/logger.js'
 
 type UseTrashCleanupProps = {

@@ -1,7 +1,20 @@
 import { createContext, useContext, ReactNode, useState, useMemo } from 'react'
 import { getTheme } from '@utils/themes/index.js'
-import type { ViewState, AppUIContextData } from './AppUIContext.types.js'
-import type { GitRakeConfig } from '@utils/config.js'
+import type { GitRakeConfig } from '@utils/config.types.js'
+import type { AppTheme } from '@utils/themes/themes.types.js'
+
+type ViewState = 'branches' | 'branch' | 'confirmation'
+
+type AppUIContextData = {
+  currentView: ViewState
+  inputLocked: boolean
+  showExitWarning: boolean
+  config: GitRakeConfig
+  theme: AppTheme
+  setCurrentView: (view: ViewState) => void
+  setInputLocked: (locked: boolean) => void
+  setShowExitWarning: (show: boolean) => void
+}
 
 const AppUIContext = createContext<AppUIContextData | undefined>(undefined)
 

@@ -1,24 +1,6 @@
 import { useMemo } from 'react'
 import { useScreenSize } from 'fullscreen-ink'
-import type { BoxProps } from 'ink'
-
-type BoxLayoutProps = Pick<
-  BoxProps,
-  'width' | 'flexGrow' | 'flexShrink' | 'minWidth' | 'overflow' | 'marginRight'
->
-type ColumnName =
-  | 'selection'
-  | 'branchName'
-  | 'status'
-  | 'updated'
-  | 'upstream'
-  | 'lastCommit'
-type ColumnConfig = {
-  visible: boolean
-  styles: BoxLayoutProps
-}
-
-export type BranchesListLayout = Record<ColumnName, ColumnConfig>
+import type { BranchesListLayout, BoxLayoutProps } from '../types.js'
 
 const BREAKPOINTS = {
   STATUS: 55,

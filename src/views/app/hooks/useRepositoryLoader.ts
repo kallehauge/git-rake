@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { GitRepository } from '@services/GitRepository.js'
 import type { GitBranch } from '@services/GitRepository.types.js'
-import { GitRakeConfig } from '@utils/config.js'
+import type { GitRakeConfig } from '@utils/config.types.js'
 
 type UseRepositoryLoaderProps = {
   gitRepo: GitRepository

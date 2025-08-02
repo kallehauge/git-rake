@@ -1,19 +1,5 @@
-// AppTheme interface
-export type AppTheme = {
-  name: string
-  colors: {
-    primary: string
-    secondary: string
-    success: string
-    warning: string
-    error: string
-    text: string
-    border: string
-    selection: string
-    muted: string
-    accent: string
-  }
-}
+import type { AppTheme } from './themes.types.js'
+export type { AppTheme }
 
 // Import all theme families
 import { autoTheme } from './families/auto.js'

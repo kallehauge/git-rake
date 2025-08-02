@@ -1,15 +1,21 @@
 import { useMemo } from 'react'
 import type { GitBranch } from '@services/GitRepository.types.js'
-import { AppTheme } from '@utils/themes/index.js'
-import { BranchFilter } from '@utils/filters.js'
-import { StatusBarInfo } from '@utils/derivedState.js'
-import type { UIOperationType } from './branches.types.js'
+import type { AppTheme } from '@utils/themes/themes.types.js'
+import type { BranchFilter } from '@utils/filters.types.js'
+import type { UIOperationType } from '../types.js'
 
 type UseBranchesDisplayProps = {
   pendingOperation: UIOperationType | null
   selectedBranches: GitBranch[]
   contextFilteredBranches: GitBranch[]
-  statusBarInfo: StatusBarInfo
+  statusBarInfo: {
+    filterType: BranchFilter
+    totalBranches: number
+    filteredBranches: number
+    selectedCount: number
+    searchMode: boolean
+    searchQuery: string
+  }
   branches: GitBranch[]
   theme: AppTheme
 }
@@ -94,5 +100,3 @@ export function useBranchesDisplay({
     statusBarProps,
   }
 }
-
-export type { BranchesStatusBarProps }

@@ -1,14 +1,20 @@
 import { createContext, useContext, ReactNode, useState, useMemo } from 'react'
-import type { SelectionContextData } from './SelectionContext.types.js'
 
-const defaultSelectionState: SelectionContextData = {
+type SelectionContextState = {
+  selectedBranchNames: Set<string>
+  selectedIndex: number
+  setSelectedIndex: (index: number) => void
+  setSelectedBranchNames: (names: Set<string>) => void
+}
+
+const defaultSelectionState: SelectionContextState = {
   selectedBranchNames: new Set(),
   selectedIndex: 0,
   setSelectedIndex: () => {},
   setSelectedBranchNames: () => {},
 }
 
-export const SelectionContext = createContext<SelectionContextData>(
+export const SelectionContext = createContext<SelectionContextState>(
   defaultSelectionState,
 )
 

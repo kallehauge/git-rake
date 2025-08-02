@@ -1,6 +1,6 @@
 import { Box, Text } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
-import type { BranchesListLayout } from './hooks/useBranchesListLayout.js'
+import type { BranchesListLayout } from './types.js'
 
 type BranchesListHeaderProps = {
   columnLayout: BranchesListLayout

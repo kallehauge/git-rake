@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { Key } from 'ink'
 import { useSearchContext } from '@contexts/SearchContext.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
-import { BranchFilter } from '@utils/filters.js'
+import type { BranchFilter } from '@utils/filters.types.js'
 
 type UseBranchesSearchReturn = {
   handleSearchInput: (input: string, key: Key) => boolean

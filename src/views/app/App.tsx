@@ -7,7 +7,7 @@ import { SelectionProvider } from '@contexts/SelectionContext.js'
 import { BranchDataProvider } from '@contexts/BranchDataContext.js'
 import { ErrorView } from '@views/error/ErrorView.js'
 import { StrictMode, useMemo, useEffect, useRef } from 'react'
-import { GitRakeConfig } from '@utils/config.js'
+import type { GitRakeConfig } from '@utils/config.types.js'
 import { useTrashCleanup } from './hooks/useTrashCleanup.js'
 
 type AppProps = {

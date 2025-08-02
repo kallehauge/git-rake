@@ -1,5 +1,5 @@
 import { Text } from 'ink'
-import { AppTheme } from '@utils/themes/index.js'
+import type { AppTheme } from '@utils/themes/themes.types.js'
 
 type BranchesStatusBarContentProps = {
   selectedCount: number

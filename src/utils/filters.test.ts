@@ -1,5 +1,5 @@
 import { filterBranches, getFilterOptionsForType } from './filters'
-import { GitBranch } from '@types'
+import type { GitBranch } from '../services/GitRepository.types.js'
 
 const mockBranch = (overrides: Partial<GitBranch> = {}): GitBranch => ({
   name: 'test-branch',
@@ -9,8 +9,13 @@ const mockBranch = (overrides: Partial<GitBranch> = {}): GitBranch => ({
   lastCommitDate: new Date(),
   lastCommitMessage: 'Test commit',
   lastCommitHash: 'abc123',
+  lastCommitAuthor: 'Test Author',
   isMerged: false,
   isStale: false,
+  staleDays: 0,
+  upstreamBranch: null,
+  upstreamTrack: null,
+  upstreamTrackShort: null,
   ...overrides,
 })
 

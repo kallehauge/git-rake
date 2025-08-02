@@ -2,14 +2,34 @@ import { useCallback, useState, useMemo } from 'react'
 import { GitRepository } from '@services/GitRepository.js'
 import { useBranchesSelection } from './useBranchesSelection.js'
 import { logger } from '@utils/logger.js'
-import { UI_OPERATIONS } from './branches.types.js'
-import type {
-  BranchOperationType,
-  UIOperationType,
-  ConfirmationConfig,
-  UseBranchesOperationsReturn,
-} from './branches.types.js'
+import { BRANCH_OPERATIONS } from '../constants.js'
+import type { UIOperationType } from '../types.js'
 import type { GitBranch } from '@services/GitRepository.types.js'
+
+type BranchOperationType =
+  (typeof BRANCH_OPERATIONS)[keyof typeof BRANCH_OPERATIONS]
+
+type ConfirmationConfig = {
+  type: 'alert' | 'warning' | 'info'
+  confirmText: string
+  cancelText: string
+  message?: string
+}
+
+type UseBranchesOperationsReturn = {
+  performOperation: (
+    operation: BranchOperationType,
+    branches: GitBranch[],
+  ) => Promise<void>
+  pendingOperation: UIOperationType | null
+  startConfirmation: (operation: UIOperationType) => void
+  createOperationHandler: (
+    selectedBranches: GitBranch[],
+    onRefresh: () => Promise<void>,
+  ) => () => Promise<void>
+  handleCancel: () => void
+  confirmationConfig: ConfirmationConfig | null
+}
 
 export function useBranchesOperations(
   gitRepo: GitRepository,
@@ -68,20 +88,20 @@ export function useBranchesOperations(
   const createConfirmationConfig = useCallback(
     (operation: UIOperationType): ConfirmationConfig => {
       const configs = {
-        [UI_OPERATIONS.DELETE]: {
+        [BRANCH_OPERATIONS.DELETE]: {
           type: 'alert' as const,
           confirmText: 'Delete (Y)',
           cancelText: 'Cancel (N)',
           message: '⚠️ WARNING: This will permanently delete branches!',
         },
-        [UI_OPERATIONS.TRASH]: {
+        [BRANCH_OPERATIONS.TRASH]: {
           type: 'warning' as const,
           confirmText: 'Trash (Y)',
           cancelText: 'Cancel (N)',
           message:
             'Note: Branches will be moved to trash and can be restored later.',
         },
-        [UI_OPERATIONS.RESTORE]: {
+        [BRANCH_OPERATIONS.RESTORE]: {
           type: 'info' as const,
           confirmText: 'Restore (Y)',
           cancelText: 'Cancel (N)',

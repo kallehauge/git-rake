@@ -1,14 +1,80 @@
 import { createContext, useContext, ReactNode, useMemo } from 'react'
-import type { BranchContextData } from './BranchDataContext.types.js'
 import type { GitBranch } from '@services/GitRepository.types.js'
+import type { BranchFilter } from '@utils/filters.types.js'
 import {
-  computeFilteredBranches,
-  computeSelectedBranches,
-  computeStatusBarInfo,
-  computeCurrentBranch,
-} from '@utils/derivedState.js'
+  getFilterOptionsForType,
+  filterBranches,
+  BranchSearcher,
+} from '@utils/filters.js'
 import { SearchContext } from './SearchContext.js'
 import { SelectionContext } from './SelectionContext.js'
+
+type StatusBarInfo = {
+  filterType: BranchFilter
+  totalBranches: number
+  filteredBranches: number
+  selectedCount: number
+  searchMode: boolean
+  searchQuery: string
+}
+
+type BranchContextData = {
+  branches: GitBranch[]
+  filteredBranches: GitBranch[]
+  selectedBranches: GitBranch[]
+  currentBranch: GitBranch | null
+  statusBarInfo: StatusBarInfo
+}
+
+function computeFilteredBranches(
+  branches: GitBranch[],
+  searchQuery: string,
+  filterType: BranchFilter,
+): GitBranch[] {
+  const filterOptions = getFilterOptionsForType(filterType)
+  let filteredBranches = filterBranches(branches, filterOptions)
+
+  if (searchQuery.trim()) {
+    const searcher = new BranchSearcher(filteredBranches)
+    filteredBranches = searcher.search(searchQuery)
+  }
+
+  return filteredBranches
+}
+
+function computeSelectedBranches(
+  branches: GitBranch[],
+  selectedBranchNames: Set<string>,
+): GitBranch[] {
+  return Array.from(selectedBranchNames)
+    .map(name => branches.find(b => b.name === name))
+    .filter(Boolean) as GitBranch[]
+}
+
+function computeStatusBarInfo(
+  filterType: BranchFilter,
+  totalBranches: number,
+  filteredBranches: number,
+  selectedCount: number,
+  searchMode: boolean,
+  searchQuery: string,
+): StatusBarInfo {
+  return {
+    filterType,
+    totalBranches,
+    filteredBranches,
+    selectedCount,
+    searchMode,
+    searchQuery,
+  }
+}
+
+function computeCurrentBranch(
+  filteredBranches: GitBranch[],
+  selectedIndex: number,
+): GitBranch | null {
+  return filteredBranches[selectedIndex] || null
+}
 
 const defaultBranchData: BranchContextData = {
   branches: [],

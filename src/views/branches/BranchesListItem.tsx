@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { Box, Text } from 'ink'
 import type { GitBranch } from '@services/GitRepository.types.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
-import type { BranchesListLayout } from './hooks/useBranchesListLayout.js'
+import type { BranchesListLayout } from './types.js'
 import {
   getCompactTimeAgo,
   getBranchStatus,

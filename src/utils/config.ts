@@ -1,14 +1,7 @@
 import { cosmiconfigSync } from 'cosmiconfig'
-import type { GitConfig } from '@services/GitRepository.types.js'
+import type { GitRakeConfig } from './config.types.js'
 import { homedir } from 'os'
 import { simpleGit } from 'simple-git'
-
-export type GitRakeConfig = GitConfig & {
-  theme: string
-  includeRemote: boolean
-  autoCleanupTrash: boolean
-  excludedBranches: string[]
-}
 
 const defaultConfig: GitRakeConfig = {
   staleDaysThreshold: 30,

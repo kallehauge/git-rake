@@ -1,15 +1,14 @@
 import Fuse from 'fuse.js'
 import type { GitBranch } from '@services/GitRepository.types.js'
+import type { BranchFilter } from './filters.types.js'
 
-export type BranchFilterOptions = {
+type BranchFilterOptions = {
   showMerged: boolean
   showUnmerged: boolean
   showStale: boolean
   showLocal: boolean
   showRemote: boolean
 }
-
-export type BranchFilter = 'all' | 'merged' | 'stale' | 'unmerged'
 
 export function filterBranches(
   branches: GitBranch[],

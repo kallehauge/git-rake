@@ -1,5 +1,5 @@
 import type { GitBranch } from '@services/GitRepository.types.js'
-import { AppTheme } from '@utils/themes/index.js'
+import type { AppTheme } from '@utils/themes/themes.types.js'
 
 export function getCompactTimeAgo(date: Date): string {
   const now = new Date()
@@ -20,7 +20,7 @@ export function getCompactTimeAgo(date: Date): string {
   return `${diffInYears}y ago`
 }
 
-export type BranchStatus = {
+type BranchStatus = {
   text: string
   color: string
 }

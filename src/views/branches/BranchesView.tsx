@@ -5,7 +5,7 @@ import { useBranchDataContext } from '@contexts/BranchDataContext.js'
 import { useBranchesSearch } from './hooks/useBranchesSearch.js'
 import { useBranchesSelection } from './hooks/useBranchesSelection.js'
 import { useBranchesOperations } from './hooks/useBranchesOperations.js'
-import { UI_OPERATIONS } from './hooks/branches.types.js'
+import { BRANCH_OPERATIONS } from './constants.js'
 import { useBranchesDisplay } from './hooks/useBranchesDisplay.js'
 import { GitRepository } from '@services/GitRepository.js'
 import { BranchesList } from './BranchesList.js'
@@ -86,17 +86,17 @@ export const BranchesView = React.memo(function BranchesView({
     }
 
     if (input === 't' && selectedBranches.length > 0 && !restoreMode) {
-      startConfirmation(UI_OPERATIONS.TRASH)
+      startConfirmation(BRANCH_OPERATIONS.TRASH)
       return
     }
 
     if (input === 'd' && selectedBranches.length > 0 && !restoreMode) {
-      startConfirmation(UI_OPERATIONS.DELETE)
+      startConfirmation(BRANCH_OPERATIONS.DELETE)
       return
     }
 
     if (input === 'r' && selectedBranches.length > 0 && restoreMode) {
-      startConfirmation(UI_OPERATIONS.RESTORE)
+      startConfirmation(BRANCH_OPERATIONS.RESTORE)
       return
     }
   })

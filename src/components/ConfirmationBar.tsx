@@ -4,21 +4,19 @@ import { Spinner } from './Spinner.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { logger } from '@utils/logger.js'
 
-export type ConfirmationType = 'info' | 'warning' | 'alert'
-
-export const CONFIRMATION_SHORTCUTS = {
-  navigate: '←→',
-  confirm: 'Enter/Y',
-  cancel: 'ESC/N',
-}
-
 type ConfirmationBarProps = {
-  type: ConfirmationType
+  type: 'info' | 'warning' | 'alert'
   children?: React.ReactNode
   confirmText: string
   cancelText: string
   onConfirm: () => Promise<void>
   onCancel: () => void
+}
+
+export const CONFIRMATION_SHORTCUTS = {
+  navigate: '←→',
+  confirm: 'Enter/Y',
+  cancel: 'ESC/N',
 }
 
 export function ConfirmationBar({
