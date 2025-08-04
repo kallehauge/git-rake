@@ -23,6 +23,8 @@ type UseBranchesStateReturn = {
 
   // Navigation actions
   handleListNavigation: (key: Key) => boolean
+  navigateDown: () => void
+  navigateUp: () => void
 }
 
 function getValidatedIndex(index: number, arrayLength: number): number {
@@ -96,23 +98,37 @@ export function useBranchesState(): UseBranchesStateReturn {
     setSelectedBranches(branchMap)
   }, [availableBranches, setSelectedBranches])
 
+  const moveToIndex = useCallback(
+    (newIndex: number) => {
+      const validatedIndex = getValidatedIndex(newIndex, displayBounds)
+      setSelectedIndex(validatedIndex)
+    },
+    [setSelectedIndex, displayBounds],
+  )
+
+  const navigateDown = useCallback(() => {
+    moveToIndex(selectedIndex + 1)
+  }, [moveToIndex, selectedIndex])
+
+  const navigateUp = useCallback(() => {
+    moveToIndex(selectedIndex - 1)
+  }, [moveToIndex, selectedIndex])
+
   const handleListNavigation = useCallback(
     (key: Key): boolean => {
       if (key.upArrow) {
-        const newIndex = getValidatedIndex(selectedIndex - 1, displayBounds)
-        setSelectedIndex(newIndex)
+        moveToIndex(selectedIndex - 1)
         return true
       }
 
       if (key.downArrow) {
-        const newIndex = getValidatedIndex(selectedIndex + 1, displayBounds)
-        setSelectedIndex(newIndex)
+        navigateDown()
         return true
       }
 
       return false
     },
-    [selectedIndex, setSelectedIndex, displayBounds],
+    [moveToIndex, navigateDown, selectedIndex],
   )
 
   return {
@@ -129,5 +145,7 @@ export function useBranchesState(): UseBranchesStateReturn {
 
     // Navigation actions
     handleListNavigation,
+    navigateDown,
+    navigateUp,
   }
 }

@@ -20,8 +20,13 @@ export const BranchesList = memo(function BranchesList({
   const { theme, inputLocked } = useAppUIContext()
   const { selectedIndex, selectedBranches } = useBranchesSelectionContext()
   const { searchQuery } = useSearchContext()
-  const { currentBranch, toggleBranchSelection, handleListNavigation } =
-    useBranchesState()
+  const {
+    currentBranch,
+    toggleBranchSelection,
+    handleListNavigation,
+    navigateDown,
+    navigateUp,
+  } = useBranchesState()
   const columnLayout = useBranchesListLayout()
 
   const renderBranchItem = useCallback(
@@ -44,6 +49,11 @@ export const BranchesList = memo(function BranchesList({
 
       if (input === ' ' && currentBranch) {
         toggleBranchSelection(currentBranch)
+        if (key.shift) {
+          navigateUp()
+        } else {
+          navigateDown()
+        }
         return
       }
     },
