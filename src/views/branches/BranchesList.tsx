@@ -18,7 +18,7 @@ export const BranchesList = memo(function BranchesList({
   branches,
 }: BranchesListProps) {
   const { theme, inputLocked } = useAppUIContext()
-  const { selectedIndex, selectedBranchNames } = useBranchesSelectionContext()
+  const { selectedIndex, selectedBranches } = useBranchesSelectionContext()
   const { searchQuery } = useSearchContext()
   const { currentBranch, toggleBranchSelection, handleListNavigation } =
     useBranchesState()
@@ -30,12 +30,12 @@ export const BranchesList = memo(function BranchesList({
         key={branch.ref}
         branch={branch}
         isSelected={isSelected}
-        isMarked={selectedBranchNames.has(branch.name)}
+        isMarked={selectedBranches.has(branch.name)}
         showSelection={!branch.isCurrent}
         columnLayout={columnLayout}
       />
     ),
-    [selectedBranchNames, columnLayout],
+    [selectedBranches, columnLayout],
   )
 
   useInput(

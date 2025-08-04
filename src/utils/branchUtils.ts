@@ -1,11 +1,5 @@
 import type { GitBranch } from '@services/GitRepository.types.js'
 import type { AppTheme } from '@utils/themes/themes.types.js'
-import type { BranchFilter } from './filters.types.js'
-import {
-  getFilterOptionsForType,
-  filterBranches,
-  BranchSearcher,
-} from './filters.js'
 
 export function getCompactTimeAgo(date: Date): string {
   const now = new Date()
@@ -54,28 +48,4 @@ export function getSelectionIndicator(
   if (branch.isCurrent) return 'x'
   if (!showSelection) return ' '
   return isMarked ? '●' : '○'
-}
-
-export function getFilteredBranches(
-  branches: GitBranch[],
-  selectedBranches: GitBranch[],
-  searchQuery: string,
-  filterType: BranchFilter,
-): GitBranch[] {
-  // Early bail for selection filter - shows user-selected branches
-  if (filterType === 'selected') {
-    return selectedBranches
-  }
-
-  // Property-based filtering for all other filter types
-  const filterOptions = getFilterOptionsForType(filterType)
-  let filteredBranches = filterBranches(branches, filterOptions)
-
-  // Apply search within filtered results
-  if (searchQuery.trim()) {
-    const searcher = new BranchSearcher(filteredBranches)
-    filteredBranches = searcher.search(searchQuery)
-  }
-
-  return filteredBranches
 }

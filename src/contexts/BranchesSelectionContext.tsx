@@ -7,25 +7,24 @@ import {
   useCallback,
 } from 'react'
 import type { GitBranch } from '@services/GitRepository.types.js'
+import type { SelectedBranches } from '@views/branches/types.js'
 
 type BranchesSelectionContextState = {
   branches: GitBranch[]
-  selectedBranchNames: Set<string>
+  selectedBranches: SelectedBranches
   selectedIndex: number
   setSelectedIndex: (index: number) => void
-  setSelectedBranchNames: (names: Set<string>) => void
-  addSelectedBranch: (branchName: string) => void
-  removeSelectedBranch: (branchName: string) => void
+  setSelectedBranches: (branches: SelectedBranches) => void
+  toggleSelectedBranch: (branch: GitBranch) => void
 }
 
 const defaultBranchesSelectionState: BranchesSelectionContextState = {
   branches: [],
-  selectedBranchNames: new Set(),
+  selectedBranches: new Map(),
   selectedIndex: 0,
   setSelectedIndex: () => {},
-  setSelectedBranchNames: () => {},
-  addSelectedBranch: () => {},
-  removeSelectedBranch: () => {},
+  setSelectedBranches: () => {},
+  toggleSelectedBranch: () => {},
 }
 
 const BranchesSelectionContext = createContext<BranchesSelectionContextState>(
@@ -41,40 +40,33 @@ export function BranchesSelectionProvider({
   children,
   branches,
 }: BranchesSelectionProviderProps) {
-  const [selectedBranchNames, setSelectedBranchNames] = useState<Set<string>>(
-    new Set(),
+  const [selectedBranches, setSelectedBranches] = useState<SelectedBranches>(
+    new Map(),
   )
   const [selectedIndex, setSelectedIndex] = useState(0)
 
-  const addSelectedBranch = useCallback((branchName: string) => {
-    setSelectedBranchNames(prev => new Set(prev).add(branchName))
-  }, [])
-
-  const removeSelectedBranch = useCallback((branchName: string) => {
-    setSelectedBranchNames(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(branchName)
-      return newSet
+  const toggleSelectedBranch = useCallback((branch: GitBranch) => {
+    setSelectedBranches(prev => {
+      const newMap = new Map(prev)
+      if (newMap.has(branch.name)) {
+        newMap.delete(branch.name)
+      } else {
+        newMap.set(branch.name, branch)
+      }
+      return newMap
     })
   }, [])
 
   const contextValue = useMemo(
     () => ({
       branches,
-      selectedBranchNames,
+      selectedBranches,
       selectedIndex,
       setSelectedIndex,
-      setSelectedBranchNames,
-      addSelectedBranch,
-      removeSelectedBranch,
+      setSelectedBranches,
+      toggleSelectedBranch,
     }),
-    [
-      branches,
-      selectedBranchNames,
-      selectedIndex,
-      addSelectedBranch,
-      removeSelectedBranch,
-    ],
+    [branches, selectedBranches, selectedIndex, toggleSelectedBranch],
   )
 
   return (

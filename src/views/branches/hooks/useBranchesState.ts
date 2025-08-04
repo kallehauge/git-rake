@@ -3,7 +3,11 @@ import type { Key } from 'ink'
 import type { GitBranch } from '@services/GitRepository.types.js'
 import { useBranchesSelectionContext } from '@contexts/BranchesSelectionContext.js'
 import { useSearchContext } from '@contexts/SearchContext.js'
-import { getFilteredBranches } from '@utils/branchUtils.js'
+import {
+  getFilterOptionsForType,
+  filterBranches,
+  BranchSearcher,
+} from '@utils/filters.js'
 
 type UseBranchesStateReturn = {
   // Display state
@@ -15,7 +19,6 @@ type UseBranchesStateReturn = {
   // Selection actions
   toggleBranchSelection: (branch: GitBranch) => void
   clearSelectedBranches: () => void
-  setSelectedBranches: (branches: GitBranch[]) => void
   selectAllAvailableBranches: () => void
 
   // Navigation actions
@@ -29,33 +32,41 @@ function getValidatedIndex(index: number, arrayLength: number): number {
 export function useBranchesState(): UseBranchesStateReturn {
   const {
     branches,
-    selectedBranchNames,
+    selectedBranches,
     selectedIndex,
     setSelectedIndex,
-    setSelectedBranchNames,
-    addSelectedBranch,
-    removeSelectedBranch,
+    setSelectedBranches,
+    toggleSelectedBranch,
   } = useBranchesSelectionContext()
 
   const { filterType, searchQuery } = useSearchContext()
 
-  const selectedBranches = useMemo(() => {
-    return branches.reduce((acc: GitBranch[], branch) => {
-      if (selectedBranchNames.has(branch.name)) {
-        acc.push(branch)
-      }
-      return acc
-    }, [])
-  }, [branches, selectedBranchNames])
+  // Optimize: Split dependencies to avoid unnecessary re-computation
+  const selectedBranchesArray = useMemo(() => {
+    return Array.from(selectedBranches.values())
+  }, [selectedBranches])
+
+  const filteredBranches = useMemo(() => {
+    // Property-based filtering for non-selected filter types
+    const filterOptions = getFilterOptionsForType(filterType)
+    let filtered = filterBranches(branches, filterOptions)
+
+    // Apply search within filtered results
+    if (searchQuery.trim()) {
+      const searcher = new BranchSearcher(filtered)
+      filtered = searcher.search(searchQuery)
+    }
+
+    return filtered
+  }, [branches, searchQuery, filterType])
 
   const availableBranches = useMemo(() => {
-    return getFilteredBranches(
-      branches,
-      selectedBranches,
-      searchQuery,
-      filterType,
-    )
-  }, [branches, selectedBranches, searchQuery, filterType])
+    // Special case: return user-selected branches for "selected" filter
+    if (filterType === 'selected') {
+      return selectedBranchesArray
+    }
+    return filteredBranches
+  }, [filterType, selectedBranchesArray, filteredBranches])
 
   const displayBounds = availableBranches.length
 
@@ -67,37 +78,24 @@ export function useBranchesState(): UseBranchesStateReturn {
   const toggleBranchSelection = useCallback(
     (branch: GitBranch) => {
       if (branch.isCurrent) return
-
-      if (selectedBranchNames.has(branch.name)) {
-        removeSelectedBranch(branch.name)
-      } else {
-        addSelectedBranch(branch.name)
-      }
+      toggleSelectedBranch(branch)
     },
-    [selectedBranchNames, removeSelectedBranch, addSelectedBranch],
+    [toggleSelectedBranch],
   )
 
   const clearSelectedBranches = useCallback(() => {
-    setSelectedBranchNames(new Set())
-  }, [setSelectedBranchNames])
-
-  const setSelectedBranches = useCallback(
-    (branches: GitBranch[]) => {
-      const branchNames = new Set(branches.map(b => b.name))
-      setSelectedBranchNames(branchNames)
-    },
-    [setSelectedBranchNames],
-  )
+    setSelectedBranches(new Map())
+  }, [setSelectedBranches])
 
   const selectAllAvailableBranches = useCallback(() => {
-    const branchNames = availableBranches.reduce((set, branch) => {
+    const branchMap = availableBranches.reduce((map, branch) => {
       if (!branch.isCurrent) {
-        set.add(branch.name)
+        map.set(branch.name, branch)
       }
-      return set
-    }, new Set<string>())
-    setSelectedBranchNames(branchNames)
-  }, [availableBranches, setSelectedBranchNames])
+      return map
+    }, new Map<string, GitBranch>())
+    setSelectedBranches(branchMap)
+  }, [availableBranches, setSelectedBranches])
 
   const handleListNavigation = useCallback(
     (key: Key): boolean => {
@@ -121,14 +119,13 @@ export function useBranchesState(): UseBranchesStateReturn {
   return {
     // Display state
     availableBranches,
-    selectedBranches,
+    selectedBranches: selectedBranchesArray,
     currentBranch,
     displayBounds,
 
     // Selection actions
     toggleBranchSelection,
     clearSelectedBranches,
-    setSelectedBranches,
     selectAllAvailableBranches,
 
     // Navigation actions
