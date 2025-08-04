@@ -49,7 +49,13 @@ export function useBranchesSearch(): UseBranchesSearchReturn {
       }
 
       if (key.delete || key.backspace) {
-        setSearchQuery('')
+        setSearchQuery(prev => {
+          if (prev.length <= 0) {
+            return ''
+          }
+
+          return prev.slice(0, -1)
+        })
         return true
       }
 

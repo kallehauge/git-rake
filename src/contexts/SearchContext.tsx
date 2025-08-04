@@ -16,7 +16,7 @@ type SearchState = {
 
 type SearchActions = {
   setSearchMode: (active: boolean) => void
-  setSearchQuery: (query: string) => void
+  setSearchQuery: (query: string | ((prev: string) => string)) => void
   appendSearchQuery: (char: string) => void
   setFilterType: (type: BranchFilter) => void
 }
