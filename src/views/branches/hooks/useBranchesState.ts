@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useEffect } from 'react'
 import type { Key } from 'ink'
 import type { GitBranch } from '@services/GitRepository.types.js'
 import { useBranchesSelectionContext } from '@contexts/BranchesSelectionContext.js'
@@ -70,6 +70,17 @@ export function useBranchesState(): UseBranchesStateReturn {
   }, [filterType, selectedBranchesArray, filteredBranches])
 
   const displayBounds = availableBranches.length
+
+  // Edge case: When filtering by "selected" and user deselects the last branch in the list,
+  // the availableBranches array shrinks but selectedIndex may still point beyond the array bounds.
+  // This causes highlighting to be lost since there's no valid branch at that index.
+  // We need to adjust selectedIndex to stay within the valid range when the list changes.
+  useEffect(() => {
+    if (displayBounds > 0 && selectedIndex >= displayBounds) {
+      const newIndex = Math.max(0, displayBounds - 1)
+      setSelectedIndex(newIndex)
+    }
+  }, [displayBounds, selectedIndex, setSelectedIndex])
 
   const currentBranch = useMemo(() => {
     const validIndex = getValidatedIndex(selectedIndex, displayBounds)
