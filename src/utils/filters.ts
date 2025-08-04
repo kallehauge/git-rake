@@ -1,4 +1,3 @@
-import Fuse from 'fuse.js'
 import type { GitBranch } from '@services/GitRepository.types.js'
 import type { BranchFilter } from './filters.types.js'
 
@@ -83,24 +82,16 @@ export function getFilterDisplayText(filter: BranchFilter): string {
   }
 }
 
-export class BranchSearcher {
-  private fuse: Fuse<GitBranch>
-  constructor(branches: GitBranch[]) {
-    this.fuse = new Fuse(branches, {
-      keys: [{ name: 'name', weight: 1 }],
-    })
+export function searchBranches(
+  branches: GitBranch[],
+  query: string,
+): GitBranch[] {
+  if (!query.trim()) {
+    return branches
   }
 
-  search(query: string): GitBranch[] {
-    if (!query.trim()) {
-      return []
-    }
-
-    const results = this.fuse.search(query)
-    return results.map(result => result.item)
-  }
-
-  updateBranches(branches: GitBranch[]): void {
-    this.fuse.setCollection(branches)
-  }
+  const lowerQuery = query.toLowerCase()
+  return branches.filter(branch =>
+    branch.name.toLowerCase().includes(lowerQuery),
+  )
 }

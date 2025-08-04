@@ -8,7 +8,7 @@ Built with [Ink](https://github.com/vadimdemedes/ink) for React-style terminal i
 
 - 🎯 **Interactive Branch Browser** - Navigate branches with visual indicators
 - 🗑️ **Safe Deletion** - Branches moved to trash namespace for easy restoration
-- 🔍 **Fuzzy Search** - Quick branch finding with `/` key
+- 🔍 **Search** - Quick branch finding with `/` key
 - 📊 **Detailed view** - See commit history and branch details
 - ⚡ **Batch Operations** - Select multiple branches for bulk operations
 - 🎨 **Themes** - Popular themes inspired by programs like VS Code, GitHub, Atom, and general themes like Tokyo Night, Catppuccin, and Gruvbox

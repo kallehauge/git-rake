@@ -6,7 +6,7 @@ import { useSearchContext } from '@contexts/SearchContext.js'
 import {
   getFilterOptionsForType,
   filterBranches,
-  BranchSearcher,
+  searchBranches,
 } from '@utils/filters.js'
 
 type UseBranchesStateReturn = {
@@ -53,8 +53,7 @@ export function useBranchesState(): UseBranchesStateReturn {
 
     // Apply search within filtered results
     if (searchQuery.trim()) {
-      const searcher = new BranchSearcher(filtered)
-      filtered = searcher.search(searchQuery)
+      filtered = searchBranches(filtered, searchQuery)
     }
 
     return filtered
