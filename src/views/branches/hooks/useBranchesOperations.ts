@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { GitRepository } from '@services/GitRepository.js'
 import { useBranchesState } from './useBranchesState.js'
+import { useBranchesSearch } from './useBranchesSearch.js'
 import { useSearchContext } from '@contexts/SearchContext.js'
 import { logger } from '@utils/logger.js'
 import { BRANCH_OPERATIONS } from '../constants.js'
@@ -28,6 +29,7 @@ export function useBranchesOperations(
   onRefresh?: () => Promise<void>,
 ): UseBranchesOperationsReturn {
   const { clearSelectedBranches } = useBranchesState()
+  const { clearSearch } = useBranchesSearch()
   const { filterType, setFilterType } = useSearchContext()
 
   const [pendingOperation, setPendingOperation] =
@@ -77,7 +79,8 @@ export function useBranchesOperations(
       })
       throw error
     } finally {
-      setFilterType(filterBeforeConfirmation)
+      setFilterType('all')
+      clearSearch()
       setPendingOperation(null)
     }
   }, [
@@ -85,8 +88,8 @@ export function useBranchesOperations(
     selectedBranches,
     onRefresh,
     performOperation,
-    filterBeforeConfirmation,
     setFilterType,
+    clearSearch,
   ])
 
   const exitConfirmationMode = useCallback(() => {
