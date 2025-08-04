@@ -66,6 +66,23 @@ export function getFilterOptionsForType(
   }
 }
 
+export function getFilterDisplayText(filter: BranchFilter): string {
+  switch (filter) {
+    case 'all':
+      return 'All'
+    case 'merged':
+      return 'Merged'
+    case 'stale':
+      return 'Stale'
+    case 'unmerged':
+      return 'Unmerged'
+    case 'selected':
+      return 'Selected'
+    default:
+      return 'All'
+  }
+}
+
 export class BranchSearcher {
   private fuse: Fuse<GitBranch>
   constructor(branches: GitBranch[]) {

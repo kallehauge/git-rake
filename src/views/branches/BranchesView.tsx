@@ -1,21 +1,19 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Box, Text, useInput } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
-import { useBranchDataContext } from '@contexts/BranchDataContext.js'
+import { useSearchContext } from '@contexts/SearchContext.js'
 import { useBranchesSearch } from './hooks/useBranchesSearch.js'
-import { useBranchesSelection } from './hooks/useBranchesSelection.js'
 import { useBranchesOperations } from './hooks/useBranchesOperations.js'
-import { BRANCH_OPERATIONS } from './constants.js'
-import { useBranchesDisplay } from './hooks/useBranchesDisplay.js'
+import {
+  BRANCH_OPERATIONS,
+  OPERATION_CONFIRMATION_CONFIG,
+} from './constants.js'
+import { useBranchesState } from './hooks/useBranchesState.js'
 import { GitRepository } from '@services/GitRepository.js'
 import { BranchesList } from './BranchesList.js'
 import { ViewLayout } from '@views/app/ViewLayout.js'
-import { BranchesStatusBarContent } from './BranchesStatusBarContent.js'
 import { Spinner } from '@components/Spinner.js'
-import {
-  ConfirmationBar,
-  CONFIRMATION_SHORTCUTS,
-} from '@components/ConfirmationBar.js'
+import { BranchesStatusBar } from './BranchesStatusBar.js'
 
 type BranchesViewProps = {
   restoreMode: boolean
@@ -33,32 +31,32 @@ export const BranchesView = React.memo(function BranchesView({
   refreshBranches,
 }: BranchesViewProps) {
   const { inputLocked, setCurrentView, theme } = useAppUIContext()
-  const {
-    selectedBranches,
-    branches,
-    filteredBranches: contextFilteredBranches,
-    statusBarInfo,
-  } = useBranchDataContext()
+  const { filterType } = useSearchContext()
   const { handleSearchInput, activateSearch, cycleFilter } = useBranchesSearch()
-  const { selectAllVisibleBranches } = useBranchesSelection()
+  const {
+    availableBranches,
+    selectedBranches,
+    selectAllAvailableBranches,
+    handleListNavigation,
+  } = useBranchesState()
   const {
     pendingOperation,
-    startConfirmation,
-    createOperationHandler,
-    handleCancel,
-    confirmationConfig,
-  } = useBranchesOperations(gitRepo)
-  const { branchesToDisplay, statusBarProps } = useBranchesDisplay({
-    pendingOperation,
-    selectedBranches,
-    contextFilteredBranches,
-    statusBarInfo,
-    branches,
-    theme,
-  })
+    enterConfirmationMode,
+    executeOperationAndExit,
+    exitConfirmationMode,
+  } = useBranchesOperations(gitRepo, selectedBranches, refreshBranches)
 
   useInput((input, key) => {
-    if (loading || pendingOperation) return
+    if (loading) return
+
+    // During confirmation: only allow up/down navigation within selected branches
+    if (pendingOperation) {
+      if (handleListNavigation(key)) {
+        return
+      }
+      // Block all other input during confirmation
+      return
+    }
 
     if (handleSearchInput(input, key)) return
 
@@ -76,7 +74,7 @@ export const BranchesView = React.memo(function BranchesView({
     }
 
     if (input === 'a') {
-      selectAllVisibleBranches()
+      selectAllAvailableBranches()
       return
     }
 
@@ -86,64 +84,66 @@ export const BranchesView = React.memo(function BranchesView({
     }
 
     if (input === 't' && selectedBranches.length > 0 && !restoreMode) {
-      startConfirmation(BRANCH_OPERATIONS.TRASH)
+      enterConfirmationMode(BRANCH_OPERATIONS.TRASH)
       return
     }
 
     if (input === 'd' && selectedBranches.length > 0 && !restoreMode) {
-      startConfirmation(BRANCH_OPERATIONS.DELETE)
+      enterConfirmationMode(BRANCH_OPERATIONS.DELETE)
       return
     }
 
     if (input === 'r' && selectedBranches.length > 0 && restoreMode) {
-      startConfirmation(BRANCH_OPERATIONS.RESTORE)
+      enterConfirmationMode(BRANCH_OPERATIONS.RESTORE)
       return
     }
   })
 
-  const branchesHelpText = `↑↓: navigate • space: select • a: select all • /: search • f: filter • enter: details • ${restoreMode ? 'r: restore' : 't: trash • d: delete permanently'}`
-  const confirmationHelpText = `${CONFIRMATION_SHORTCUTS.navigate}: navigate • ${CONFIRMATION_SHORTCUTS.confirm}: confirm • ${CONFIRMATION_SHORTCUTS.cancel}: cancel`
-  const helpText = pendingOperation ? confirmationHelpText : branchesHelpText
+  const statusBarType = pendingOperation
+    ? OPERATION_CONFIRMATION_CONFIG[pendingOperation].type
+    : 'default'
+
+  const helpText = useMemo(() => {
+    if (pendingOperation) {
+      return '↑↓: navigate • Space: deselect • Y/Enter: confirm • N/Esc: cancel'
+    }
+    return `↑↓: navigate • space: select • a: select all • /: search • f: filter • enter: details • ${restoreMode ? 'r: restore' : 't: trash • d: delete permanently'}`
+  }, [pendingOperation, restoreMode])
+
+  const statusBarContent = (
+    <BranchesStatusBar
+      pendingOperation={pendingOperation}
+      selectedBranches={selectedBranches}
+      onConfirm={executeOperationAndExit}
+      onCancel={exitConfirmationMode}
+    />
+  )
 
   return (
     <ViewLayout
-      statusBarContent={<BranchesStatusBarContent {...statusBarProps} />}
-      restoreMode={restoreMode}
+      statusBarContent={statusBarContent}
+      statusBarType={statusBarType}
       helpText={helpText}
       currentPath={currentPath}
-      confirmationBarContent={
-        confirmationConfig ? (
-          <ConfirmationBar
-            type={confirmationConfig.type}
-            confirmText={confirmationConfig.confirmText}
-            cancelText={confirmationConfig.cancelText}
-            onConfirm={createOperationHandler(
-              selectedBranches,
-              refreshBranches,
-            )}
-            onCancel={handleCancel}
-          >
-            {confirmationConfig.message && (
-              <Text>{confirmationConfig.message}</Text>
-            )}
-          </ConfirmationBar>
-        ) : undefined
-      }
     >
       <Box flexGrow={1} flexDirection="column">
-        {branchesToDisplay.length === 0 ? (
+        {availableBranches.length === 0 ? (
           loading ? (
             <Box justifyContent="center" alignItems="center" flexGrow={1}>
               <Spinner text="Loading branches..." />
             </Box>
           ) : (
             <Box justifyContent="center" alignItems="center" flexGrow={1}>
-              <Text>No branches found</Text>
+              <Text color={theme.colors.text}>
+                {filterType === 'selected' && selectedBranches.length === 0
+                  ? 'No branches selected'
+                  : 'No branches found'}
+              </Text>
             </Box>
           )
         ) : (
           <>
-            <BranchesList branches={branchesToDisplay} />
+            <BranchesList branches={availableBranches} />
           </>
         )}
       </Box>

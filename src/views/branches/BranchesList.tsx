@@ -3,10 +3,9 @@ import { Box, Text, useInput } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { BranchesListItem } from './BranchesListItem.js'
 import { BranchesListHeader } from './BranchesListHeader.js'
-import { useBranchDataContext } from '@contexts/BranchDataContext.js'
-import { useSelectionContext } from '@contexts/SelectionContext.js'
+import { useBranchesSelectionContext } from '@contexts/BranchesSelectionContext.js'
 import { useSearchContext } from '@contexts/SearchContext.js'
-import { useBranchesSelection } from './hooks/useBranchesSelection.js'
+import { useBranchesState } from './hooks/useBranchesState.js'
 import { useBranchesListLayout } from './hooks/useBranchesListLayout.js'
 import { ScrollableList } from '@components/scrollable-list/index.js'
 import type { GitBranch } from '@services/GitRepository.types.js'
@@ -19,10 +18,10 @@ export const BranchesList = memo(function BranchesList({
   branches,
 }: BranchesListProps) {
   const { theme, inputLocked } = useAppUIContext()
-  const { currentBranch } = useBranchDataContext()
-  const { selectedIndex, selectedBranchNames } = useSelectionContext()
+  const { selectedIndex, selectedBranchNames } = useBranchesSelectionContext()
   const { searchQuery } = useSearchContext()
-  const { toggleBranchSelection, handleListNavigation } = useBranchesSelection()
+  const { currentBranch, toggleBranchSelection, handleListNavigation } =
+    useBranchesState()
   const columnLayout = useBranchesListLayout()
 
   const renderBranchItem = useCallback(

@@ -1,9 +1,13 @@
-import { Text } from 'ink'
+import { useMemo } from 'react'
+import {
+  StatusBarContent,
+  type StatusBarItem,
+} from '@components/status-bar/StatusBarContent.js'
 import type { AppTheme } from '@utils/themes/themes.types.js'
 
 type BranchesStatusBarContentProps = {
   selectedCount: number
-  filteredCount: number
+  availableCount: number
   totalBranches: number
   filterDisplay: string
   searchMode: boolean
@@ -14,7 +18,7 @@ type BranchesStatusBarContentProps = {
 
 export function BranchesStatusBarContent({
   selectedCount,
-  filteredCount,
+  availableCount,
   totalBranches,
   filterDisplay,
   searchMode,
@@ -22,33 +26,45 @@ export function BranchesStatusBarContent({
   showSearch,
   theme,
 }: BranchesStatusBarContentProps) {
+  const items = useMemo((): StatusBarItem[] => {
+    const baseItems: StatusBarItem[] = [
+      {
+        label: 'Selected:',
+        value: selectedCount.toString(),
+      },
+      {
+        label: `${searchMode ? 'Found' : 'Showing'}:`,
+        value: `${availableCount}/${totalBranches}`,
+      },
+      {
+        label: 'Filter:',
+        value: filterDisplay,
+      },
+    ]
+
+    if (showSearch && (searchMode || searchQuery)) {
+      baseItems.push({
+        label: 'Search:',
+        value: searchQuery + (searchMode ? '|' : ''),
+      })
+    }
+
+    return baseItems
+  }, [
+    selectedCount,
+    availableCount,
+    totalBranches,
+    filterDisplay,
+    searchMode,
+    searchQuery,
+    showSearch,
+  ])
+
   return (
-    <>
-      <Text color={theme.colors.text}>
-        Selected: <Text color={theme.colors.warning}>{selectedCount}</Text>
-      </Text>
-
-      <Text color={theme.colors.text}> • </Text>
-      <Text color={theme.colors.text}>
-        {searchMode ? 'Found' : 'Showing'}:{' '}
-        <Text color={theme.colors.success}>{filteredCount}</Text>/
-        {totalBranches}
-      </Text>
-
-      <Text color={theme.colors.text}> • </Text>
-      <Text color={theme.colors.text}>
-        Filter: <Text color={theme.colors.primary}>{filterDisplay}</Text>
-      </Text>
-
-      {showSearch && (searchMode || searchQuery) && (
-        <>
-          <Text color={theme.colors.text}> • </Text>
-          <Text color={theme.colors.text}>
-            Search: <Text color={theme.colors.primary}>{searchQuery}</Text>
-            {searchMode && <Text color={theme.colors.accent}>|</Text>}
-          </Text>
-        </>
-      )}
-    </>
+    <StatusBarContent
+      items={items}
+      labelColor={theme.colors.text}
+      valueColor={theme.colors.primary}
+    />
   )
 }

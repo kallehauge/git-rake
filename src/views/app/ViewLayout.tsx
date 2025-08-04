@@ -1,25 +1,25 @@
 import { ReactNode } from 'react'
 import { Box, Text } from 'ink'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
-import { StatusBar } from '@components/StatusBar.js'
+import { StatusBar } from '@components/status-bar/StatusBar.js'
 import { HelpBar } from '@components/HelpBar.js'
+import { type StatusBarType } from '@components/status-bar/StatusBar.types.js'
+import { getStatusBarTypeColor } from '@components/status-bar/utils.js'
 
 type ViewLayoutProps = {
   children: ReactNode
   statusBarContent?: ReactNode
-  restoreMode?: boolean
   helpText: string
   currentPath: string
-  confirmationBarContent?: ReactNode
+  statusBarType?: StatusBarType
 }
 
 export function ViewLayout({
   children,
   statusBarContent,
-  restoreMode = false,
   helpText,
   currentPath,
-  confirmationBarContent,
+  statusBarType = 'default',
 }: ViewLayoutProps) {
   const { theme, showExitWarning } = useAppUIContext()
 
@@ -32,10 +32,10 @@ export function ViewLayout({
       <Box
         flexShrink={0}
         borderStyle="single"
-        borderColor={theme.colors.primary}
+        borderColor={getStatusBarTypeColor(statusBarType, theme)}
         paddingX={1}
       >
-        <StatusBar restoreMode={restoreMode}>{statusBarContent}</StatusBar>
+        <StatusBar title="Git Rake">{statusBarContent}</StatusBar>
       </Box>
 
       {children}
@@ -48,9 +48,6 @@ export function ViewLayout({
       >
         <HelpBar helpText={helpText} showExitWarning={showExitWarning} />
       </Box>
-
-      {/* Optional Confirmation Bar */}
-      {confirmationBarContent}
     </Box>
   )
 }

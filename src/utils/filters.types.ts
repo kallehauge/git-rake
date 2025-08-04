@@ -1,1 +1,1 @@
-export type BranchFilter = 'all' | 'merged' | 'stale' | 'unmerged'
+export type BranchFilter = 'all' | 'merged' | 'stale' | 'unmerged' | 'selected'

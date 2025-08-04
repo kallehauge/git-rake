@@ -81,7 +81,13 @@ export function useBranchesSearch(): UseBranchesSearchReturn {
   }, [setSearchMode, setSearchQuery])
 
   const cycleFilter = useCallback(() => {
-    const filterTypes: BranchFilter[] = ['all', 'merged', 'stale', 'unmerged']
+    const filterTypes: BranchFilter[] = [
+      'all',
+      'merged',
+      'stale',
+      'unmerged',
+      'selected',
+    ]
     const currentIndex = filterTypes.indexOf(filterType)
     const nextIndex = (currentIndex + 1) % filterTypes.length
     setFilterType(filterTypes[nextIndex])

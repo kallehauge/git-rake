@@ -3,8 +3,7 @@ import { GitRepository } from '@services/GitRepository.js'
 import { useRepositoryLoader } from './hooks/useRepositoryLoader.js'
 import { AppUIProvider } from '@contexts/AppUIContext.js'
 import { SearchProvider } from '@contexts/SearchContext.js'
-import { SelectionProvider } from '@contexts/SelectionContext.js'
-import { BranchDataProvider } from '@contexts/BranchDataContext.js'
+import { BranchesSelectionProvider } from '@contexts/BranchesSelectionContext.js'
 import { ErrorView } from '@views/error/ErrorView.js'
 import { StrictMode, useMemo, useEffect, useRef } from 'react'
 import type { GitRakeConfig } from '@utils/config.types.js'
@@ -55,17 +54,15 @@ export function App({
     <StrictMode>
       <AppUIProvider config={config}>
         <SearchProvider>
-          <SelectionProvider>
-            <BranchDataProvider branches={branches}>
-              <ViewManager
-                restoreMode={restoreMode || false}
-                gitRepo={gitRepo}
-                currentPath={currentPath}
-                loading={loading}
-                refreshBranches={loadBranches}
-              />
-            </BranchDataProvider>
-          </SelectionProvider>
+          <BranchesSelectionProvider branches={branches}>
+            <ViewManager
+              restoreMode={restoreMode || false}
+              gitRepo={gitRepo}
+              currentPath={currentPath}
+              loading={loading}
+              refreshBranches={loadBranches}
+            />
+          </BranchesSelectionProvider>
         </SearchProvider>
       </AppUIProvider>
     </StrictMode>

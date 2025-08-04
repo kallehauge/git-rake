@@ -4,21 +4,21 @@ import { useAppUIContext } from '@contexts/AppUIContext.js'
 
 type StatusBarProps = {
   children?: ReactNode
-  restoreMode?: boolean
+  title: string
 }
 
-export function StatusBar({ children, restoreMode = false }: StatusBarProps) {
+export function StatusBar({ children, title }: StatusBarProps) {
   const { theme } = useAppUIContext()
 
   return (
     <>
       <Text color={theme.colors.primary} bold>
-        Git Rake{restoreMode ? ' - Restore Mode' : ''}
+        {title}
       </Text>
 
       {children && (
         <>
-          <Text color={theme.colors.text}> • </Text>
+          <Text> • </Text>
           {children}
         </>
       )}
