@@ -1,5 +1,5 @@
 import { simpleGit, SimpleGit } from 'simple-git'
-import { differenceInDays } from 'date-fns'
+import { differenceInDays } from 'date-fns/differenceInDays'
 import { spawn } from 'child_process'
 import { logger } from '@utils/logger.js'
 import type {
