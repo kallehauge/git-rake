@@ -90,8 +90,8 @@ export function useBranchesSearch(): UseBranchesSearchReturn {
     const filterTypes: BranchFilter[] = [
       'all',
       'merged',
-      'stale',
       'unmerged',
+      'stale',
       'selected',
     ]
     const currentIndex = filterTypes.indexOf(filterType)
