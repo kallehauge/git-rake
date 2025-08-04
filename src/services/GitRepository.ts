@@ -107,42 +107,6 @@ export class GitRepository {
     }
   }
 
-  async getBranchAheadBehind(
-    branchName: string,
-    currentBranch?: string,
-  ): Promise<{ aheadBy: number; behindBy: number } | null> {
-    try {
-      const baseBranch = currentBranch || (await this.getCurrentBranch())
-      const mergeCompareBranch = this.mergeCompareBranch
-
-      if (branchName === baseBranch || branchName === mergeCompareBranch) {
-        return null
-      }
-
-      const result = await this.git.raw([
-        'rev-list',
-        '--left-right',
-        '--count',
-        `${mergeCompareBranch}...${branchName}`,
-      ])
-
-      const counts = result.trim().split('\t')
-      if (counts.length === 2) {
-        const behindBy = parseInt(counts[0]) || 0
-        const aheadBy = parseInt(counts[1]) || 0
-        return { aheadBy, behindBy }
-      }
-
-      return null
-    } catch (error) {
-      logger.error('Error getting ahead/behind data for branch', {
-        branchName,
-        error: error instanceof Error ? error.message : String(error),
-      })
-      return null
-    }
-  }
-
   async deleteBranch(branchName: string, force = false): Promise<void> {
     await this.git.deleteLocalBranch(branchName, force)
   }
