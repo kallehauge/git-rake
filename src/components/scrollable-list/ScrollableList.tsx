@@ -1,4 +1,4 @@
-import { cloneElement, ReactNode, memo, Fragment } from 'react'
+import { cloneElement, ReactNode, memo, Fragment, ReactElement } from 'react'
 import { Box, Text } from 'ink'
 import { useMeasuredBoxComponent } from '@utils/componentMeasurement.js'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
@@ -67,7 +67,7 @@ export const ScrollableList = memo(function ScrollableList<T>({
     />
   ) : null
 
-  return cloneElement(flexContainer, {
+  return cloneElement(flexContainer as ReactElement<{ children?: ReactNode }>, {
     children: (
       <>
         {visibleItems.map((item, visibleIndex) => {

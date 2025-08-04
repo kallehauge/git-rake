@@ -18,7 +18,7 @@ export function initializeLogger(debug = false): void {
 
   try {
     mkdirSync(logDir, { recursive: true })
-  } catch (error) {
+  } catch {
     // Fallback to current directory if chosen directory is not writable
   }
 

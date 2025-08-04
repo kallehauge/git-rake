@@ -23,7 +23,12 @@ export function useMeasuredBoxComponent(boxComponent: ReactElement): {
     }
   }, [screenHeight, screenWidth])
 
-  const component = React.cloneElement(boxComponent, { ref })
+  const component = React.cloneElement(
+    boxComponent as React.ReactElement<{ ref?: React.Ref<DOMElement> }>,
+    {
+      ref,
+    },
+  )
 
   return { component, height }
 }

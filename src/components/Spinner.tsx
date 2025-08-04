@@ -1,5 +1,5 @@
 import { Box, Text } from 'ink'
-import InkSpinner from 'ink-spinner'
+import { default as InkSpinner } from 'ink-spinner'
 import type { SpinnerName } from 'cli-spinners'
 import { useAppUIContext } from '@contexts/AppUIContext.js'
 
