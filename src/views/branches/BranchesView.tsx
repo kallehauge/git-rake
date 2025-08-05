@@ -52,7 +52,7 @@ export const BranchesView = React.memo(function BranchesView({
 
     // During confirmation: only allow up/down navigation within selected branches
     if (pendingOperation) {
-      if (handleListNavigation(key)) {
+      if (handleListNavigation(key, input)) {
         return
       }
       // Block all other input during confirmation
