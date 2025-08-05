@@ -188,7 +188,7 @@ _and if you forget the `grep -vE` part, you'll end up removing the main branch a
 
 **2. Prune stale branches**
 
-**Terminal**: The concept of "stale branches" doesn't really exist in Git, but you can pipe pipe the following commands together to get a similar experience (notice the cutoof date):
+**Terminal**: The concept of "stale branches" doesn't really exist in Git, but you can pipe pipe the following commands together to get a similar experience (notice the cutoff date):
 
 ```bash
 git for-each-ref \
