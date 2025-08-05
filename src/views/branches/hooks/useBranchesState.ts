@@ -9,6 +9,12 @@ import {
   searchBranches,
 } from '@utils/filters.js'
 
+// @todo We're starting with a fixed (reasonable?) chunk of branches to skip
+// for our initial implementation. This might end up being an actual page of
+// branches that are visible in the terminal view (think: tied into the
+// ScrollableList component's visible branches logic).
+const PAGE_SIZE = 10
+
 type UseBranchesStateReturn = {
   // Display state
   availableBranches: GitBranch[]
@@ -25,6 +31,8 @@ type UseBranchesStateReturn = {
   handleListNavigation: (key: Key) => boolean
   navigateDown: () => void
   navigateUp: () => void
+  navigatePageDown: () => void
+  navigatePageUp: () => void
 }
 
 function getValidatedIndex(index: number, arrayLength: number): number {
@@ -125,6 +133,14 @@ export function useBranchesState(): UseBranchesStateReturn {
     moveToIndex(selectedIndex - 1)
   }, [moveToIndex, selectedIndex])
 
+  const navigatePageDown = useCallback(() => {
+    moveToIndex(Math.min(selectedIndex + PAGE_SIZE, displayBounds - 1))
+  }, [moveToIndex, selectedIndex, displayBounds])
+
+  const navigatePageUp = useCallback(() => {
+    moveToIndex(Math.max(selectedIndex - PAGE_SIZE, 0))
+  }, [moveToIndex, selectedIndex])
+
   const handleListNavigation = useCallback(
     (key: Key): boolean => {
       if (key.upArrow) {
@@ -137,9 +153,25 @@ export function useBranchesState(): UseBranchesStateReturn {
         return true
       }
 
+      if (key.pageDown) {
+        navigatePageDown()
+        return true
+      }
+
+      if (key.pageUp) {
+        navigatePageUp()
+        return true
+      }
+
       return false
     },
-    [moveToIndex, navigateDown, selectedIndex],
+    [
+      moveToIndex,
+      navigateDown,
+      navigatePageDown,
+      navigatePageUp,
+      selectedIndex,
+    ],
   )
 
   return {
@@ -158,5 +190,7 @@ export function useBranchesState(): UseBranchesStateReturn {
     handleListNavigation,
     navigateDown,
     navigateUp,
+    navigatePageDown,
+    navigatePageUp,
   }
 }
