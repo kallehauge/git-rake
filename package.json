@@ -1,6 +1,6 @@
 {
   "name": "git-rake",
-  "version": "1.0.0",
+  "version": "1.0.0.",
   "description": "Interactive CLI tool to safely prune, delete, and restore Git branches",
   "author": "André Kallehauge <hi@andrekh.com> (https://andrekh.com/)",
   "main": "dist/index.js",
@@ -33,17 +33,17 @@
     "cosmiconfig": "^9.0.0",
     "date-fns": "^4.1.0",
     "fullscreen-ink": "^0.1.0",
-    "ink": "^6.1.0",
+    "ink": "5.2.1",
     "ink-spinner": "^5.0.0",
     "pino": "^9.7.0",
-    "react": "^19.0.0",
+    "react": "^18.2.0",
     "simple-git": "^3.28.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.2.0",
-    "@types/react": "^19.0.2",
+    "@types/react": "^18.2.0",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "eslint": "^9.32.0",
