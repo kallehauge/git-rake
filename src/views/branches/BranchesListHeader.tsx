@@ -14,24 +14,24 @@ export function BranchesListHeader({ columnLayout }: BranchesListHeaderProps) {
       paddingX={1}
       paddingY={0}
       borderBottom={true}
-      borderColor={theme.colors.border}
+      borderColor={theme.colors.primary}
       flexShrink={0}
       overflow="hidden"
       width="100%"
     >
       <Box {...columnLayout.selection.styles}>
-        <Text color={theme.colors.secondary}> </Text>
+        <Text color={theme.colors.primary}> </Text>
       </Box>
 
       <Box {...columnLayout.branchName.styles}>
-        <Text color={theme.colors.secondary} bold wrap="truncate-end">
+        <Text color={theme.colors.primary} bold wrap="truncate-end">
           BRANCH NAME
         </Text>
       </Box>
 
       {columnLayout.status.visible && (
         <Box {...columnLayout.status.styles}>
-          <Text color={theme.colors.secondary} bold wrap="truncate-end">
+          <Text color={theme.colors.primary} bold wrap="truncate-end">
             STATUS
           </Text>
         </Box>
@@ -39,7 +39,7 @@ export function BranchesListHeader({ columnLayout }: BranchesListHeaderProps) {
 
       {columnLayout.updated.visible && (
         <Box {...columnLayout.updated.styles}>
-          <Text color={theme.colors.secondary} bold wrap="truncate-end">
+          <Text color={theme.colors.primary} bold wrap="truncate-end">
             UPDATED
           </Text>
         </Box>
@@ -47,7 +47,7 @@ export function BranchesListHeader({ columnLayout }: BranchesListHeaderProps) {
 
       {columnLayout.upstream.visible && (
         <Box {...columnLayout.upstream.styles}>
-          <Text color={theme.colors.secondary} bold wrap="truncate-end">
+          <Text color={theme.colors.primary} bold wrap="truncate-end">
             UPSTREAM
           </Text>
         </Box>
@@ -55,7 +55,7 @@ export function BranchesListHeader({ columnLayout }: BranchesListHeaderProps) {
 
       {columnLayout.lastCommit.visible && (
         <Box {...columnLayout.lastCommit.styles}>
-          <Text color={theme.colors.secondary} bold wrap="truncate-end">
+          <Text color={theme.colors.primary} bold wrap="truncate-end">
             LAST COMMIT
           </Text>
         </Box>

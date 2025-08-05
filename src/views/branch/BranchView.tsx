@@ -66,15 +66,15 @@ export const BranchView = React.memo(function BranchView({
         currentPath={currentPath}
       >
         <Box flexDirection="column">
-          <Box paddingX={1} paddingY={1}>
-            <Text color={theme.colors.primary} bold>
-              Branch Preview
-            </Text>
-          </Box>
-          <Box flexGrow={1} justifyContent="center" alignItems="center">
-            <Text color={theme.colors.secondary}>
-              Select a branch to view details
-            </Text>
+          <Box
+            paddingX={1}
+            paddingY={1}
+            flexGrow={1}
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Text bold>Branch Preview</Text>
+            <Text>Select a branch to view details</Text>
           </Box>
         </Box>
       </ViewLayout>
@@ -134,12 +134,7 @@ export const BranchView = React.memo(function BranchView({
           )}
         </Box>
 
-        <Box
-          paddingX={1}
-          paddingY={1}
-          borderTop={true}
-          borderColor={theme.colors.border}
-        >
+        <Box paddingX={1} paddingY={1}>
           <Text color={theme.colors.primary} bold>
             Recent Commits
           </Text>

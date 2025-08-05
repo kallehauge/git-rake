@@ -12,7 +12,7 @@ export function ErrorView({ error, currentPath }: ErrorViewProps) {
   const helpText = 'ESC: exit • Ctrl+C: force exit'
 
   const statusBarContent = (
-    <Text color={theme.colors.error} bold>
+    <Text color={theme.colors.alert} bold>
       Error
     </Text>
   )
@@ -24,7 +24,7 @@ export function ErrorView({ error, currentPath }: ErrorViewProps) {
       currentPath={currentPath}
     >
       <Box flexDirection="column" padding={1}>
-        <Text color={theme.colors.error}>Error: {error}</Text>
+        <Text color={theme.colors.alert}>Error: {error}</Text>
       </Box>
     </ViewLayout>
   )

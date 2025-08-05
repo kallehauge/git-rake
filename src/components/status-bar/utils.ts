@@ -9,7 +9,7 @@ export function getStatusBarTypeColor(
     case 'warning':
       return theme.colors.warning
     case 'alert':
-      return theme.colors.error
+      return theme.colors.alert
     case 'success':
       return theme.colors.success
     default:

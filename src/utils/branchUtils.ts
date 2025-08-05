@@ -30,7 +30,7 @@ export function getBranchStatus(
   theme: AppTheme,
 ): BranchStatus {
   if (branch.isMerged) {
-    return { text: 'merged', color: theme.colors.error }
+    return { text: 'merged', color: theme.colors.alert }
   }
 
   if (branch.isStale) {

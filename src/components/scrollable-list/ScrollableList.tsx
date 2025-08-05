@@ -1,7 +1,6 @@
 import { cloneElement, ReactNode, memo, Fragment, ReactElement } from 'react'
 import { Box, Text } from 'ink'
 import { useMeasuredBoxComponent } from '@utils/componentMeasurement.js'
-import { useAppUIContext } from '@contexts/AppUIContext.js'
 import { useCalculateVisibleItems } from './hooks/useCalculateVisibleItems.js'
 import { ScrollableListIndicator } from './ScrollableListIndicator.js'
 
@@ -26,8 +25,6 @@ export const ScrollableList = memo(function ScrollableList<T>({
   selectedIndex,
   centerSelected = false,
 }: ScrollableListProps<T>) {
-  const { theme } = useAppUIContext()
-
   // Create flexbox container that fills available space to get the
   // height of the container.
   const { component: flexContainer, height: containerHeight } =
@@ -35,7 +32,7 @@ export const ScrollableList = memo(function ScrollableList<T>({
       <Box flexGrow={1} height="100%" flexDirection="column">
         {items.length === 0 && (
           <Box justifyContent="center" alignItems="center" height={10}>
-            <Text color={theme.colors.text}>No items</Text>
+            <Text>No items</Text>
           </Box>
         )}
       </Box>,

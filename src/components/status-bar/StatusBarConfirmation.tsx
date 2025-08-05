@@ -58,7 +58,7 @@ export function StatusBarConfirmation({
         {selectedCount} {selectedCount === 1 ? 'branch' : 'branches'}?{' '}
       </Text>
       <Text color={actionColor}>[Y/n]</Text>
-      {isExecuting && <Text color={theme.colors.muted}> • Processing...</Text>}
+      {isExecuting && <Text> • Processing...</Text>}
     </Text>
   )
 }

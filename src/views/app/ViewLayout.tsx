@@ -43,7 +43,7 @@ export function ViewLayout({
       <Box
         flexShrink={0}
         borderStyle="single"
-        borderColor={theme.colors.secondary}
+        borderColor={theme.colors.muted}
         paddingX={1}
       >
         <HelpBar helpText={helpText} showExitWarning={showExitWarning} />

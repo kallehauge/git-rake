@@ -46,7 +46,7 @@ export const BranchesListItem = React.memo(function BranchesListItem({
   const getUpstreamStatusText = (
     status: string | null,
   ): { text: string; color: string } => {
-    if (status === null) return { text: '—', color: theme.colors.secondary }
+    if (status === null) return { text: '—', color: textColor }
 
     switch (status) {
       case '>':
@@ -54,13 +54,13 @@ export const BranchesListItem = React.memo(function BranchesListItem({
       case '<':
         return { text: 'behind', color: theme.colors.warning }
       case '<>':
-        return { text: 'diverged', color: theme.colors.error }
+        return { text: 'diverged', color: theme.colors.alert }
       case '=':
         return { text: 'in sync', color: theme.colors.success }
       case '[gone]':
-        return { text: 'gone', color: theme.colors.error }
+        return { text: 'gone', color: theme.colors.alert }
       default:
-        return { text: '—', color: theme.colors.secondary }
+        return { text: '—', color: theme.colors.primary }
     }
   }
 
@@ -79,7 +79,7 @@ export const BranchesListItem = React.memo(function BranchesListItem({
       {columnLayout.status.visible && (
         <Box {...columnLayout.status.styles}>
           <Text
-            color={isSelected ? theme.colors.selection : statusInfo.color}
+            color={isSelected ? textColor : statusInfo.color}
             wrap="truncate-end"
           >
             {statusInfo.text}
@@ -100,7 +100,7 @@ export const BranchesListItem = React.memo(function BranchesListItem({
           <Text
             color={
               isSelected
-                ? theme.colors.selection
+                ? textColor
                 : getUpstreamStatusText(branch.upstreamTrackShort).color
             }
             wrap="truncate-end"
