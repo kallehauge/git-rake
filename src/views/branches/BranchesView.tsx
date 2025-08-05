@@ -38,6 +38,7 @@ export const BranchesView = React.memo(function BranchesView({
     selectedBranches,
     selectAllAvailableBranches,
     handleListNavigation,
+    clearSelectedBranches,
   } = useBranchesState()
   const {
     pendingOperation,
@@ -75,6 +76,10 @@ export const BranchesView = React.memo(function BranchesView({
 
     if (input === 'a') {
       selectAllAvailableBranches()
+      return
+    }
+    if (input === 'A') {
+      clearSelectedBranches()
       return
     }
 

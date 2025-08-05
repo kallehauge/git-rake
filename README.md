@@ -50,6 +50,8 @@ git-rake branch
 ### Keyboard Controls
 - `↑/↓` - Navigate branches
 - `s` - Select/deselect branch for batch operations (_`S` will move the next selection upwards_)
+- `a` - Select all branches that are being displayed
+- `A` - Deselect all branches that are being displayed
 - `/` - Enter search mode
 - `f` - Cycle filters (all/merged/stale/unmerged)
 - `t` - Trash selected branches (soft delete)
