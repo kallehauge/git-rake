@@ -49,7 +49,7 @@ git-rake branch
 
 ### Keyboard Controls
 - `↑/↓` - Navigate branches
-- `Space` - Select/deselect branch for batch operations
+- `s` - Select/deselect branch for batch operations (_`S` will move the next selection upwards_)
 - `/` - Enter search mode
 - `f` - Cycle filters (all/merged/stale/unmerged)
 - `t` - Trash selected branches (soft delete)

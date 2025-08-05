@@ -105,9 +105,9 @@ export const BranchesView = React.memo(function BranchesView({
 
   const helpText = useMemo(() => {
     if (pendingOperation) {
-      return '↑↓: navigate • Space: deselect • Y/Enter: confirm • N/Esc: cancel'
+      return '↑↓: navigate • s: deselect • Y/Enter: confirm • N/Esc: cancel'
     }
-    return `↑↓: navigate • space: select • a: select all • /: search • f: filter • enter: details • ${restoreMode ? 'r: restore' : 't: trash • d: delete permanently'}`
+    return `↑↓: navigate • s: select • a: select all • /: search • f: filter • enter: details • ${restoreMode ? 'r: restore' : 't: trash • d: delete permanently'}`
   }, [pendingOperation, restoreMode])
 
   const statusBarContent = (

@@ -47,9 +47,9 @@ export const BranchesList = memo(function BranchesList({
     (input, key) => {
       if (handleListNavigation(key)) return
 
-      if (input === ' ' && currentBranch) {
+      if (input.toLowerCase() === 's' && currentBranch) {
         toggleBranchSelection(currentBranch)
-        if (key.shift) {
+        if (input === 'S') {
           navigateUp()
         } else {
           navigateDown()
