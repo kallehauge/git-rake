@@ -1,28 +1,26 @@
 # Git Rake Configuration
 # This file can be named anything supported by cosmiconfig (e.g .gitrakerc, gitrake.config.js, .gitrakerc.yml)
 
-# Theme: Choose from available themes
-# Light themes: "auto", "one-light", "github-light", "catppuccin-latte", "gruvbox-light", "tokyo-night-day", "ayu-light", "vscode-light"
-# Dark themes: "one-dark", "github-dark", "catppuccin-mocha", "gruvbox-dark", "tokyo-night", "ayu-dark", "ayu-mirage", "dracula", "vscode-dark"
+# Theme: use the default `auto` theme that tries to give as wide support as possible based on your terminal's own colors.
+# Alternatively, you can also choose from these:
+# - Light themes: "github-light", "catppuccin-latte", "gruvbox-light", "tokyo-night-day", "vscode-light"
+# - Dark themes: "catppuccin-mocha", "gruvbox-dark", "tokyo-night", "ayu", "dracula", "vscode-dark"
 theme: "auto"
 
-# Number of days before a branch is considered stale
+# Number of days before a branch is considered stale.
 staleDaysThreshold: 30
 
-# Number of days to keep deleted branches in trash
+# Disable automatic cleanup of trashed branches that are past their TTL.
+autoCleanupTrash: false
+
+# Number of days to keep deleted branches in trash before they get cleaned up
+# via `autoCleanupTrash` or manually with the `git rake trash --prune` command.
 trashTtlDays: 90
 
-# Include remote tracking branches in the list
-includeRemote: false
-
-# Automatically cleanup old trash entries on startup
-autoCleanupTrash: true
-
-# Branches to exclude from git rake operations (never shown or selectable)
-# These branches will be completely filtered out and cannot be deleted
-excludedBranches: ["main", "master", "develop", "staging"]
-
-# The branch the tool will use to compare if other branches are already merged
+# The branch the tool will use to compare if other branches are already merged.
 # Based on my own experience, this is typically a "develop" branch since, when
 # we work, we do so against that branch - but it's up to you and your flow!
-mergeCompareBranch: develop
+mergeCompareBranch: "develop"
+
+# Branches to exclude from git rake operations (they'll never be shown or selectable).
+excludedBranches: ["main", "master", "develop", "staging"]

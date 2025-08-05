@@ -1,18 +1,26 @@
 # Git Rake 🍂
 
-An interactive CLI tool to safely prune, delete, and restore Git branches with a rich terminal UI.
+Git Rake, the interactive TUI that simplifies cleaning up branches.
 
-Built with [Ink](https://github.com/vadimdemedes/ink) for React-style terminal interfaces and TypeScript for type safety.
+Although you can completely skip the feature entirely, then Rake also introduces a new "**trash system**" that will move your local branches from `refs/head/*` to a new `refs/rake-trash` (it happens behind the scenes). This allows you to, safely, be more aggresive with cleaning up branches you're unsure if you want to keep around.
+
+![Demo of Git Rake](docs/assets/demo.gif)
 
 ## Features
 
 - 🎯 **Interactive Branch Browser** - Navigate branches with visual indicators
-- 🗑️ **Safe Deletion** - Branches moved to trash namespace for easy restoration
+- ⚡ **Batch Operations** - Select multiple branches for bulk operations (delete, trash, restore)
 - 🔍 **Search** - Quick branch finding with `/` key
-- 📊 **Detailed view** - See commit history and branch details
-- ⚡ **Batch Operations** - Select multiple branches for bulk operations
-- 🎨 **Themes** - Popular themes inspired by programs like VS Code, GitHub, Atom, and general themes like Tokyo Night, Catppuccin, and Gruvbox
+- 🗂️ **Filter** - Select filters to easily do bulk operations on a full category (e.g. delete all merged branches)
+  - `All`: Show all branches
+  - `Merged`: Show merged branches
+  - `Unmerged`: Show unmerged branches
+  - `Stale`: Show stale branches (based on staleDaysThreshold)
+  - `Selected`: Show branches selected for batch operation
 - 📅 **Stale Detection** - Automatically identify old branches
+- 🗑️ **Safe Deletion** - (Optional) Branches moved to trash namespace for easy restoration
+- 🎨 **Themes** - Select between different "light" or "dark" themes inspired by existing color-schemes (VS Code, GitHub, and general themes like Tokyo Night, Catppuccin, and Gruvbox)
+- 📊 **Detailed view** - See expanded commit history and branch details
 
 ## Installation
 
@@ -25,9 +33,15 @@ Or run directly with npx:
 npx git-rake
 ```
 
+### Requirements
+
+- Node.js ≥14
+- Git
+
 ## Usage
 
 ### Available Commands
+
 ```bash
 git-rake                    # Show command help
 git-rake trash              # Interactive branch management (trash/delete)
@@ -39,17 +53,14 @@ git-rake restore            # Interactive restore mode
 git-rake restore <branch>   # Restore specific branch
 ```
 
-### Interactive Mode
-```bash
-# Enter interactive branch management
-git-rake trash
-# or using the alias
-git-rake branch
-```
+I'd personally recommend looking at the [Git Alias Setup](https://github.com/kallehauge/git-rake?tab=readme-ov-file#git-alias-setup) section for a more seamless command-flow.
 
 ### Keyboard Controls
-- `↑/↓` - Navigate branches
-- `s` - Select/deselect branch for batch operations (_`S` will move the next selection upwards_)
+
+#### Branches list
+
+- `↑/↓` (or `j/k`) - Navigate branches
+- `space` / `s` - Select/deselect branch for batch operations (_`S` will move the next selection upwards_)
 - `a` - Select all branches that are being displayed
 - `A` - Deselect all branches that are being displayed
 - `/` - Enter search mode
@@ -57,165 +68,107 @@ git-rake branch
 - `t` - Trash selected branches (soft delete)
 - `d` - Delete selected branches (permanent)
 - `r` - Restore selected branches (in restore mode)
-- `Esc`- Cancel current operation
-- `Ctrl+C` - Exit
+- `v` - View more details about a specific branch
+- `Esc` - Cancel current operation (_e.g. clear search query_)
+- `Ctrl+c` - Exit
 
-### Command Examples
+#### Confirmation prompt
 
-```bash
-# Interactive branch management
-git-rake trash
-git-rake branch  # An alias that does the same as `trash`
-
-# List trashed branches
-git-rake trash --list
-
-# Prune trashed branches that are past TTL
-git-rake trash --prune
-
-# Move specific branch to trash
-git-rake trash feature-branch
-
-# Restore deleted branches interactively
-git-rake restore
-
-# Restore specific branch
-git-rake restore my-feature-branch
-```
-
-## Themes
-
-Git Rake comes with themes inspired by popular editors and terminal color schemes:
-
-### Adaptive
-- **Auto** - Adapts to your terminal colors
-
-### Light Themes
-- **One (light)** - Atom's beloved light theme with perfect contrast
-- **GitHub (light)** - GitHub's clean design system
-- **Catppuccin (latte)** - Warm soothing pastels
-- **Gruvbox (light)** - Retro warm colors
-- **Tokyo Night (day)** - Popular VS Code light theme
-- **Ayu (light)** - Clean minimalist design
-- **VS Code (light)** - Visual Studio Code's default light theme
-
-### Dark Themes
-- **One (dark)** - Atom's iconic dark theme loved by millions
-- **GitHub (dark)** - GitHub's modern dark design
-- **Catppuccin (mocha)** - Trendy 2025 pastel dark theme
-- **Gruvbox (dark)** - Beloved retro community favorite
-- **Tokyo Night** - Most popular VS Code/Vim theme
-- **Ayu (dark)** - Minimalist dark elegance
-- **Ayu (mirage)** - Unique balanced variant
-- **Dracula** - Vibrant purple/pink classic
-- **VS Code (dark)** - Visual Studio Code's default dark theme
+- `↑/↓` - Navigate branches
+- `space` / `s` - Last chance to review and deselect/remove branches you do not want to <delete|trash|restore>
+- `y` / `Enter` - Approve operation (<delete|trash|restore>)
+- `n` / `Esc` - Cancel operation (<delete|trash|restore>)
+- `Ctrl+c` - Exit
 
 ## Configuration
 
-Create a `.gitrakerc`, `.gitrakerc.yml`, or `.gitrakerc.yaml` file:
+Make Git Rake fit your own workflow!
 
-```yaml
-# Number of days before a branch is considered stale
-staleDaysThreshold: 30
+Git Rake looks for configuration files in two locations (the actual file format can be any of `.gitrakerc`, `.gitrake.config.js`, `.gitrakerc.yml`, or any other format supported to [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig)):
 
-# Number of days to keep deleted branches in trash
-trashTtlDays: 90
+1. Home: `~/.gitrakerc`
+2. Project: `/my/project/root/.gitrakerc`
 
-# Theme: Choose from 17 beautiful themes
-# Light themes: "auto", "one-light", "github-light", "catppuccin-latte", "gruvbox-light", "tokyo-night-day", "ayu-light", "vscode-light"
-# Dark themes: "one-dark", "github-dark", "catppuccin-mocha", "gruvbox-dark", "tokyo-night", "ayu-dark", "ayu-mirage", "dracula", "vscode-dark"
-theme: "auto"
+Any configuration that is defined in a project will override user configuration (think: you define your prefered `theme` in the user configuration and then define `mergeCompareBranch` and `excludedBranches` in projects that needs some modification to work).
 
-# Include remote tracking branches in the list
-includeRemote: false
+**Tip - add `.gitrakerc` to global Git ignore:**
 
-# Automatically cleanup old trash entries on startup
-autoCleanupTrash: true
+I consider Git Rake a personal tool that projects shouldn't know about, so I have added all `.gitrakerc` files to my global ignore file.
+If you don't have global ignore file already, then you can register one like this:
+
+```bash
+git config --global core.excludesfile ~/.gitignore
 ```
 
-## How It Works
+### Example `.gitrakerc` file
 
-### Trash System
-Instead of permanently deleting branches, git-rake moves them to a special namespace (`refs/rake-trash/*`). This allows for:
-- Safe restoration of accidentally deleted branches
-- Automatic cleanup after configurable TTL
-- No impact on repository size (refs are lightweight)
+```yaml
+# Theme: use the default `auto` theme that tries to give as wide support as possible based on your terminal's own colors.
+# Alternatively, you can also choose from these:
+# - Light themes: "github-light", "catppuccin-latte", "gruvbox-light", "tokyo-night-day", "vscode-light"
+# - Dark themes: "catppuccin-mocha", "gruvbox-dark", "tokyo-night", "ayu", "dracula", "vscode-dark"
+theme: "tokyo-night"
 
-### Filters
-- **All**: Show all local branches
-- **Merged**: Show only merged branches
-- **Stale**: Show only stale branches (based on staleDaysThreshold)
-- **Unmerged**: Show only unmerged branches
+# Number of days before a branch is considered stale.
+staleDaysThreshold: 30
+
+# Disable automatic cleanup of trashed branches that are past their TTL.
+autoCleanupTrash: false
+
+# Number of days to keep deleted branches in trash before they get cleaned up
+# via `autoCleanupTrash` or manually with the `git rake trash --prune` command.
+trashTtlDays: 90
+
+# The branch the tool will use to compare if other branches are already merged.
+# Based on my own experience, this is typically a "develop" branch since, when
+# we work, we do so against that branch - but it's up to you and your flow!
+mergeCompareBranch: "develop"
+
+# Branches to exclude from git rake operations (they'll never be shown or selectable).
+excludedBranches: ["main", "master", "develop", "staging"]
+```
 
 ## Git Alias Setup
 
-To use git-rake as a git subcommand:
+There are generally two ways you can setup Git Rake as a Git alias (or combine them):
+
+Add `rake` as an alias:
 
 ```bash
 git config --global alias.rake '!git-rake'
 ```
 
-Then use:
+This will allow you to run subcommands using `git rake <command>`:
+
 ```bash
 git rake trash              # Interactive branch management
 git rake restore            # Interactive restore mode
 git rake trash --prune      # Prune trashed branches that are past TTL
 ```
 
-### Suggested Git Aliases
+A more direct way would be to add the subcommands directly:
 
 ```bash
-# Common aliases for branch management
 git config --global alias.trash '!git-rake trash'
 git config --global alias.restore '!git-rake restore'
-git config --global alias.prune-trash '!git-rake trash --prune'
 ```
 
-Then use:
+This will allow you to ignore the `rake` top-level command and feel even more integrated into Git itself:
+
 ```bash
 git trash                   # Interactive branch management
 git restore                 # Interactive restore mode
-git prune-trash             # Prune trashed branches that are past TTL
 ```
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Development mode
-# Using "dev", the app enables React DevTools integration and profiling.
-When DEV=true is set, the app enables React DevTools integration and profiling.
-npm run dev
-npx react-devtools
-
-# Run development mode against different Git repo
-npm run dev -- --cwd /path/to/repo
-
-# Build
-npm run build
-
-# Run tests
-npm test
-
-# Lint
-npm run lint
-
-# Type check
-npm run typecheck
-```
-
-## Requirements
-
-- Node.js ≥14
-- Git
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Run `npm run lint` and `npm run typecheck`
-6. Submit a pull request
+[See more in the development docs](https://github.com/kallehauge/git-rake/blob/main/docs/development.md) (WIP)
+
+## Appreciation
+
+This project is built using:
+
+* [Ink](https://github.com/vadimdemedes/ink) - used to create a TUI with React and TypeScript for type safety
+* [Ink Fullscreen](https://github.com/DaniGuardiola/fullscreen-ink) - used to trigger a fullscreen alternate buffer screen
+* [Commander.js](https://github.com/tj/commander.js) - used to register CLI Commands
+* [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) - used to easily load and support different config formats
