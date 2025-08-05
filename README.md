@@ -3,7 +3,7 @@
 Git Rake is an interactive Terminal UI that allows you to easily do bulk operations on Git branches.
 
 Practical example: assuming you work full time on a project, and you do manual testing of your colleague's pull requests, you'll quickly end up with loads of branches and jumping between your own active branches can become more annoying if you're not actively pruning branches.
-So! `git rake` provides users with an easier way to prune branches that would otherwise require a combination of e.g. `git branch --merged | fzf --multi` and `xargs git branch -d` to do it in an efficient manner.
+So! `git rake` provides users with an easier way to prune branches that would otherwise require a combination of e.g. `git branch --merged | fzf --multi` and `xargs git branch -d` to do it in an efficient manner (you can read more about these in the [Git Flows Made Easy](https://github.com/kallehauge/git-rake?tab=readme-ov-file#git-flows-made-easy) section).
 
 **Trash system**: although you can completely skip the feature, then Git Rake also introduces a new "trash system" that will move your branches from `refs/heads/*` to a new `refs/rake-trash/` namespace so they do not appear in your normal `git branch` commands anymore, but they can be restored again later.
 This allows you to, safely, be more aggresive with cleaning up branches you're unsure if you want to keep around.
@@ -39,7 +39,7 @@ npx git-rake
 
 _**Tip** - I'd personally recommend looking at the [Git Alias Setup](https://github.com/kallehauge/git-rake?tab=readme-ov-file#git-alias-setup) section for a more seamless command-flow._
 
-### Requirements
+#### Requirements
 
 - Node.js ≥14
 - Git
@@ -169,6 +169,36 @@ git restore                 # Interactive restore mode
 ## Contributing
 
 [See more in the development docs](https://github.com/kallehauge/git-rake/blob/main/docs/development.md) (WIP)
+
+## Git Flows Made Easy
+
+These are a couple of examples of what Git Rake lets you do, without remembering all the terminal commands:
+
+**1. Cleanup merged branches**
+
+**Terminal**: Git doesn't have a simple built-in "prune all merged branches" command - especially if you want to do some manual selection/deselection, but you can use something like `fzf` together with a few more piped commands:
+
+```bash
+  git branch --merged main | grep -vE 'main' | fzf --multi | xargs -r git branch -d
+```
+
+_and if you forget the `grep -vE` part, you'll end up removing the main branch as well._
+
+**Git Rake**: In `git-rake` you can use the `merged` filter _(`f` key to cycle filters)_ to displayed all merged branches. On that list, you can either pick individual branches or select all _(`a` key)_ and delete them in one bulk operation _ (`d` key)_.
+
+**2. Prune stale branches**
+
+**Terminal**: The concept of "stale branches" doesn't really exist in Git, but you can pipe pipe the following commands together to get a similar experience (notice the cutoof date):
+
+```bash
+git for-each-ref \
+  --format="%(committerdate:short) %(refname:short)" refs/heads \
+| awk -v cutoff="$(date -d '30 days ago' +%Y-%m-%d)" \
+      '$1 < cutoff { print $2 }' \
+| xargs -r git branch -d
+```
+
+**Git Rake**: In `git-rake` you can use the `stale` filter _(`f` key to cycle filters)_ to list all stale branches. On that list, you can either pick individual branches or select all _(`a` key)_ and delete them in one bulk operation _(`d` key)_.
 
 ## Appreciation
 
