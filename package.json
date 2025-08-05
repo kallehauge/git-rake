@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Interactive CLI tool to safely prune, delete, and restore Git branches",
   "author": "André Kallehauge <hi@andrekh.com> (https://andrekh.com/)",
+  "homepage": "https://github.com/kallehauge/git-rake#readme",
+  "repository": "kallehauge/git-rake",
+  "bugs": "https://github.com/kallehauge/git-rake/issues",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
