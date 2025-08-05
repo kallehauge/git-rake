@@ -1,8 +1,12 @@
 # Git Rake 🍂
 
-Git Rake, the interactive TUI that simplifies cleaning up branches.
+Git Rake is an interactive Terminal UI that allows you to easily do bulk operations on Git branches.
 
-Although you can completely skip the feature entirely, then Rake also introduces a new "**trash system**" that will move your local branches from `refs/head/*` to a new `refs/rake-trash` (it happens behind the scenes). This allows you to, safely, be more aggresive with cleaning up branches you're unsure if you want to keep around.
+Practical example: assuming you work full time on a project, and you do manual testing of your colleague's pull requests, you'll quickly end up with loads of branches and jumping between your own active branches can become more annoying if you're not actively pruning branches.
+So! `git rake` provides users with an easier way to prune branches that would otherwise require a combination of e.g. `git branch --merged | fzf --multi` and `xargs git branch -d` to do it in an efficient manner.
+
+**Trash system**: although you can completely skip the feature, then Git Rake also introduces a new "trash system" that will move your branches from `refs/heads/*` to a new `refs/rake-trash/` namespace so they do not appear in your normal `git branch` commands anymore, but they can be restored again later.
+This allows you to, safely, be more aggresive with cleaning up branches you're unsure if you want to keep around.
 
 ![Demo of Git Rake](https://raw.githubusercontent.com/kallehauge/git-rake/main/docs/assets/demo.gif)
 
