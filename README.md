@@ -33,6 +33,8 @@ Or run directly with npx:
 npx git-rake
 ```
 
+_**Tip** - I'd personally recommend looking at the [Git Alias Setup](https://github.com/kallehauge/git-rake?tab=readme-ov-file#git-alias-setup) section for a more seamless command-flow._
+
 ### Requirements
 
 - Node.js ≥14
@@ -53,7 +55,7 @@ git-rake restore            # Interactive restore mode
 git-rake restore <branch>   # Restore specific branch
 ```
 
-I'd personally recommend looking at the [Git Alias Setup](https://github.com/kallehauge/git-rake?tab=readme-ov-file#git-alias-setup) section for a more seamless command-flow.
+_**Tip** - I'd personally recommend looking at the [Git Alias Setup](https://github.com/kallehauge/git-rake?tab=readme-ov-file#git-alias-setup) section for a more seamless command-flow._
 
 ### Keyboard Controls
 
