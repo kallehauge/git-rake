@@ -18,7 +18,7 @@ export const OPERATION_CONFIRMATION_CONFIG = {
     name: 'Trash',
   },
   [BRANCH_OPERATIONS.RESTORE]: {
-    type: 'default' as StatusBarType,
+    type: 'warning' as StatusBarType,
     icon: '↩️',
     name: 'Restore',
   },
