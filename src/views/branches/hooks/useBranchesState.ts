@@ -28,7 +28,7 @@ type UseBranchesStateReturn = {
   selectAllAvailableBranches: () => void
 
   // Navigation actions
-  handleListNavigation: (key: Key) => boolean
+  handleListNavigation: (key: Key, input: string) => boolean
   navigateDown: () => void
   navigateUp: () => void
   navigatePageDown: () => void
@@ -142,13 +142,13 @@ export function useBranchesState(): UseBranchesStateReturn {
   }, [moveToIndex, selectedIndex])
 
   const handleListNavigation = useCallback(
-    (key: Key): boolean => {
-      if (key.upArrow) {
+    (key: Key, input: string): boolean => {
+      if (key.upArrow || input === 'k') {
         moveToIndex(selectedIndex - 1)
         return true
       }
 
-      if (key.downArrow) {
+      if (key.downArrow || input === 'j') {
         navigateDown()
         return true
       }
