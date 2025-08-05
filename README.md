@@ -4,7 +4,7 @@ Git Rake, the interactive TUI that simplifies cleaning up branches.
 
 Although you can completely skip the feature entirely, then Rake also introduces a new "**trash system**" that will move your local branches from `refs/head/*` to a new `refs/rake-trash` (it happens behind the scenes). This allows you to, safely, be more aggresive with cleaning up branches you're unsure if you want to keep around.
 
-![Demo of Git Rake](docs/assets/demo.gif)
+![Demo of Git Rake](https://raw.githubusercontent.com/kallehauge/git-rake/main/docs/assets/demo.gif)
 
 ## Features
 

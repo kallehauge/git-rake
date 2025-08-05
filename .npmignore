@@ -1,0 +1,87 @@
+# Source files (use compiled dist instead)
+src/
+*.ts
+*.tsx
+tsconfig.json
+tsup.config.ts
+
+# Development and testing
+jest.config.cjs
+eslint.config.js
+.eslintrc*
+.prettierrc*
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__/
+coverage/
+.nyc_output/
+
+# Documentation and assets (but keep assets for README)
+docs/
+*.md
+!README.md
+
+# Local configuration and secrets
+.env*
+.gitrakerc*
+CLAUDE.md
+CLAUDE.local.md
+*.local.*
+.cursor/
+
+# Version control and CI/CD
+.git/
+.github/
+.husky/
+.gitignore
+.gitattributes
+lint-staged.config.*
+
+# Build artifacts and caches
+*.tsbuildinfo
+.cache/
+.parcel-cache/
+.turbo/
+*.log
+logs/
+tmp/
+temp/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Package manager files (keep package.json)
+pnpm-lock.yaml
+yarn.lock
+!package.json
+
+# Development tools
+.editorconfig
+.nvmrc
+.tool-versions
+
+# Bundle analysis
+stats.json
+report.html
+*.map
+
+# Other unnecessary files
+*.tgz
+*.zip
+CONTRIBUTING.md
+CHANGELOG.md
