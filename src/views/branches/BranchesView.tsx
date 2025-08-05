@@ -93,7 +93,7 @@ export const BranchesView = React.memo(function BranchesView({
       return
     }
 
-    if (input === 'd' && selectedBranches.length > 0 && !restoreMode) {
+    if (input === 'd' && selectedBranches.length > 0) {
       enterConfirmationMode(BRANCH_OPERATIONS.DELETE)
       return
     }
@@ -112,7 +112,7 @@ export const BranchesView = React.memo(function BranchesView({
     if (pendingOperation) {
       return '↑↓: navigate • s: deselect • Y/Enter: confirm • N/Esc: cancel'
     }
-    return `↑↓: navigate • s: select • a: select all • /: search • f: filter • v: view • ${restoreMode ? 'r: restore' : 't: trash • d: delete permanently'}`
+    return `↑↓: navigate • s: select • a: select all • /: search • f: filter • v: view • d: delete permanently • ${restoreMode ? 'r: restore' : 't: trash'}`
   }, [pendingOperation, restoreMode])
 
   const statusBarContent = (

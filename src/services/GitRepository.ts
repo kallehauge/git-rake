@@ -503,6 +503,16 @@ export class GitRepository {
     })
   }
 
+  /**
+   * Creates git commands for deleting refs
+   */
+  private createDeleteCommands(branches: GitBranch[]) {
+    return branches.map(branch => ({
+      action: 'delete' as const,
+      ref: branch.ref,
+    }))
+  }
+
   private async trashBranchesWithRetry(
     operations: RefOperation[],
   ): Promise<void> {
@@ -762,8 +772,7 @@ export class GitRepository {
    * Executes multiple branch operations with intelligent batching
    *
    * Groups operations by type because different operations require different git commands:
-   * - trash/restore use `git update-ref --stdin` for atomic ref manipulation
-   * - delete uses `git branch -D` for safety checks
+   * - trash/restore/delete use `git update-ref --stdin` for atomic ref manipulation
    * - prune uses `git remote prune` (inherently single operation)
    */
   async performBatchOperations(
@@ -794,11 +803,14 @@ export class GitRepository {
       await this.restoreBranchesFromTrash(branchNames)
     }
 
-    // Delete operations remain individual because simple-git's `deleteLocalBranch`
-    // doesn't provide batch interface and implementing custom batching
-    // would require duplicating its safety checks.
-    for (const op of operationGroups.delete) {
-      await this.deleteBranch(op.branch.name, true)
+    if (operationGroups.delete.length > 0) {
+      const branches = operationGroups.delete.map(op => op.branch)
+      const result = await this.executeBatchRefUpdates(
+        this.createDeleteCommands(branches),
+      )
+      if (!result.success) {
+        throw new Error(`Delete operation failed: ${result.error}`)
+      }
     }
 
     // Prune is inherently a single operation but multiple prune requests
