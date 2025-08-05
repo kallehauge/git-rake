@@ -44,7 +44,7 @@ export const BranchView = React.memo(function BranchView({
     { isActive: !inputLocked },
   )
 
-  const helpText = 'ESC: back to branches'
+  const helpText = 'Esc: back to branches'
 
   const statusBarContent = (
     <Text color={theme.colors.text}>{currentBranch?.name}</Text>
