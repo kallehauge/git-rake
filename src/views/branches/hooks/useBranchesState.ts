@@ -25,6 +25,7 @@ type UseBranchesStateReturn = {
   // Selection actions
   toggleBranchSelection: (branch: GitBranch) => void
   clearSelectedBranches: () => void
+  deselectAvailableBranches: () => void
   selectAllAvailableBranches: () => void
 
   // Navigation actions
@@ -107,6 +108,16 @@ export function useBranchesState(): UseBranchesStateReturn {
     setSelectedBranches(new Map())
   }, [setSelectedBranches])
 
+  const deselectAvailableBranches = useCallback(() => {
+    const newSelectedBranches = new Map(selectedBranches)
+
+    availableBranches.forEach(branch => {
+      newSelectedBranches.delete(branch.name)
+    })
+
+    setSelectedBranches(newSelectedBranches)
+  }, [availableBranches, selectedBranches, setSelectedBranches])
+
   const selectAllAvailableBranches = useCallback(() => {
     const branchMap = availableBranches.reduce((map, branch) => {
       if (!branch.isCurrent) {
@@ -184,6 +195,7 @@ export function useBranchesState(): UseBranchesStateReturn {
     // Selection actions
     toggleBranchSelection,
     clearSelectedBranches,
+    deselectAvailableBranches,
     selectAllAvailableBranches,
 
     // Navigation actions
