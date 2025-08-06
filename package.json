@@ -1,6 +1,6 @@
 {
   "name": "git-rake",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Interactive CLI tool to safely prune, delete, and restore Git branches",
   "author": "André Kallehauge <hi@andrekh.com> (https://andrekh.com/)",
   "homepage": "https://github.com/kallehauge/git-rake#readme",
