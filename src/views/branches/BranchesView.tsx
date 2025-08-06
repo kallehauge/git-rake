@@ -110,7 +110,7 @@ export const BranchesView = React.memo(function BranchesView({
 
   const helpText = useMemo(() => {
     if (pendingOperation) {
-      return '↑↓: navigate • s: deselect • Y/Enter: confirm • N/Esc: cancel'
+      return '↑↓: navigate • Space: deselect • Y/Enter: confirm • N/Esc: cancel'
     }
     return `↑↓: navigate • space: select • a: select all • /: search • f: filter • v: view • d: delete permanently • ${restoreMode ? 'r: restore' : 't: trash'}`
   }, [pendingOperation, restoreMode])
